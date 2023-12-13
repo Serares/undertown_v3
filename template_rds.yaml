@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  undertown_v3_rds_postgres
+# Transform section specifies one or more macros that AWS CloudFormation uses to process your template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Parameters:
+  InfraStackName:
+    Type: String
+    Description: "Stack name for rds template"
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
