@@ -9,9 +9,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/Serares/api/register/types"
-	"github.com/Serares/repository"
-	"github.com/Serares/repository/psql"
+	"github.com/Serares/undertown_v3/repositories/repository"
+	"github.com/Serares/undertown_v3/repositories/repository/psql"
+	"github.com/Serares/undertown_v3/services/api/register/types"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/argon2"
 )

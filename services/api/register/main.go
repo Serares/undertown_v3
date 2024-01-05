@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/Serares/api/register/handlers"
-	"github.com/Serares/api/register/service"
-	"github.com/Serares/repository"
-	"github.com/Serares/repository/utils"
+	"github.com/Serares/undertown_v3/repositories/repository"
+	"github.com/Serares/undertown_v3/repositories/repository/utils"
+	"github.com/Serares/undertown_v3/services/api/register/handlers"
+	"github.com/Serares/undertown_v3/services/api/register/service"
 	"github.com/joho/godotenv"
 )
 

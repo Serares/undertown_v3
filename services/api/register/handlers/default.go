@@ -5,12 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Serares/api/register/service"
-	"github.com/Serares/api/register/types"
-)
-
-const (
-	ErrorUnmarshal = "error trying to unmarshal the request"
+	"github.com/Serares/undertown_v3/services/api/register/service"
+	"github.com/Serares/undertown_v3/services/api/register/types"
+	"github.com/Serares/undertown_v3/utils"
 )
 
 type RegisterHandler struct {
@@ -31,14 +28,15 @@ func (rh *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var user types.PostUserRequest
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
-			rh.Log.Error("%s - %w", ErrorUnmarshal, err)
-			// TODO handle response error
+			rh.Log.Error("error trying to unmarshal the request", "error:", err)
+			utils.ReplyError(w, r, http.StatusInternalServerError, "error on POST request")
 		}
 		err = rh.RegisterService.PersistUser(r.Context(), &user)
 		if err != nil {
-			// TODO handle error response
 			rh.Log.Error("error persisting user", "type", types.ErrorPersistingUser, "error", err)
+			utils.ReplyError(w, r, http.StatusInternalServerError, err.Error())
 		}
-		// TODO success response
+
+		utils.ReplySuccess(w, r, http.StatusAccepted, "success persisting user")
 	}
 }
