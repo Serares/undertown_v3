@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# goose postgres "user=postgres dbname=undertown_v3 sslmode=disable password=password" status
 GOOSE_PATH=$(command -v goose)
 PG_CONNECTION_URL="postgresql://$PG_USER:$PG_PASSWORD@$PG_HOST:$PG_PORT/$PG_DB"
 

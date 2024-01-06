@@ -16,7 +16,7 @@ if [ "$CI_COMMIT_REF_NAME" = "" ]; then
             exit 127
         fi
     fi
-
+    # podman run -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_DB=undertown_v3 -d --name=postgres postgres
     $DOCKER run -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_DB=local_db -d --name=postgres postgres:16-alpine
 
     printf "\nWaiting for PostgreSQL to be fully available."

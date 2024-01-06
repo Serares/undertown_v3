@@ -8,16 +8,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/repositories/repository/utils"
-	"github.com/Serares/undertown_v3/services/api/addProperty/handler"
-	"github.com/Serares/undertown_v3/services/api/addProperty/service"
+	"github.com/Serares/undertown_v3/services/api/login/handlers"
+	"github.com/Serares/undertown_v3/services/api/login/service"
+	"github.com/joho/godotenv"
 )
 
-// 🚀
+// 🔎
+// logging in the user
 func main() {
 	err := godotenv.Load(".env.local")
 	if err != nil {
@@ -25,22 +24,21 @@ func main() {
 	}
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3031"
+		port = "3033"
 	}
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	dbUrl := utils.CreatePsqlUrl()
-	db, err := repository.NewPropertiesRepo(dbUrl)
-	ss := service.NewSubmitService(log, db)
-
+	userRepo, err := repository.NewUsersRepository(dbUrl)
 	if err != nil {
 		log.Error("error on initializing the db")
 	}
+	service := service.NewLoginService(log, userRepo)
+	h := handlers.NewLoginHandler(log, &service)
 
-	hh := handler.New(log, ss)
 	server := &http.Server{
 		Addr:         fmt.Sprintf("localhost:%s", port),
-		Handler:      hh,
+		Handler:      h,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 10,
 	}

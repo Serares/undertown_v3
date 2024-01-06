@@ -1,0 +1,11 @@
+go 1.21.4
+
+use (
+	./cdk
+	./repositories/repository
+	./services/api/addProperty
+	./services/api/login
+	./services/api/register
+	./services/ssr/homepage
+	./utils
+)
