@@ -24,14 +24,20 @@ func setupService(t *testing.T) (*UserService, func()) {
 	// setup logger
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	// initialize the db
-	dbUrl := utils.CreatePsqlUrl()
+	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
+	if err != nil {
+		t.Fatal("error on creating the db url")
+	}
 	userRepo, err := repository.NewUsersRepository(dbUrl)
 	if err != nil {
 		t.Fatal("error connectiong to the db")
 	}
 	service := NewRegisterService(log, userRepo)
 	return &service, func() {
-		userRepo.CloseDbConnection(context.Background())
+		err := userRepo.CloseDbConnection(context.Background())
+		if err != nil {
+			t.Errorf("failed to close the db connection for users: %v", err)
+		}
 	}
 }
 func TestRegisterService(t *testing.T) {

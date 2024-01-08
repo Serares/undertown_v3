@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -14,6 +15,8 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/repositories/repository/utils"
 	"github.com/Serares/undertown_v3/services/api/addProperty/handler"
+	"github.com/Serares/undertown_v3/services/api/addProperty/service"
+	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 )
 
 func setupAPI(t *testing.T) (string, func()) {
@@ -25,13 +28,16 @@ func setupAPI(t *testing.T) (string, func()) {
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	// create db connection
-	dbUrl := utils.CreatePsqlUrl()
+	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
+	if err != nil {
+		t.Fatal("error on creating the connection string")
+	}
 	db, err := repository.NewPropertiesRepo(dbUrl)
 	if err != nil {
 		log.Error("error on initializing the db")
 	}
-	hh := handler.New(log, db)
-
+	service := service.NewSubmitService(log, db)
+	hh := handler.New(log, service)
 	ts := httptest.NewServer(hh)
 
 	r, err := http.Post(ts.URL+"/", "application/json", bytes.NewBuffer(mockProperty))
@@ -43,6 +49,10 @@ func setupAPI(t *testing.T) (string, func()) {
 		t.Fatalf("failed to create the mock property: %d", r.StatusCode)
 	}
 	return ts.URL, func() {
+		err := db.CloseDbConnection(context.Background())
+		if err != nil {
+			t.Errorf("failed to close the db connection: %v", err)
+		}
 		ts.Close()
 	}
 }
@@ -54,7 +64,7 @@ func TestPost(t *testing.T) {
 		t.Error("error reading the mock property file")
 	}
 	// unmarshal the property to be able to change it's fields
-	var parsedProperty handler.POSTProperty
+	var parsedProperty types.POSTProperty
 	if err = json.NewDecoder(bytes.NewBuffer(mockProperty)).Decode(&parsedProperty); err != nil {
 		t.Error("failed to decode the mocked json")
 	}
@@ -81,7 +91,7 @@ func TestPost(t *testing.T) {
 			URL:            "/",
 			expectedStatus: http.StatusMethodNotAllowed,
 			propertyTitle:  "This method is not allowed",
-			expectedError:  handler.ErrorMethodNotSupported,
+			expectedError:  types.ErrorMethodNotSupported,
 		},
 	}
 

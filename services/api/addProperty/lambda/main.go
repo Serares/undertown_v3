@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log/slog"
 	"os"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
+	"github.com/Serares/undertown_v3/repositories/repository/utils"
 	"github.com/Serares/undertown_v3/services/api/addProperty/handler"
 	"github.com/Serares/undertown_v3/services/api/addProperty/service"
 	"github.com/akrylysov/algnhsa"
@@ -13,7 +14,10 @@ import (
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	dbUrl := createPsqlUrl()
+	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
+	if err != nil {
+		log.Error("error on creating the connection string")
+	}
 	dbRepo, err := repository.NewPropertiesRepo(dbUrl)
 	ss := service.NewSubmitService(log, dbRepo)
 	if err != nil {
@@ -22,14 +26,4 @@ func main() {
 	addPropertyHandler := handler.New(log, ss)
 
 	algnhsa.ListenAndServe(addPropertyHandler, nil)
-}
-
-func createPsqlUrl() string {
-	dbUser := os.Getenv("PSQL_USER")
-	dbPassword := os.Getenv("PSQL_PASSWORD")
-	dbName := os.Getenv("PSQL_NAME")
-	dbHost := os.Getenv("PSQL_HOST")
-	dbPort := os.Getenv("PSQL_PORT")
-
-	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", dbUser, dbPassword, dbName, dbHost, dbPort)
 }

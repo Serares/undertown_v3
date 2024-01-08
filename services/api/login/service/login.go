@@ -11,6 +11,7 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/repositories/repository/psql"
 	"github.com/Serares/undertown_v3/services/api/login/types"
+	"github.com/Serares/undertown_v3/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -50,7 +51,7 @@ func (ls *LoginService) LoginUser(ctx context.Context, email string, password st
 	}
 
 	// generate the JWT
-	token, err := ls.signAndGenerateToken(user.Email, user.ID.String())
+	token, err := ls.signAndGenerateToken(user.Email, user.ID.String(), user.Isadmin)
 	if err != nil {
 		return "", fmt.Errorf("error while generating token %w", err)
 	}
@@ -78,12 +79,9 @@ func (ls *LoginService) comparePasswords(plainPassword string, hashedPassword []
 	}
 	return nil
 }
-
-func (ls *LoginService) signAndGenerateToken(email string, userId string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":  email,
-		"userId": userId,
-	})
+func (ls *LoginService) signAndGenerateToken(email string, userId string, isadmin bool) (string, error) {
+	claims := utils.JWTClaims{Email: email, UserId: userId, Isadmin: isadmin}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {

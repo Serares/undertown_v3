@@ -30,11 +30,13 @@ func (rh *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			rh.Log.Error("error trying to unmarshal the request", "error:", err)
 			utils.ReplyError(w, r, http.StatusInternalServerError, "error on POST request")
+			return
 		}
 		err = rh.RegisterService.PersistUser(r.Context(), &user)
 		if err != nil {
 			rh.Log.Error("error persisting user", "type", types.ErrorPersistingUser, "error", err)
 			utils.ReplyError(w, r, http.StatusInternalServerError, err.Error())
+			return
 		}
 
 		utils.ReplySuccess(w, r, http.StatusAccepted, "success persisting user")

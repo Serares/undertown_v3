@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -29,7 +30,10 @@ func main() {
 	}
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	dbUrl := utils.CreatePsqlUrl()
+	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
+	if err != nil {
+		log.Error("error on creating the connection string")
+	}
 	db, err := repository.NewPropertiesRepo(dbUrl)
 	ss := service.NewSubmitService(log, db)
 

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -28,23 +27,15 @@ func NewRegisterService(log *slog.Logger, userRepo repository.IUsersRepository) 
 	}
 }
 
-func generateSalt(length int32) ([]byte, error) {
-	salt := make([]byte, length)
-	_, err := rand.Read(salt)
-	if err != nil {
-		return nil, err
-	}
-	return salt, nil
-}
-
 func (us *UserService) checkUserExists(ctx context.Context, id uuid.UUID) (bool, error) {
+	// derefference a struct
 	_, err := us.UserRepo.Get(ctx, id)
 	// only return false if the SqlNoRows error is returned by the repo
 	if err != nil {
 		if errors.Is(err, repository.ErrorNotFound) {
 			return false, nil
 		}
-		us.Log.Error("%s -- %v", types.ErrorCheckingIfUserExists, err)
+		us.Log.Error("error checking if user exists", "type", types.ErrorCheckingIfUserExists, "error", err)
 		return false, err
 	}
 	return true, nil
@@ -57,7 +48,7 @@ func (us *UserService) checkIfEmailAlreadyExists(ctx context.Context, email stri
 		if errors.Is(err, repository.ErrorNotFound) {
 			return false, nil
 		}
-		us.Log.Error("%s -- %v", types.ErrorCheckingIfEmailExists, err)
+		us.Log.Error("error checking if email exists", "type", types.ErrorCheckingIfEmailExists, "error", err)
 		return false, err
 	}
 	return true, nil

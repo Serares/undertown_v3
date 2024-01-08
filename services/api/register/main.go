@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -28,7 +29,10 @@ func main() {
 	}
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	dbUrl := utils.CreatePsqlUrl()
+	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
+	if err != nil {
+		log.Error("error creating the db connection string", err)
+	}
 	userRepo, err := repository.NewUsersRepository(dbUrl)
 	if err != nil {
 		log.Error("error on initializing the db")

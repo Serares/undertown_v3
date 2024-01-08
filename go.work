@@ -4,8 +4,10 @@ use (
 	./cdk
 	./repositories/repository
 	./services/api/addProperty
+	./services/api/authorizer
 	./services/api/login
 	./services/api/register
+	./services/api/registerAuthorizer
 	./services/ssr/homepage
 	./utils
 )

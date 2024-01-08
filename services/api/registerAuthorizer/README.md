@@ -1,0 +1,1 @@
+**Authorizer for `/register` route**
