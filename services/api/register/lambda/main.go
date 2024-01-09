@@ -20,7 +20,7 @@ func main() {
 	}
 	userRepo, err := repository.NewUsersRepository(dbUrl)
 	if err != nil {
-		log.Error("error on initializing the db")
+		log.Error("error on initializing the db", "error:", err)
 		os.Exit(1)
 	}
 	service := service.NewRegisterService(log, userRepo)

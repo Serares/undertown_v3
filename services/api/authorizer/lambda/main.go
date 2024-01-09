@@ -35,7 +35,7 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 		// Return a policy document that denies access
 		return generatePolicy("user", "Deny", event.MethodArn), nil
 	}
-	return generatePolicy("user", "Deny", event.MethodArn), nil
+	return generatePolicy("user", "Allow", event.MethodArn), nil
 }
 
 func main() {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	"github.com/aws/constructs-go/constructs/v10"
@@ -50,6 +51,18 @@ func ApiLambdaStack(scope constructs.Construct, id string, props *ApiLambdaStack
 	// THIS IS THE
 	auroraDbName := awscdk.Fn_ImportValue(jsii.String(DB_STACK_KEY_DB_NAME))
 	auroraDbSecret := awscdk.Fn_ImportValue(jsii.String(DB_STACK_KEY_DB_SECRET))
+
+	// Lambda role to access secrets manager
+	apiLambdaRole := awsiam.NewRole(stack, jsii.String("SecretsManagerAccessRole"), &awsiam.RoleProps{
+		// TODO think about if this needs to apply the least priviledge principle
+		AssumedBy: awsiam.NewServicePrincipal(jsii.String("lambda.amazonaws.com"), nil),
+	})
+	apiLambdaRole.AddManagedPolicy(awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("service-role/AWSLambdaBasicExecutionRole")))
+	apiLambdaRole.AddToPolicy(awsiam.NewPolicyStatement(&awsiam.PolicyStatementProps{
+		Actions:   jsii.Strings("secretsmanager:GetSecretValue"),
+		Resources: jsii.Strings(*auroraDbSecret),
+	}))
+
 	// API
 	// Add a resource based policy to the API so that the homessr lambda can only call:
 	registerLambda := awslambdago.NewGoFunction(stack, jsii.String("RegisterLambda"), &awslambdago.GoFunctionProps{
@@ -63,9 +76,12 @@ func ApiLambdaStack(scope constructs.Construct, id string, props *ApiLambdaStack
 			"PSQL_USER":     jsii.String(""),
 			"PSQL_PASSWORD": jsii.String(""),
 			"PSQL_DB":       jsii.String(*auroraDbName),
+			"PSQL_PORT":     jsii.String("5432"),
 			// this is used to retreive the password and username
 			"PSQL_SECRET_ARN": jsii.String(*auroraDbSecret),
 		},
+		Role:    apiLambdaRole,
+		Timeout: awscdk.Duration_Seconds(jsii.Number(20)),
 	})
 	//Register Authorizer
 	registerAuthorizerLambda := awslambdago.NewGoFunction(stack, jsii.String("RegisterAuthorizer"), &awslambdago.GoFunctionProps{
@@ -101,13 +117,21 @@ func ApiLambdaStack(scope constructs.Construct, id string, props *ApiLambdaStack
 			"PSQL_USER":     jsii.String(""),
 			"PSQL_PASSWORD": jsii.String(""),
 			"PSQL_DB":       jsii.String(*auroraDbName),
+			"PSQL_PORT":     jsii.String("5432"),
 			// this is used to retreive the password and username
 			"PSQL_SECRET_ARN": jsii.String(*auroraDbSecret),
 		},
+		Role:    apiLambdaRole,
+		Timeout: awscdk.Duration_Seconds(jsii.Number(20)),
 	})
+
 	// Define the API Gateway
 	spaApi := awsapigateway.NewRestApi(stack, jsii.String("SPAUndertownAPI"), &awsapigateway.RestApiProps{
 		RestApiName: jsii.String("SPAUndertownAPI"),
+		DeployOptions: &awsapigateway.StageOptions{
+			TracingEnabled: jsii.Bool(true),
+		},
+		// CloudWatchRole: jsii.Bool(true),
 	})
 
 	// Define the SPA Authorizer
@@ -142,9 +166,23 @@ func ApiLambdaStack(scope constructs.Construct, id string, props *ApiLambdaStack
 		Api: spaApi,
 	})
 
+	// devLogGroup := awslogs.NewLogGroup(stack, jsii.String("devlogs"), &awslogs.LogGroupProps{})
+
 	stage := awsapigateway.NewStage(stack, jsii.String("DevStage"), &awsapigateway.StageProps{
 		Deployment: deployment,
 		StageName:  jsii.String("dev"),
+		// AccessLogDestination: awsapigateway.NewLogGroupLogDestination(devLogGroup),
+		// AccessLogFormat: awsapigateway.AccessLogFormat_JsonWithStandardFields(&awsapigateway.JsonWithStandardFieldProps{
+		// 	Caller:         jsii.Bool(false),
+		// 	HttpMethod:     jsii.Bool(true),
+		// 	Ip:             jsii.Bool(true),
+		// 	Protocol:       jsii.Bool(true),
+		// 	RequestTime:    jsii.Bool(true),
+		// 	ResourcePath:   jsii.Bool(true),
+		// 	ResponseLength: jsii.Bool(true),
+		// 	Status:         jsii.Bool(true),
+		// 	User:           jsii.Bool(true),
+		// }),
 	})
 	spaApi.SetDeploymentStage(stage)
 	// createPropertyLambda := awslambdago.NewGoFunction(stack, )
