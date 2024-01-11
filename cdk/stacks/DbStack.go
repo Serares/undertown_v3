@@ -51,6 +51,7 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 	// store the database password and username in the secret
 	// TODO the database is provisioned in public subnets without NAT gateway
 	// NAT gateway is expensive (and it's used mainly to run db in private subnets with connection through nat to the internet)
+	// config inspired from: https://github.com/aws/aws-cdk-go/blob/main/awscdk/awsrds/ClusterInstance.go#L10
 	auroraCluster := awsrds.NewDatabaseCluster(stack, jsii.String("AuroraServerlessCluster"), &awsrds.DatabaseClusterProps{
 		Engine: awsrds.DatabaseClusterEngine_AuroraPostgres(&awsrds.AuroraPostgresClusterEngineProps{
 			Version: awsrds.AuroraPostgresEngineVersion_VER_14_4(),
@@ -62,7 +63,8 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 			}),
 		},
 		Writer: awsrds.ClusterInstance_ServerlessV2(jsii.String("writer-instance"), &awsrds.ServerlessV2ClusterInstanceProps{
-			PubliclyAccessible: jsii.Bool(true),
+			PubliclyAccessible:      jsii.Bool(true),
+			AutoMinorVersionUpgrade: jsii.Bool(true),
 		}),
 		Vpc:                     props.Vpc,
 		Credentials:             awsrds.Credentials_FromSecret(secret, jsii.String(dbUsername)),
