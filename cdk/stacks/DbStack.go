@@ -20,6 +20,7 @@ var (
 
 type DbStackProps struct {
 	awscdk.StackProps
+	Vpc awsec2.Vpc
 }
 
 // TODO it looks like there are too many problems deploying this aurora stack
@@ -32,10 +33,6 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 	}
 	secretString, _ := json.Marshal(secretContent)
 
-	// crate the vpc for the postgres db
-	vpc := awsec2.NewVpc(stack, jsii.String("VPC"), &awsec2.VpcProps{
-		MaxAzs: jsii.Number(2),
-	})
 	// Create a database secret
 	secret := awssecretsmanager.NewSecret(stack, jsii.String("DBSecret"), &awssecretsmanager.SecretProps{
 		GenerateSecretString: &awssecretsmanager.SecretStringGenerator{
@@ -45,19 +42,36 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 		},
 	})
 
+	databaseSecurityGroup := awsec2.NewSecurityGroup(stack, jsii.String("DatabaseSecurityGroup"), &awsec2.SecurityGroupProps{
+		Vpc: props.Vpc,
+	})
+
+	databaseSecurityGroup.AddIngressRule(awsec2.Peer_AnyIpv4(), awsec2.Port_Tcp(jsii.Number(5432)), jsii.String("Allow Access To PG"), nil)
 	// create the aurora postgres database
 	// store the database password and username in the secret
-	//
-	auroraCluster := awsrds.NewServerlessCluster(stack, jsii.String("AuroraCluster"), &awsrds.ServerlessClusterProps{
+	// TODO the database is provisioned in public subnets without NAT gateway
+	// NAT gateway is expensive (and it's used mainly to run db in private subnets with connection through nat to the internet)
+	auroraCluster := awsrds.NewDatabaseCluster(stack, jsii.String("AuroraServerlessCluster"), &awsrds.DatabaseClusterProps{
 		Engine: awsrds.DatabaseClusterEngine_AuroraPostgres(&awsrds.AuroraPostgresClusterEngineProps{
-			Version: awsrds.AuroraPostgresEngineVersion_VER_13_4(),
+			Version: awsrds.AuroraPostgresEngineVersion_VER_14_4(),
 		}),
-		Vpc:                 vpc,
-		Credentials:         awsrds.Credentials_FromSecret(secret, jsii.String(dbUsername)),
-		DefaultDatabaseName: jsii.String(DB_STACK_VALUE_DB_NAME),
-		RemovalPolicy:       awscdk.RemovalPolicy_DESTROY,
-		EnableDataApi:       jsii.Bool(true),
-		Scaling:             &awsrds.ServerlessScalingOptions{MaxCapacity: awsrds.AuroraCapacityUnit_ACU_8},
+		Readers: &[]awsrds.IClusterInstance{
+			awsrds.ClusterInstance_ServerlessV2(jsii.String("reader-instance"), &awsrds.ServerlessV2ClusterInstanceProps{
+				PubliclyAccessible:      jsii.Bool(true),
+				AutoMinorVersionUpgrade: jsii.Bool(true),
+			}),
+		},
+		Writer: awsrds.ClusterInstance_ServerlessV2(jsii.String("writer-instance"), &awsrds.ServerlessV2ClusterInstanceProps{
+			PubliclyAccessible: jsii.Bool(true),
+		}),
+		Vpc:                     props.Vpc,
+		Credentials:             awsrds.Credentials_FromSecret(secret, jsii.String(dbUsername)),
+		DefaultDatabaseName:     jsii.String(DB_STACK_VALUE_DB_NAME),
+		ServerlessV2MaxCapacity: jsii.Number(4),
+		SecurityGroups:          &[]awsec2.ISecurityGroup{databaseSecurityGroup},
+		VpcSubnets: &awsec2.SubnetSelection{
+			SubnetType: awsec2.SubnetType_PUBLIC,
+		},
 	},
 	)
 	// TODO the secret is used for username and password
