@@ -11,20 +11,25 @@ func main() {
 	defer jsii.Close()
 
 	app := awscdk.NewApp(nil)
-	// TODO
-	// It's too expensive to host a relational db on aws
-	// at least from what I could figure out
-	// aurora serverless v2 might be a lot cheaper
+
+	vpc := stacks.VpcStack(app, "VpcStack", &stacks.VpcStackProps{
+		StackProps: awscdk.StackProps{
+			Env: env(),
+		},
+	})
+
 	stacks.DbStack(app, "DBStack", &stacks.DbStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
+		Vpc: vpc,
 	})
 
 	stacks.ApiLambdaStack(app, "APILambdaStack", &stacks.ApiLambdaStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
+		Vpc: vpc,
 	})
 	app.Synth(nil)
 }
