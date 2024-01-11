@@ -45,6 +45,7 @@ func (us *UserService) checkIfEmailAlreadyExists(ctx context.Context, email stri
 	_, err := us.UserRepo.GetByEmail(ctx, email)
 	// only return false if the SqlNoRows error is returned by the repo
 	if err != nil {
+		us.Log.Error("error checking for email", err)
 		if errors.Is(err, repository.ErrorNotFound) {
 			return false, nil
 		}
@@ -60,6 +61,7 @@ func (us *UserService) createPasswordHash(password string) ([]byte, error) {
 }
 
 func (us *UserService) PersistUser(ctx context.Context, user *types.PostUserRequest) error {
+	us.Log.Info("persist user method", "user", user)
 	// create the user params to be persisted
 	userParams := psql.CreateUserParams{
 		ID:        uuid.New(),
@@ -83,6 +85,7 @@ func (us *UserService) PersistUser(ctx context.Context, user *types.PostUserRequ
 	}
 	// Create the password hash after checking if the user exist to not waste resources
 	if !isExist {
+		us.Log.Info("Creating password hash")
 		hash, err := us.createPasswordHash(user.Password)
 		if err != nil {
 			return fmt.Errorf("%s -- %v", types.ErrorHashingPassword, err)
