@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
@@ -15,7 +16,7 @@ import (
 
 type ApiLambdaStackProps struct {
 	awscdk.StackProps
-	DbSecretArn string
+	Vpc awsec2.Vpc
 }
 
 type DbCfg struct {
@@ -51,13 +52,20 @@ func ApiLambdaStack(scope constructs.Construct, id string, props *ApiLambdaStack
 	// THIS IS THE
 	auroraDbName := awscdk.Fn_ImportValue(jsii.String(DB_STACK_KEY_DB_NAME))
 	auroraDbSecret := awscdk.Fn_ImportValue(jsii.String(DB_STACK_KEY_DB_SECRET))
-
+	// // Security group for lambdas
+	// lambdaSecurityGroup := awsec2.NewSecurityGroup(stack, jsii.String("LambdaSG"), &awsec2.SecurityGroupProps{
+	// 	Vpc: props.Vpc,
+	// 	// ... Lambda SG configurations ...
+	// })
+	// lambdaSecurityGroup.AddIngressRule(awsec2.Peer_AnyIpv4(), awsec2.Port_AllTcp(), jsii.String("APILambdaSecurityGroup"), nil)
 	// Lambda role to access secrets manager
-	apiLambdaRole := awsiam.NewRole(stack, jsii.String("SecretsManagerAccessRole"), &awsiam.RoleProps{
+	apiLambdaRole := awsiam.NewRole(stack, jsii.String("APIServicesLambdaRole"), &awsiam.RoleProps{
 		// TODO think about if this needs to apply the least priviledge principle
 		AssumedBy: awsiam.NewServicePrincipal(jsii.String("lambda.amazonaws.com"), nil),
 	})
 	apiLambdaRole.AddManagedPolicy(awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("service-role/AWSLambdaBasicExecutionRole")))
+	apiLambdaRole.AddManagedPolicy(awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("service-role/AWSLambdaVPCAccessExecutionRole")))
+	apiLambdaRole.AddManagedPolicy(awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonRDSDataFullAccess")))
 	apiLambdaRole.AddToPolicy(awsiam.NewPolicyStatement(&awsiam.PolicyStatementProps{
 		Actions:   jsii.Strings("secretsmanager:GetSecretValue"),
 		Resources: jsii.Strings(*auroraDbSecret),
