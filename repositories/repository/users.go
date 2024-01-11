@@ -33,6 +33,9 @@ func NewUsersRepository(dbUrl string) (*Users, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
 	dbQueries := psql.New(db)
 	return &Users{
 		db:           dbQueries,
