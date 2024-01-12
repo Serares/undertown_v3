@@ -14,6 +14,9 @@ type VpcStackProps struct {
 func VpcStack(scope constructs.Construct, id string, props *VpcStackProps) awsec2.Vpc {
 	var sprops awscdk.StackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)
+	// Be aware
+	// the vpc will need an endpoint to the secrets manager
+	// for lambdas to be able to retreive the database secrets
 	// crate the vpc for the postgres db
 	vpc := awsec2.NewVpc(stack, jsii.String("VPC"), &awsec2.VpcProps{
 		MaxAzs: jsii.Number(2),
@@ -23,8 +26,8 @@ func VpcStack(scope constructs.Construct, id string, props *VpcStackProps) awsec
 		// NAT gateways are expensive
 		SubnetConfiguration: &[]*awsec2.SubnetConfiguration{
 			{
-				Name:       jsii.String("public-subnet"),
-				SubnetType: awsec2.SubnetType_PUBLIC,
+				Name:       jsii.String("private-subnet"),
+				SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
 			},
 		},
 		NatGateways: jsii.Number(0),

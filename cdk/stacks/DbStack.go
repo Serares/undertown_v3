@@ -52,30 +52,33 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 	// TODO the database is provisioned in public subnets without NAT gateway
 	// NAT gateway is expensive (and it's used mainly to run db in private subnets with connection through nat to the internet)
 	// config inspired from: https://github.com/aws/aws-cdk-go/blob/main/awscdk/awsrds/ClusterInstance.go#L10
-	auroraCluster := awsrds.NewDatabaseCluster(stack, jsii.String("AuroraServerlessCluster"), &awsrds.DatabaseClusterProps{
+	auroraCluster := awsrds.NewServerlessCluster(stack, jsii.String("AuroraServerlessCluster"), &awsrds.ServerlessClusterProps{
 		Engine: awsrds.DatabaseClusterEngine_AuroraPostgres(&awsrds.AuroraPostgresClusterEngineProps{
-			Version: awsrds.AuroraPostgresEngineVersion_VER_14_4(),
+			Version: awsrds.AuroraPostgresEngineVersion_VER_13_12(),
 		}),
-		Readers: &[]awsrds.IClusterInstance{
-			awsrds.ClusterInstance_ServerlessV2(jsii.String("reader-instance"), &awsrds.ServerlessV2ClusterInstanceProps{
-				PubliclyAccessible:      jsii.Bool(true),
-				AutoMinorVersionUpgrade: jsii.Bool(true),
-			}),
-		},
-		Writer: awsrds.ClusterInstance_ServerlessV2(jsii.String("writer-instance"), &awsrds.ServerlessV2ClusterInstanceProps{
-			PubliclyAccessible:      jsii.Bool(true),
-			AutoMinorVersionUpgrade: jsii.Bool(true),
-		}),
-		Vpc:                     props.Vpc,
-		Credentials:             awsrds.Credentials_FromSecret(secret, jsii.String(dbUsername)),
-		DefaultDatabaseName:     jsii.String(DB_STACK_VALUE_DB_NAME),
-		ServerlessV2MaxCapacity: jsii.Number(4),
-		SecurityGroups:          &[]awsec2.ISecurityGroup{databaseSecurityGroup},
+		Vpc:                 props.Vpc,
+		Credentials:         awsrds.Credentials_FromSecret(secret, jsii.String(dbUsername)),
+		DefaultDatabaseName: jsii.String(DB_STACK_VALUE_DB_NAME),
+		SecurityGroups:      &[]awsec2.ISecurityGroup{databaseSecurityGroup},
 		VpcSubnets: &awsec2.SubnetSelection{
-			SubnetType: awsec2.SubnetType_PUBLIC,
+			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
+		},
+		Scaling: &awsrds.ServerlessScalingOptions{
+			MinCapacity: awsrds.AuroraCapacityUnit_ACU_2,
+			MaxCapacity: awsrds.AuroraCapacityUnit_ACU_4,
+			AutoPause:   awscdk.Duration_Minutes(jsii.Number(5)),
 		},
 	},
 	)
+
+	// create the vpc endpoint for secretsmanager
+	props.Vpc.AddInterfaceEndpoint(jsii.String("SecretsManagerEndpoint"), &awsec2.InterfaceVpcEndpointOptions{
+		Service: awsec2.InterfaceVpcEndpointAwsService_SECRETS_MANAGER(),
+		Subnets: &awsec2.SubnetSelection{
+			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
+		},
+	})
+
 	// TODO the secret is used for username and password
 	// stack.ExportValue(secret.SecretArn(), &awscdk.ExportValueOptions{
 	// 	Name: jsii.String(STACK_OUTPUT_DB_SECRET_KEY),
