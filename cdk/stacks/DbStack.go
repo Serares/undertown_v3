@@ -79,6 +79,16 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 		},
 	})
 
+	// create the vpc endpoint for S3
+	// if lambda is not able to send to S3
+	// you will have to use sqs messages and a proxy lambda to send the images to s3
+	props.Vpc.AddInterfaceEndpoint(jsii.String("S3Endpoint"), &awsec2.InterfaceVpcEndpointOptions{
+		Service: awsec2.InterfaceVpcEndpointAwsService_S3(),
+		Subnets: &awsec2.SubnetSelection{
+			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
+		},
+	})
+
 	// TODO the secret is used for username and password
 	// stack.ExportValue(secret.SecretArn(), &awscdk.ExportValueOptions{
 	// 	Name: jsii.String(STACK_OUTPUT_DB_SECRET_KEY),

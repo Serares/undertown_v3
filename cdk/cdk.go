@@ -5,11 +5,16 @@ import (
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	defer jsii.Close()
-
+	err := godotenv.Load(".env.dev")
+	if err != nil {
+		// handle error in the cdk stack
+		panic(err)
+	}
 	app := awscdk.NewApp(nil)
 
 	vpc := stacks.VpcStack(app, "VpcStack", &stacks.VpcStackProps{
@@ -25,7 +30,7 @@ func main() {
 		Vpc: vpc,
 	})
 
-	stacks.ApiLambdaStack(app, "APILambdaStack", &stacks.ApiLambdaStackProps{
+	stacks.U1LambdaStack(app, "U1LambdaStack", &stacks.ApiLambdaStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
