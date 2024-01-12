@@ -29,7 +29,7 @@ type APIAuthorizers struct {
 
 // Those lambdas are authorizing gateway endpoints
 // create both the lambdas and the apigw authorizer resources
-func AuthorizersStack(scope constructs.Construct, id string, props *AuthorizerProps) APIAuthorizersMap {
+func Authorizers(scope constructs.Construct, id string, props *AuthorizerProps) APIAuthorizersMap {
 	var authorizationHeader = "Authorization"
 	var authorizers APIAuthorizersMap
 

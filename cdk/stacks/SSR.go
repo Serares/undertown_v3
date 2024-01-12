@@ -11,7 +11,7 @@ type SSRStackProps struct {
 
 // This might have to be created after the APIStack
 // because it needs to import a refference to the endpoint resources so it can call the CRUD operations
-func SSRStack(scope constructs.Construct, id string, props *SSRStackProps) awscdk.Stack {
+func SSR(scope constructs.Construct, id string, props *SSRStackProps) awscdk.Stack {
 	stack := awscdk.NewStack(scope, &id, nil)
 	return stack
 	// createPropertyLambda := awslambdago.NewGoFunction(stack, )

@@ -21,7 +21,7 @@ type APIStackProps struct {
 }
 
 // The API Gateway resources and deployments
-func APIStack(scope constructs.Construct, id string, props *APIStackProps) awscdk.Stack {
+func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Stack {
 	var sprops awscdk.StackProps
 	if props != nil {
 		sprops = props.StackProps

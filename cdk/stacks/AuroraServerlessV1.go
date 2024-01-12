@@ -23,11 +23,10 @@ type DbStackProps struct {
 	Vpc awsec2.Vpc
 }
 
-// TODO it looks like there are too many problems deploying this aurora stack
-func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.Stack {
+func AuroraServerlessV1(scope constructs.Construct, id string, props *DbStackProps) awscdk.Stack {
 	var sprops awscdk.StackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)
-	var dbUsername = "postgres"
+	var dbUsername = "secretusername"
 	secretContent := map[string]string{
 		"username": dbUsername,
 	}
@@ -70,25 +69,6 @@ func DbStack(scope constructs.Construct, id string, props *DbStackProps) awscdk.
 		},
 	},
 	)
-
-	// create the vpc endpoint for secretsmanager
-	props.Vpc.AddInterfaceEndpoint(jsii.String("SecretsManagerEndpoint"), &awsec2.InterfaceVpcEndpointOptions{
-		Service: awsec2.InterfaceVpcEndpointAwsService_SECRETS_MANAGER(),
-		Subnets: &awsec2.SubnetSelection{
-			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
-		},
-	})
-
-	// create the vpc endpoint for S3
-	// if lambda is not able to send to S3
-	// you will have to use sqs messages and a proxy lambda to send the images to s3
-	props.Vpc.AddInterfaceEndpoint(jsii.String("S3Endpoint"), &awsec2.InterfaceVpcEndpointOptions{
-		Service: awsec2.InterfaceVpcEndpointAwsService_S3(),
-		Subnets: &awsec2.SubnetSelection{
-			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
-		},
-	})
-
 	// TODO the secret is used for username and password
 	// stack.ExportValue(secret.SecretArn(), &awscdk.ExportValueOptions{
 	// 	Name: jsii.String(STACK_OUTPUT_DB_SECRET_KEY),

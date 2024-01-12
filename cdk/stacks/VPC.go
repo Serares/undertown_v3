@@ -11,7 +11,7 @@ type VpcStackProps struct {
 	awscdk.StackProps
 }
 
-func VpcStack(scope constructs.Construct, id string, props *VpcStackProps) awsec2.Vpc {
+func VPC(scope constructs.Construct, id string, props *VpcStackProps) awsec2.Vpc {
 	var sprops awscdk.StackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)
 	// Be aware
@@ -33,5 +33,22 @@ func VpcStack(scope constructs.Construct, id string, props *VpcStackProps) awsec
 		NatGateways: jsii.Number(0),
 	})
 
+	// create the vpc endpoint for secretsmanager
+	vpc.AddInterfaceEndpoint(jsii.String("SecretsManagerEndpoint"), &awsec2.InterfaceVpcEndpointOptions{
+		Service: awsec2.InterfaceVpcEndpointAwsService_SECRETS_MANAGER(),
+		Subnets: &awsec2.SubnetSelection{
+			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
+		},
+	})
+
+	// create the vpc endpoint for S3
+	// if lambda is not able to send to S3
+	// you will have to use sqs messages and a proxy lambda to send the images to s3
+	vpc.AddInterfaceEndpoint(jsii.String("S3Endpoint"), &awsec2.InterfaceVpcEndpointOptions{
+		Service: awsec2.InterfaceVpcEndpointAwsService_S3(),
+		Subnets: &awsec2.SubnetSelection{
+			SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
+		},
+	})
 	return vpc
 }

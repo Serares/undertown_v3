@@ -12,7 +12,7 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-type U1LambdaStackProps struct {
+type U1LambdaProps struct {
 	awscdk.StackProps
 	Vpc         awsec2.Vpc
 	authorizers APIAuthorizersMap
@@ -28,7 +28,7 @@ type DbCfg struct {
 }
 
 // This stack is used for CRUD operations
-func U1LambdaStack(scope constructs.Construct, id string, props *U1LambdaStackProps) []IntegrationLambda {
+func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) []IntegrationLambda {
 	var sprops awscdk.StackProps
 	var lambdas []IntegrationLambda
 
