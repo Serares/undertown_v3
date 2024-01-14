@@ -27,7 +27,7 @@ Repository
 
 **Serverless V2 engine**
 
-golang`
+```
 auroraCluster := awsrds.NewDatabaseCluster(stack, jsii.String("AuroraServerlessCluster"), &awsrds.DatabaseClusterProps{
 Engine: awsrds.DatabaseClusterEngine_AuroraPostgres(&awsrds.AuroraPostgresClusterEngineProps{
 Version: awsrds.AuroraPostgresEngineVersion_VER_14_4(),
@@ -51,10 +51,25 @@ VpcSubnets: &awsec2.SubnetSelection{
 SubnetType: awsec2.SubnetType_PUBLIC,
 },
 },
-)`
+)
+```
 
 **This is a working configuration but it's not helping my case**
 
 - Serverless v2 always has a capacity of `0.5` meaning that it's not trully serverless and it will charge even when it's not used
 
 - Have to use serverless v1 and do some hacks to make it work with lambdas
+
+- From aws billing: `USD 0.14 per Aurora Capacity Unit hour running Aurora PostgreSQL Serverless v2`
+
+**Serverless v1 issue**
+
+The cdk configuration is still available in the file:
+`cdk/stacks/AuroraServerlessV1.go`
+
+- Serverless v1 can be provisioned only in a private VPC unlike serverless v2 that can be made public
+- Lambdas need to be running in the same VPC to be able to connect to aurora serverless v1
+- The VPC will need `VPC endpoints` for lambdas to be able to access other aws services like `Secrets Manager` and `S3`
+- `VPC endpoints` are billed `$0.011 per VPC Endpoint Hour` so it's not a trully serverless option
+
+**Using Turso as the next cheapest viable SQL database**

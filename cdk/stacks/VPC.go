@@ -14,10 +14,6 @@ type VpcStackProps struct {
 func VPC(scope constructs.Construct, id string, props *VpcStackProps) awsec2.Vpc {
 	var sprops awscdk.StackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)
-	// Be aware
-	// the vpc will need an endpoint to the secrets manager
-	// for lambdas to be able to retreive the database secrets
-	// crate the vpc for the postgres db
 	vpc := awsec2.NewVpc(stack, jsii.String("VPC"), &awsec2.VpcProps{
 		MaxAzs: jsii.Number(2),
 		// For a VPC with only ISOLATED subnets, this value will be undefined.
@@ -44,6 +40,7 @@ func VPC(scope constructs.Construct, id string, props *VpcStackProps) awsec2.Vpc
 	// create the vpc endpoint for S3
 	// if lambda is not able to send to S3
 	// you will have to use sqs messages and a proxy lambda to send the images to s3
+	// TODO not sure if this works yet
 	vpc.AddInterfaceEndpoint(jsii.String("S3Endpoint"), &awsec2.InterfaceVpcEndpointOptions{
 		Service: awsec2.InterfaceVpcEndpointAwsService_S3(),
 		Subnets: &awsec2.SubnetSelection{

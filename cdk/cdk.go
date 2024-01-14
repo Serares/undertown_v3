@@ -17,19 +17,6 @@ func main() {
 	}
 	app := awscdk.NewApp(nil)
 
-	vpc := stacks.VpcStack(app, "VpcStack", &stacks.VpcStackProps{
-		StackProps: awscdk.StackProps{
-			Env: env(),
-		},
-	})
-
-	stacks.DbStack(app, "DBStack", &stacks.DbStackProps{
-		StackProps: awscdk.StackProps{
-			Env: env(),
-		},
-		Vpc: vpc,
-	})
-
 	stacks.U1LambdaStack(app, "U1LambdaStack", &stacks.ApiLambdaStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),

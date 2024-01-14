@@ -36,14 +36,6 @@ func SSR(scope constructs.Construct, id string, props *SSRStackProps) awscdk.Sta
 	// 	Value:      lambdaURL.Url(),
 	// })
 
-	// assetsBucket := awss3.NewBucket(stack, jsii.String("assets"), &awss3.BucketProps{
-	// 	BlockPublicAccess: awss3.BlockPublicAccess_BLOCK_ALL(),
-	// 	Encryption:        awss3.BucketEncryption_S3_MANAGED,
-	// 	EnforceSSL:        jsii.Bool(true),
-	// 	RemovalPolicy:     awscdk.RemovalPolicy_DESTROY,
-	// 	Versioned:         jsii.Bool(false),
-	// })
-
 	// // Allow CloudFront to read from the bucket.
 	// cfOAI := awscloudfront.NewOriginAccessIdentity(stack, jsii.String("cfnOriginAccessIdentity"), &awscloudfront.OriginAccessIdentityProps{})
 	// cfs := awsiam.NewPolicyStatement(&awsiam.PolicyStatementProps{})
