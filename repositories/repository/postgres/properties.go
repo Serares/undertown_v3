@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -9,14 +9,6 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
-
-type IPropertiesRepository interface {
-	Add(ctx context.Context, propertyParameters psql.AddPropertyParams) error
-	GetById(ctx context.Context, id *uuid.NullUUID, humanReadableId *string) (psql.Property, error)
-	List(ctx context.Context) ([]psql.Property, error)
-	DeleteByHumanReadableId(ctx context.Context, humanReadableId *string) error
-	CloseDbConnection(ctx context.Context) error
-}
 
 type Properties struct {
 	db           *psql.Queries

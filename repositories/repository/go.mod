@@ -22,4 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.26.7 // indirect
 	github.com/aws/smithy-go v1.19.0 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/mattn/go-sqlite3 v1.14.19 // indirect
+	github.com/tursodatabase/libsql-client-go v0.0.0-20231216154754-8383a53d618f // indirect
 )

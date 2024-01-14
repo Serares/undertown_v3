@@ -1,0 +1,8 @@
+version: "2"
+sql:
+  - schema: "../migrations/sqlite_schema"
+    queries: "../sql/sqlite"
+    engine: "sqlite"
+    gen:
+      go:
+        out: "lite"

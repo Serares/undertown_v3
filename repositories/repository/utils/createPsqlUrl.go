@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -23,7 +22,7 @@ type DBSecretValue struct {
 }
 
 // TODO this might have to handle the creation of urls for aurora psql also
-func CreatePsqlUrl(ctx context.Context, log *slog.Logger) (string, error) {
+func CreatePsqlUrl(ctx context.Context) (string, error) {
 	dbUser := os.Getenv("PSQL_USER")
 	dbPassword := os.Getenv("PSQL_PASSWORD")
 	dbName := os.Getenv("PSQL_DB")
@@ -34,10 +33,8 @@ func CreatePsqlUrl(ctx context.Context, log *slog.Logger) (string, error) {
 		// log.Info("The context that was passed:", ctx)
 		secret, err := getSecret(ctx, secretArn)
 		if err != nil {
-			log.Error("error trying to access the secret: ", "err", err)
 			return "", fmt.Errorf("error trying to access the secret")
 		}
-		log.Info("Success in getting the secret: ", "secret", secret)
 		dbHost = secret.Host
 		dbPassword = secret.Password
 		dbName = secret.Dbname
