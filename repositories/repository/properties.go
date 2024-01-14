@@ -5,21 +5,20 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/Serares/undertown_v3/repositories/repository/psql"
-	"github.com/google/uuid"
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	_ "github.com/lib/pq"
 )
 
 type IPropertiesRepository interface {
-	Add(ctx context.Context, propertyParameters psql.AddPropertyParams) error
-	GetById(ctx context.Context, id *uuid.NullUUID, humanReadableId *string) (psql.Property, error)
-	List(ctx context.Context) ([]psql.Property, error)
+	Add(ctx context.Context, propertyParameters lite.AddPropertyParams) error
+	GetById(ctx context.Context, id string, humanReadableId *string) (lite.Property, error)
+	List(ctx context.Context) ([]lite.Property, error)
 	DeleteByHumanReadableId(ctx context.Context, humanReadableId *string) error
 	CloseDbConnection(ctx context.Context) error
 }
 
 type Properties struct {
-	db           *psql.Queries
+	db           *lite.Queries
 	dbConnection *sql.DB
 }
 
@@ -29,7 +28,7 @@ func NewPropertiesRepo(dbUrl string) (*Properties, error) {
 		return nil, err
 	}
 	// manage the resource usage of the db
-	dbQueries := psql.New(db)
+	dbQueries := lite.New(db)
 
 	return &Properties{
 		db:           dbQueries,
@@ -47,7 +46,7 @@ func NewPropertiesRepo(dbUrl string) (*Properties, error) {
 -- TODO name: UpdatePropertyInterior: exec
 -- TODO name: UpdatePropertyHeating: exec
 */
-func (d *Properties) Add(ctx context.Context, propertyParams psql.AddPropertyParams) error {
+func (d *Properties) Add(ctx context.Context, propertyParams lite.AddPropertyParams) error {
 	err := d.db.AddProperty(ctx, propertyParams)
 
 	if err != nil {
@@ -60,29 +59,29 @@ func (d *Properties) Add(ctx context.Context, propertyParams psql.AddPropertyPar
 // ❔
 // not sure if using pointers to create nullable parameters is a good practice
 // this method is used to retreive both by UUID and humanReadableId
-func (d *Properties) GetById(ctx context.Context, id *uuid.UUID, humanReadableId *string) (psql.Property, error) {
-	var property psql.Property
+func (d *Properties) GetById(ctx context.Context, id *string, humanReadableId *string) (lite.Property, error) {
+	var property lite.Property
 	var err error
 	if id != nil {
 		property, err = d.db.GetProperty(ctx, *id)
 		if err != nil {
-			return psql.Property{}, fmt.Errorf("error trying to retreive by uuid: %v, err: %v", *id, err)
+			return lite.Property{}, fmt.Errorf("error trying to retreive by uuid: %v, err: %v", *id, err)
 		}
 	}
 
 	if humanReadableId != nil {
 		property, err = d.db.GetByHumanReadableId(ctx, *humanReadableId)
 		if err != nil {
-			return psql.Property{}, fmt.Errorf("error trying to retreive by humanReadableId: %v, err: %v", *humanReadableId, err)
+			return lite.Property{}, fmt.Errorf("error trying to retreive by humanReadableId: %v, err: %v", *humanReadableId, err)
 		}
 	}
 	return property, nil
 }
 
-func (d *Properties) List(ctx context.Context) ([]psql.Property, error) {
+func (d *Properties) List(ctx context.Context) ([]lite.Property, error) {
 	properties, err := d.db.ListProperties(ctx)
 	if err != nil {
-		return make([]psql.Property, 0), fmt.Errorf("error listing properties: %v", err)
+		return make([]lite.Property, 0), fmt.Errorf("error listing properties: %v", err)
 	}
 
 	return properties, nil

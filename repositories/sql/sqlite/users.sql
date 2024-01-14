@@ -7,22 +7,22 @@ INSERT INTO users (
         email,
         passwordHash
     )
-VALUES ($1, $2, $3, $4, $5, $6);
+VALUES (?, ?, ?, ?, ?, ?);
 -- name: GetUser :one
 SELECT *
 FROM users
-WHERE id = $1;
+WHERE id = ?;
 -- name: GetUserByEmail :one
 SELECT *
 FROM users
-where email = $1;
+where email = ?;
 -- name: UpdateUserEmail :exec
 UPDATE users
-SET email = $1
-WHERE id = $2;
+SET email = ?
+WHERE id = ?;
 -- name: DeleteUser :exec
 DELETE FROM users
-WHERE id = $1;
+WHERE id = ?;
 -- name: ListUsers :many
 SELECT *
 FROM users;

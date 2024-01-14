@@ -3,14 +3,11 @@
 //   sqlc v1.23.0
 // source: properties.sql
 
-package psql
+package lite
 
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 const addProperty = `-- name: AddProperty :exec
@@ -56,88 +53,88 @@ INSERT INTO properties(
         heating_floor_heating
     )
 VALUES (
-        $1,
-        $2,
-        $3,
-        $4,
-        $5,
-        $6,
-        $7,
-        $8,
-        $9,
-        $10,
-        $11,
-        $12,
-        $13,
-        $14,
-        $15,
-        $16,
-        $17,
-        $18,
-        $19,
-        $20,
-        $21,
-        $22,
-        $23,
-        $24,
-        $25,
-        $26,
-        $27,
-        $28,
-        $29,
-        $30,
-        $31,
-        $32,
-        $33,
-        $34,
-        $35,
-        $36,
-        $37,
-        $38,
-        $39
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
     )
 `
 
 type AddPropertyParams struct {
-	ID                               uuid.UUID
+	ID                               string
 	Humanreadableid                  string
 	CreatedAt                        time.Time
 	UpdatedAt                        time.Time
 	Title                            string
-	Floor                            int32
-	UserID                           uuid.UUID
-	Images                           []string
+	Floor                            int64
+	UserID                           string
+	Images                           string
 	Thumbnail                        string
-	IsFeatured                       bool
+	IsFeatured                       int64
 	EnergyClass                      string
 	EnergyConsumptionPrimary         string
 	EnergyEmissionsIndex             string
 	EnergyConsumptionGreen           string
-	DestinationResidential           bool
-	DestinationCommercial            bool
-	DestinationOffice                bool
-	DestinationHoliday               bool
-	OtherUtilitiesTerrance           bool
-	OtherUtilitiesServiceToilet      bool
-	OtherUtilitiesUndergroundStorage bool
-	OtherUtilitiesStorage            bool
-	PropertyTransaction              TransactionType
-	FurnishedNot                     bool
-	FurnishedPartially               bool
-	FurnishedComplete                bool
-	FurnishedLuxury                  bool
-	InteriorNeedsRenovation          bool
-	InteriorHasRenovation            bool
-	InteriorGoodState                bool
-	HeatingTermoficare               bool
-	HeatingCentralHeating            bool
-	HeatingBuilding                  bool
-	HeatingStove                     bool
-	HeatingRadiator                  bool
-	HeatingOtherElectrical           bool
-	HeatingGasConvector              bool
-	HeatingInfraredPanels            bool
-	HeatingFloorHeating              bool
+	DestinationResidential           int64
+	DestinationCommercial            int64
+	DestinationOffice                int64
+	DestinationHoliday               int64
+	OtherUtilitiesTerrance           int64
+	OtherUtilitiesServiceToilet      int64
+	OtherUtilitiesUndergroundStorage int64
+	OtherUtilitiesStorage            int64
+	PropertyTransaction              string
+	FurnishedNot                     int64
+	FurnishedPartially               int64
+	FurnishedComplete                int64
+	FurnishedLuxury                  int64
+	InteriorNeedsRenovation          int64
+	InteriorHasRenovation            int64
+	InteriorGoodState                int64
+	HeatingTermoficare               int64
+	HeatingCentralHeating            int64
+	HeatingBuilding                  int64
+	HeatingStove                     int64
+	HeatingRadiator                  int64
+	HeatingOtherElectrical           int64
+	HeatingGasConvector              int64
+	HeatingInfraredPanels            int64
+	HeatingFloorHeating              int64
 }
 
 func (q *Queries) AddProperty(ctx context.Context, arg AddPropertyParams) error {
@@ -149,7 +146,7 @@ func (q *Queries) AddProperty(ctx context.Context, arg AddPropertyParams) error 
 		arg.Title,
 		arg.Floor,
 		arg.UserID,
-		pq.Array(arg.Images),
+		arg.Images,
 		arg.Thumbnail,
 		arg.IsFeatured,
 		arg.EnergyClass,
@@ -187,7 +184,7 @@ func (q *Queries) AddProperty(ctx context.Context, arg AddPropertyParams) error 
 
 const deletePropertyByHumanReadableId = `-- name: DeletePropertyByHumanReadableId :exec
 DELETE FROM properties
-WHERE humanReadableId = $1
+WHERE humanReadableId = ?
 `
 
 func (q *Queries) DeletePropertyByHumanReadableId(ctx context.Context, humanreadableid string) error {
@@ -196,9 +193,9 @@ func (q *Queries) DeletePropertyByHumanReadableId(ctx context.Context, humanread
 }
 
 const getByHumanReadableId = `-- name: GetByHumanReadableId :one
-SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
+SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, "foreign", images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
 FROM properties
-WHERE humanReadableId = $1
+WHERE humanReadableId = ?
 LIMIT 1
 `
 
@@ -213,7 +210,8 @@ func (q *Queries) GetByHumanReadableId(ctx context.Context, humanreadableid stri
 		&i.Title,
 		&i.Floor,
 		&i.UserID,
-		pq.Array(&i.Images),
+		&i.Foreign,
+		&i.Images,
 		&i.Thumbnail,
 		&i.IsFeatured,
 		&i.EnergyClass,
@@ -250,13 +248,13 @@ func (q *Queries) GetByHumanReadableId(ctx context.Context, humanreadableid stri
 }
 
 const getProperty = `-- name: GetProperty :one
-SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
+SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, "foreign", images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
 FROM properties
-WHERE id = $1
+WHERE id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetProperty(ctx context.Context, id uuid.UUID) (Property, error) {
+func (q *Queries) GetProperty(ctx context.Context, id string) (Property, error) {
 	row := q.db.QueryRowContext(ctx, getProperty, id)
 	var i Property
 	err := row.Scan(
@@ -267,7 +265,8 @@ func (q *Queries) GetProperty(ctx context.Context, id uuid.UUID) (Property, erro
 		&i.Title,
 		&i.Floor,
 		&i.UserID,
-		pq.Array(&i.Images),
+		&i.Foreign,
+		&i.Images,
 		&i.Thumbnail,
 		&i.IsFeatured,
 		&i.EnergyClass,
@@ -304,7 +303,7 @@ func (q *Queries) GetProperty(ctx context.Context, id uuid.UUID) (Property, erro
 }
 
 const listProperties = `-- name: ListProperties :many
-SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
+SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, "foreign", images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
 FROM properties
 ORDER BY created_at DESC
 `
@@ -326,7 +325,8 @@ func (q *Queries) ListProperties(ctx context.Context) ([]Property, error) {
 			&i.Title,
 			&i.Floor,
 			&i.UserID,
-			pq.Array(&i.Images),
+			&i.Foreign,
+			&i.Images,
 			&i.Thumbnail,
 			&i.IsFeatured,
 			&i.EnergyClass,

@@ -3,13 +3,11 @@
 //   sqlc v1.23.0
 // source: users.sql
 
-package psql
+package lite
 
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :exec
@@ -21,11 +19,11 @@ INSERT INTO users (
         email,
         passwordHash
     )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type CreateUserParams struct {
-	ID           uuid.UUID
+	ID           string
 	CreatedAt    time.Time
 	Isadmin      bool
 	Issu         bool
@@ -47,10 +45,10 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM users
-WHERE id = $1
+WHERE id = ?
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
+func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deleteUser, id)
 	return err
 }
@@ -58,10 +56,10 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 const getUser = `-- name: GetUser :one
 SELECT id, created_at, isadmin, issu, email, passwordhash
 FROM users
-WHERE id = $1
+WHERE id = ?
 `
 
-func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, id)
 	var i User
 	err := row.Scan(
@@ -78,7 +76,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, created_at, isadmin, issu, email, passwordhash
 FROM users
-where email = $1
+where email = ?
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -132,13 +130,13 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 
 const updateUserEmail = `-- name: UpdateUserEmail :exec
 UPDATE users
-SET email = $1
-WHERE id = $2
+SET email = ?
+WHERE id = ?
 `
 
 type UpdateUserEmailParams struct {
 	Email string
-	ID    uuid.UUID
+	ID    string
 }
 
 func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {

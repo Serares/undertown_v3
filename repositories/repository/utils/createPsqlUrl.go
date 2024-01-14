@@ -22,7 +22,7 @@ type DBSecretValue struct {
 	DbClusterIdentified string `json:"dbClusterIdentifier"`
 }
 
-// TODO this might have to handle the creation of urls for aurora psql also
+// Deprecated
 func CreatePsqlUrl(ctx context.Context, log *slog.Logger) (string, error) {
 	dbUser := os.Getenv("PSQL_USER")
 	dbPassword := os.Getenv("PSQL_PASSWORD")
