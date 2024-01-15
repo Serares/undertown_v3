@@ -16,6 +16,7 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 	token := event.Headers["Authorization"]
 	err := godotenv.Load("../.env.local")
 	secret := os.Getenv("JWT_SECRET")
+	registratorSecret := os.Getenv("REGISTRATOR_SECRET")
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	log.Info("The event object", "event", event)
 	if err != nil {
@@ -30,12 +31,11 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 		}
 		return []byte(secret), nil
 	})
-	slog.Info("The claims from the token", "claims", claims)
 	if err != nil || !parsedToken.Valid {
 		// Return a policy document that denies access
 		return generatePolicy("user", "Deny", event.MethodArn), nil
 	}
-	if claims.Email == "registrator@email.com" {
+	if claims.Email == registratorSecret {
 		// Return a policy document that allows access
 		return generatePolicy("user", "Allow", event.MethodArn), nil
 	}

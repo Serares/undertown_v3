@@ -16,7 +16,6 @@ type Property struct {
 	Title                            string
 	Floor                            int64
 	UserID                           string
-	Foreign                          interface{}
 	Images                           string
 	Thumbnail                        string
 	IsFeatured                       int64

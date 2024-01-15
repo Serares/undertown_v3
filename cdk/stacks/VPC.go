@@ -11,6 +11,7 @@ type VpcStackProps struct {
 	awscdk.StackProps
 }
 
+// This is no longer needed?
 func VPC(scope constructs.Construct, id string, props *VpcStackProps) awsec2.Vpc {
 	var sprops awscdk.StackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)

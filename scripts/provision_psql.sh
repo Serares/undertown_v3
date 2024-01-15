@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# DEPRECATED
+# No longer using psql as the db engine
 DOCKER=docker
 DOCKER_PATH=$(command -v $DOCKER)
 

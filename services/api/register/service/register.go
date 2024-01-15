@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
-	"github.com/Serares/undertown_v3/repositories/repository/psql"
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	repositoryTypes "github.com/Serares/undertown_v3/repositories/repository/types"
 	"github.com/Serares/undertown_v3/services/api/register/types"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -27,12 +28,12 @@ func NewRegisterService(log *slog.Logger, userRepo repository.IUsersRepository) 
 	}
 }
 
-func (us *UserService) checkUserExists(ctx context.Context, id uuid.UUID) (bool, error) {
+func (us *UserService) checkUserExists(ctx context.Context, id string) (bool, error) {
 	// derefference a struct
 	_, err := us.UserRepo.Get(ctx, id)
 	// only return false if the SqlNoRows error is returned by the repo
 	if err != nil {
-		if errors.Is(err, repository.ErrorNotFound) {
+		if errors.Is(err, repositoryTypes.ErrorNotFound) {
 			return false, nil
 		}
 		us.Log.Error("error checking if user exists", "type", types.ErrorCheckingIfUserExists, "error", err)
@@ -46,7 +47,7 @@ func (us *UserService) checkIfEmailAlreadyExists(ctx context.Context, email stri
 	// only return false if the SqlNoRows error is returned by the repo
 	if err != nil {
 		us.Log.Error("error checking for email", err)
-		if errors.Is(err, repository.ErrorNotFound) {
+		if errors.Is(err, repositoryTypes.ErrorNotFound) {
 			return false, nil
 		}
 		us.Log.Error("error checking if email exists", "type", types.ErrorCheckingIfEmailExists, "error", err)
@@ -63,8 +64,8 @@ func (us *UserService) createPasswordHash(password string) ([]byte, error) {
 func (us *UserService) PersistUser(ctx context.Context, user *types.PostUserRequest) error {
 	us.Log.Info("persist user method", "user", user)
 	// create the user params to be persisted
-	userParams := psql.CreateUserParams{
-		ID:        uuid.New(),
+	userParams := lite.CreateUserParams{
+		ID:        uuid.New().String(),
 		CreatedAt: time.Now(),
 		Isadmin:   user.Isadmin,
 		Issu:      user.Issu,

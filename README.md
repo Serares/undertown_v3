@@ -73,3 +73,10 @@ The cdk configuration is still available in the file:
 - `VPC endpoints` are billed `$0.011 per VPC Endpoint Hour` so it's not a trully serverless option
 
 **Using Turso as the next cheapest viable SQL database**
+
+Sqld is the engine that runs locally to test the database:
+
+**Interacting with the db can be done using http requests**
+
+`curl -s -d '{"statements": ["select 1"] }' \
+        http://127.0.0.1:8000`

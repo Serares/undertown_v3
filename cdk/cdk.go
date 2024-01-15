@@ -2,6 +2,8 @@ package main
 
 import (
 	"cdk/stacks"
+	"fmt"
+	"os"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/jsii-runtime-go"
@@ -11,18 +13,35 @@ import (
 func main() {
 	defer jsii.Close()
 	err := godotenv.Load(".env.dev")
+	theEnv := os.Getenv("ENV")
 	if err != nil {
 		// handle error in the cdk stack
 		panic(err)
 	}
 	app := awscdk.NewApp(nil)
 
-	stacks.U1LambdaStack(app, "U1LambdaStack", &stacks.ApiLambdaStackProps{
+	authLambdas := stacks.A1Lambda(app, fmt.Sprintf("A1Lambda-%s", theEnv), &stacks.A1LambdaProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
-		Vpc: vpc,
+		Env: theEnv,
 	})
+
+	crudLambdas := stacks.U1Lambda(app, fmt.Sprintf("U1Lambda-%s", theEnv), &stacks.U1LambdaProps{
+		StackProps: awscdk.StackProps{
+			Env: env(),
+		},
+		Env: theEnv,
+	})
+	lambdas := append(authLambdas, crudLambdas...)
+	stacks.API(app, fmt.Sprintf("Undertown-API-%s", theEnv), &stacks.APIStackProps{
+		StackProps: awscdk.StackProps{
+			Env: env(),
+		},
+		IntegrationLambdas: lambdas,
+		Env:                theEnv,
+	})
+
 	app.Synth(nil)
 }
 

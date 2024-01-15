@@ -3,6 +3,9 @@
 -- SQLite also doesn't support UUID natively, use TEXT for UUIDs
 -- Replace TEXT [] with a TEXT field for the images
 -- BOOLEAN fields are stored as INTEGER (0 or 1) in SQLite
+-- Store as a comma-separated string or JSON string
+-- Assuming users table exists with id as TEXT
+-- +goose Up
 CREATE TABLE properties (
     id TEXT PRIMARY KEY,
     humanReadableId TEXT NOT NULL,
@@ -11,10 +14,7 @@ CREATE TABLE properties (
     title TEXT NOT NULL,
     floor INTEGER NOT NULL,
     user_id TEXT NOT NULL,
-    -- Assuming users table exists with id as TEXT
-    FOREIGN KEY (user_id) REFERENCES users(id),
     images TEXT NOT NULL,
-    -- Store as a comma-separated string or JSON string
     thumbnail TEXT NOT NULL,
     is_featured INTEGER NOT NULL,
     energy_class TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE properties (
     other_utilities_service_toilet INTEGER NOT NULL,
     other_utilities_underground_storage INTEGER NOT NULL,
     other_utilities_storage INTEGER NOT NULL,
-    property_transaction TEXT CHECK(property_transaction IN ('sell', 'rent')) NOT NULL,
+    property_transaction TEXT CHECK(property_transaction IN ('SELL', 'RENT')) NOT NULL,
     furnished_not INTEGER NOT NULL,
     furnished_partially INTEGER NOT NULL,
     furnished_complete INTEGER NOT NULL,
@@ -45,7 +45,8 @@ CREATE TABLE properties (
     heating_other_electrical INTEGER NOT NULL,
     heating_gas_convector INTEGER NOT NULL,
     heating_infrared_panels INTEGER NOT NULL,
-    heating_floor_heating INTEGER NOT NULL
+    heating_floor_heating INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 -- SQLite doesn't support the DROP TYPE statement as it does not support custom types
 -- The DROP TABLE statement remains the same

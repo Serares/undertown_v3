@@ -26,6 +26,7 @@ func New(log *slog.Logger, ss service.Submit) *AddPropertyHandler {
 func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		var property types.POSTProperty
+
 		if err := json.NewDecoder(r.Body).Decode(&property); err != nil {
 			message := fmt.Sprintf("Invalid JSON: %v", err)
 			utils.ReplyError(w, r, http.StatusInternalServerError, message)
@@ -38,7 +39,7 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		successReply := types.POSTSuccessResponse{
-			PropertyId:      id.String(),
+			PropertyId:      id,
 			HumanReadableId: hrID,
 		}
 		err = utils.ReplySuccess(w, r, http.StatusCreated, successReply)

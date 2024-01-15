@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Serares/undertown_v3/repositories/repository/psql"
+	"github.com/Serares/undertown_v3/repositories/repository/types"
 )
 
 // ❔
@@ -14,14 +14,14 @@ import (
 // use the TransactionType enum from the repository models
 // define the first two letters as the transaction type (SE || RE)
 // follow by 3+3 random generated numbers
-func HumanReadableId(propertyType psql.TransactionType) string {
+func HumanReadableId(propertyType types.TransactionType) string {
 	var randomBlock []string
 
 	for i := 0; i < 2; i++ {
 		randomBlock = append(randomBlock, generateRandomBlock(3))
 	}
 
-	transactionTypeTrimmedCapitalized := strings.ToUpper(string(propertyType[:2]))
+	transactionTypeTrimmedCapitalized := strings.ToUpper(propertyType.String()[:2])
 	generatedId := fmt.Sprintf("%s%s%s", transactionTypeTrimmedCapitalized, randomBlock[0], randomBlock[1])
 
 	return generatedId

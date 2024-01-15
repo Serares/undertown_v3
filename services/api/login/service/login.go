@@ -9,7 +9,8 @@ import (
 	"os"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
-	"github.com/Serares/undertown_v3/repositories/repository/psql"
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	repositoryTypes "github.com/Serares/undertown_v3/repositories/repository/types"
 	"github.com/Serares/undertown_v3/services/api/login/types"
 	"github.com/Serares/undertown_v3/utils"
 	"github.com/golang-jwt/jwt/v5"
@@ -51,7 +52,7 @@ func (ls *LoginService) LoginUser(ctx context.Context, email string, password st
 	}
 
 	// generate the JWT
-	token, err := ls.signAndGenerateToken(user.Email, user.ID.String(), user.Isadmin)
+	token, err := ls.signAndGenerateToken(user.Email, user.ID, user.Isadmin)
 	if err != nil {
 		return "", fmt.Errorf("error while generating token %w", err)
 	}
@@ -60,10 +61,10 @@ func (ls *LoginService) LoginUser(ctx context.Context, email string, password st
 	return tokenInBase64, nil
 }
 
-func (ls *LoginService) searchUserByEmail(ctx context.Context, email string) (*psql.User, error) {
+func (ls *LoginService) searchUserByEmail(ctx context.Context, email string) (*lite.User, error) {
 	user, err := ls.UserRepo.GetByEmail(ctx, email)
 	if err != nil {
-		if errors.Is(err, repository.ErrorNotFound) {
+		if errors.Is(err, repositoryTypes.ErrorNotFound) {
 			// have to return error in case the user is not existent
 			return nil, fmt.Errorf("user email is not registered")
 		}

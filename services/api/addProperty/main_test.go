@@ -13,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
-	"github.com/Serares/undertown_v3/repositories/repository/utils"
 	"github.com/Serares/undertown_v3/services/api/addProperty/handler"
 	"github.com/Serares/undertown_v3/services/api/addProperty/service"
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
@@ -27,12 +26,8 @@ func setupAPI(t *testing.T) (string, func()) {
 	}
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	// create db connection
-	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
-	if err != nil {
-		t.Fatal("error on creating the connection string")
-	}
-	db, err := repository.NewPropertiesRepo(dbUrl)
+
+	db, err := repository.NewPropertiesRepo()
 	if err != nil {
 		log.Error("error on initializing the db")
 	}

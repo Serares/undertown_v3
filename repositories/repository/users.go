@@ -6,7 +6,10 @@ import (
 	"fmt"
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
-	_ "github.com/lib/pq"
+	"github.com/Serares/undertown_v3/repositories/repository/types"
+	"github.com/Serares/undertown_v3/repositories/repository/utils"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	_ "modernc.org/sqlite"
 )
 
 type IUsersRepository interface {
@@ -27,7 +30,11 @@ type Users struct {
 	dbConnection *sql.DB
 }
 
-func NewUsersRepository(dbUrl string) (*Users, error) {
+func NewUsersRepository() (*Users, error) {
+	dbUrl, err := utils.CreateSqliteUrl()
+	if err != nil {
+		return nil, fmt.Errorf("error trying to create the db connection string %w", err)
+	}
 	db, err := sql.Open("libsql", dbUrl)
 	if err != nil {
 		return nil, err
@@ -56,9 +63,9 @@ func (u *Users) Delete(ctx context.Context, id string) error {
 	err := u.db.DeleteUser(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return ErrorNotFound
+			return types.ErrorNotFound
 		}
-		return fmt.Errorf("%s -- %v", ErrorAccessingDatabase, err)
+		return fmt.Errorf("%s -- %v", types.ErrorAccessingDatabase, err)
 	}
 	return nil
 }
@@ -67,9 +74,9 @@ func (u *Users) Get(ctx context.Context, id string) (*lite.User, error) {
 	user, err := u.db.GetUser(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrorNotFound
+			return nil, types.ErrorNotFound
 		}
-		return nil, fmt.Errorf("%s -- %v", ErrorAccessingDatabase, err)
+		return nil, fmt.Errorf("%s -- %v", types.ErrorAccessingDatabase, err)
 	}
 	return &user, nil
 }
@@ -78,9 +85,9 @@ func (u *Users) GetByEmail(ctx context.Context, email string) (*lite.User, error
 	user, err := u.db.GetUserByEmail(ctx, email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrorNotFound
+			return nil, types.ErrorNotFound
 		}
-		return nil, fmt.Errorf("%s -- %v", ErrorAccessingDatabase, err)
+		return nil, fmt.Errorf("%s -- %v", types.ErrorAccessingDatabase, err)
 	}
 	return &user, nil
 }
@@ -97,8 +104,3 @@ func (u *Users) CloseDbConnection(ctx context.Context) error {
 
 	return nil
 }
-
-// func (u *Users) BeginTx(ctx context.Context) (*sql.Tx, error) {
-// 	return u.dbConnection.Begin()
-// You'll have to use the tx struct and run tx.Rollback()
-// }

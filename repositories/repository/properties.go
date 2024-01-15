@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
-	_ "github.com/lib/pq"
+	"github.com/Serares/undertown_v3/repositories/repository/utils"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	_ "modernc.org/sqlite"
 )
 
 type IPropertiesRepository interface {
@@ -22,8 +24,12 @@ type Properties struct {
 	dbConnection *sql.DB
 }
 
-func NewPropertiesRepo(dbUrl string) (*Properties, error) {
-	db, err := sql.Open("postgres", dbUrl)
+func NewPropertiesRepo() (*Properties, error) {
+	dbUrl, err := utils.CreateSqliteUrl()
+	if err != nil {
+		return nil, fmt.Errorf("error creating the connection string for database %w", err)
+	}
+	db, err := sql.Open("libsql", dbUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +56,7 @@ func (d *Properties) Add(ctx context.Context, propertyParams lite.AddPropertyPar
 	err := d.db.AddProperty(ctx, propertyParams)
 
 	if err != nil {
-		return fmt.Errorf("error trying to insert property with id %v from user id %v", propertyParams.ID, propertyParams.UserID)
+		return fmt.Errorf("error trying to insert property from user id %v error: %w", propertyParams.UserID, err)
 	}
 
 	return nil

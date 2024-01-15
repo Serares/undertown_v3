@@ -3,20 +3,20 @@ package util
 import (
 	"testing"
 
-	"github.com/Serares/undertown_v3/repositories/repository/psql"
+	"github.com/Serares/undertown_v3/repositories/repository/types"
 )
 
 func TestHumanReadableId(t *testing.T) {
 	cases := []struct {
 		name            string
-		transactionType psql.TransactionType
+		transactionType types.TransactionType
 		expectedPrefix  string
 	}{
 		{name: "Sell Type",
-			transactionType: psql.TransactionTypeSell,
+			transactionType: types.Sell,
 			expectedPrefix:  "SE"},
 		{name: "Rent Type",
-			transactionType: psql.TransactionTypeRent,
+			transactionType: types.Rent,
 			expectedPrefix:  "RE"},
 	}
 	for _, tc := range cases {

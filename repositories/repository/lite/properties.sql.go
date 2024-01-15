@@ -193,7 +193,7 @@ func (q *Queries) DeletePropertyByHumanReadableId(ctx context.Context, humanread
 }
 
 const getByHumanReadableId = `-- name: GetByHumanReadableId :one
-SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, "foreign", images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
+SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
 FROM properties
 WHERE humanReadableId = ?
 LIMIT 1
@@ -210,7 +210,6 @@ func (q *Queries) GetByHumanReadableId(ctx context.Context, humanreadableid stri
 		&i.Title,
 		&i.Floor,
 		&i.UserID,
-		&i.Foreign,
 		&i.Images,
 		&i.Thumbnail,
 		&i.IsFeatured,
@@ -248,7 +247,7 @@ func (q *Queries) GetByHumanReadableId(ctx context.Context, humanreadableid stri
 }
 
 const getProperty = `-- name: GetProperty :one
-SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, "foreign", images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
+SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
 FROM properties
 WHERE id = ?
 LIMIT 1
@@ -265,7 +264,6 @@ func (q *Queries) GetProperty(ctx context.Context, id string) (Property, error) 
 		&i.Title,
 		&i.Floor,
 		&i.UserID,
-		&i.Foreign,
 		&i.Images,
 		&i.Thumbnail,
 		&i.IsFeatured,
@@ -303,7 +301,7 @@ func (q *Queries) GetProperty(ctx context.Context, id string) (Property, error) 
 }
 
 const listProperties = `-- name: ListProperties :many
-SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, "foreign", images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
+SELECT id, humanreadableid, created_at, updated_at, title, floor, user_id, images, thumbnail, is_featured, energy_class, energy_consumption_primary, energy_emissions_index, energy_consumption_green, destination_residential, destination_commercial, destination_office, destination_holiday, other_utilities_terrance, other_utilities_service_toilet, other_utilities_underground_storage, other_utilities_storage, property_transaction, furnished_not, furnished_partially, furnished_complete, furnished_luxury, interior_needs_renovation, interior_has_renovation, interior_good_state, heating_termoficare, heating_central_heating, heating_building, heating_stove, heating_radiator, heating_other_electrical, heating_gas_convector, heating_infrared_panels, heating_floor_heating
 FROM properties
 ORDER BY created_at DESC
 `
@@ -325,7 +323,6 @@ func (q *Queries) ListProperties(ctx context.Context) ([]Property, error) {
 			&i.Title,
 			&i.Floor,
 			&i.UserID,
-			&i.Foreign,
 			&i.Images,
 			&i.Thumbnail,
 			&i.IsFeatured,

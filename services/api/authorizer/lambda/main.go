@@ -55,6 +55,5 @@ func generatePolicy(principalID, effect, resource string) events.APIGatewayCusto
 			},
 		},
 	}
-
 	return authResponse
 }
