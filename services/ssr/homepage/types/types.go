@@ -1,6 +1,9 @@
 package types
 
-import "github.com/a-h/templ"
+import (
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	"github.com/a-h/templ"
+)
 
 type HomeIncludes struct {
 	Header  templ.Component
@@ -11,7 +14,8 @@ type HomeIncludes struct {
 }
 
 type HomeProps struct {
-	ErrorMessage string
+	ErrorMessage       string
+	FeaturedProperties []lite.ListFeaturedPropertiesRow
 }
 
 type ContactIncludes struct {

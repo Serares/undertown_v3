@@ -42,7 +42,7 @@ func main() {
 		Env:                theEnv,
 	})
 
-	ssrLambda := stacks.SSR(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRStackProps{
+	ssrLambdaUrl := stacks.SSR(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
@@ -53,7 +53,7 @@ func main() {
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
-		HomeLambdaUrl: ssrLambda,
+		HomeLambdaUrl: ssrLambdaUrl,
 		Env:           theEnv,
 	})
 

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Serares/ssr/homepage/handlers"
+	"github.com/Serares/ssr/homepage/service"
 	"github.com/joho/godotenv"
 )
 
@@ -19,24 +20,26 @@ import (
 // Entrypoint for deployment in inside lambda directory
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load(".env.local")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3030"
+		port = "4030"
 	}
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	client := service.NewHomeClient(log)
+	homeService := service.NewHomeService(log, client)
 	m := http.NewServeMux()
 	contactHandler := handlers.NewContactHandler(log)
-	homeHandler := handlers.NewHomeHandler(log)
+	homeHandler := handlers.NewHomeHandler(log, *homeService)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	m.Handle("/contact", http.StripPrefix("/contact", contactHandler))
 	m.Handle("/contact/", http.StripPrefix("/contact/", contactHandler))
-	// m.Handle("/property/{ID}", http.StripPrefix("/property/", contactHandler))
+	m.Handle("/property/", http.StripPrefix("/property/", contactHandler))
 	m.Handle("/", homeHandler)
 
 	server := &http.Server{

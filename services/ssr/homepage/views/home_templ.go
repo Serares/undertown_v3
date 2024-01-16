@@ -271,72 +271,100 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"row filter-list clearfix\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var19 := `
-                                    <div class="row filter-list clearfix">
-                                        <% for(let featProp of featProperties) { %>
-                                        <div
-                                            class="column mix mix_all <%- featProp.tipProprietate %> col-lg-4 col-md-6">
-                                            <div class="property_grid_1 property_item bg-white mb_30">
-                                                <div class="zoom_effect_1">
-                                                    <div class="upper_1 bg_secondary text-white">
-                                                        <%- featProp.status === 1 ? 'Vanzare' : 'Inchiriere' %>
-                                                    </div>
-                                                    <div class="upper_2 bg_primary text-white">Recomandare</div>
-                                                    <a
-                                                        href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"><img
-                                                            src="/<%- featProp.thumbnail %>" alt="Image Not Found!"></a>
-                                                    <% if(featProp.createdTimeAgo !== ""){ %>
-                                                        <div class="upper_3 text_secondary">
-                                                            <%- featProp.createdTimeAgo %>
-                                                        </div>
-                                                    <% } %>
-                                                    
-                                                </div>
-                                                <div class="property_text p-3">
-                                                    <h5 class="title"><a
-                                                            href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"><%- featProp.titlu %></a>
-                                                    </h5>
-                                                    <span class="my-3 d-block"><i class="fas fa-map-marker-alt"></i>
-                                                        <%- featProp.adresa %></span>
-                                                    <div class="quantity">
-                                                        <ul>
-                                                            <% for(let carac in featProp.caracteristici){ %>
-
-                                                            <li><span><%- featProp.caracteristici[carac].key %></span>
-                                                                <%-featProp.caracteristici[carac].value %></li>
-                                                            <% } %>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="bed_area d-table w-100">
-                                                    <ul>
-                                                        <li><%- featProp.displayPrice %></li>
-                                                        <li class="icon_medium"><a href="#"><i
-                                                                    class="flaticon-like"></i></a> </li>
-                                                        <li class="icon_medium"><a href="#"><i
-                                                                    class="flaticon-connections"></i></a> </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <% }%>
-
-                                    </div>
-                                    `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
+		for _, featProp := range props.FeaturedProperties {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"column mix mix_all &lt;%- featProp.tipProprietate %&gt; col-lg-4 col-md-6\"><div class=\"property_grid_1 property_item bg-white mb_30\"><div class=\"zoom_effect_1\"><div class=\"upper_1 bg_secondary text-white\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if featProp.Title == "1" {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Var19 := `'Vanzare'`
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Var20 := `'Cumparare'`
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"upper_2 bg_primary text-white\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var21 := `Recomandare`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><a href=\"/&lt;%- featProp.status == 2 ? &#39;inchiriere&#39; : &#39;vanzare&#39; %&gt;/&lt;%- featProp._id %&gt;\"><img src=\"/&lt;%- featProp.thumbnail %&gt;\" alt=\"Image Not Found!\"></a></div><div class=\"property_text p-3\"><h5 class=\"title\"><a href=\"/&lt;%- featProp.status == 2 ? &#39;inchiriere&#39; : &#39;vanzare&#39; %&gt;/&lt;%- featProp._id %&gt;\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var22 string = featProp.ID
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><span class=\"my-3 d-block\"><i class=\"fas fa-map-marker-alt\"></i> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var23 := `address`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><div class=\"quantity\"><ul>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var24 := `Other things`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></div><div class=\"bed_area d-table w-100\"><ul><li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var25 := `TODO forgot to add the price in the data models`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li><li class=\"icon_medium\"><a href=\"#\"><i class=\"flaticon-like\"></i></a></li><li class=\"icon_medium\"><a href=\"#\"><i class=\"flaticon-connections\"></i></a></li></ul></div></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><!--")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var20 := ` End tab content `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
+		templ_7745c5c3_Var26 := ` End tab content `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -344,8 +372,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var21 := ` Property Tab End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
+		templ_7745c5c3_Var27 := ` Property Tab End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -353,8 +381,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var22 := ` Popular Category `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
+		templ_7745c5c3_Var28 := ` Popular Category `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -362,7 +390,7 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var23 := ` <section id="popular-category" class="full_row py_80 bg_white">
+		templ_7745c5c3_Var29 := ` <section id="popular-category" class="full_row py_80 bg_white">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
@@ -428,7 +456,7 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
                     </div>
                 </div>
             </section> `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -436,8 +464,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var24 := ` Popular Category End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
+		templ_7745c5c3_Var30 := ` Popular Category End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -445,8 +473,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var25 := ` Offer Part Start `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
+		templ_7745c5c3_Var31 := ` Offer Part Start `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -454,61 +482,7 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var26 := `Inchirieri`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var27 := `Regim hotelier? Se rezolvă`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div><div class=\"col-xl-3 col-lg-4 col-sm-6\"><div class=\"offer_item_2 mb_30 text-center wow fadeInLeft\" data-wow-delay=\"100ms\" data-wow-duration=\"1000ms\"><div class=\"icon_large icon mb-2\"><i class=\"flaticon-pencil-and-paper\"></i></div><h5 class=\"title py-3\"><a href=\"#\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var28 := `Garantarea plății`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var29 := `Nu trebuie să aveti vreo girjă, noi ne ingrijorăm de toate formalitățile`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div><div class=\"col-xl-3 col-lg-4 col-sm-6\"><div class=\"offer_item_2 mb_30 text-center wow fadeInRight\" data-wow-delay=\"100ms\" data-wow-duration=\"1000ms\"><div class=\"icon_large icon mb-2\"><i class=\"flaticon-home\"></i></div><h5 class=\"title py-3\"><a href=\"#\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var30 := `Facilitare intermediere`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var31 := `Timpul nostru este dedicat 100% pentru oferirea de servicii profesionale`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div><div class=\"col-xl-3 col-lg-4 col-sm-6\"><div class=\"offer_item_2 mb_30 text-center wow fadeInRight\" data-wow-delay=\"200ms\" data-wow-duration=\"1000ms\"><div class=\"icon_large icon mb-2\"><i class=\"flaticon-connections\"></i></div><h5 class=\"title py-3\"><a href=\"#\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var32 := `Best Deal`
+		templ_7745c5c3_Var32 := `Inchirieri`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var32)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -517,8 +491,62 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var33 := `Ne asigurăm de cea mai bună ofertă`
+		templ_7745c5c3_Var33 := `Regim hotelier? Se rezolvă`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var33)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div><div class=\"col-xl-3 col-lg-4 col-sm-6\"><div class=\"offer_item_2 mb_30 text-center wow fadeInLeft\" data-wow-delay=\"100ms\" data-wow-duration=\"1000ms\"><div class=\"icon_large icon mb-2\"><i class=\"flaticon-pencil-and-paper\"></i></div><h5 class=\"title py-3\"><a href=\"#\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var34 := `Garantarea plății`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var35 := `Nu trebuie să aveti vreo girjă, noi ne ingrijorăm de toate formalitățile`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var35)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div><div class=\"col-xl-3 col-lg-4 col-sm-6\"><div class=\"offer_item_2 mb_30 text-center wow fadeInRight\" data-wow-delay=\"100ms\" data-wow-duration=\"1000ms\"><div class=\"icon_large icon mb-2\"><i class=\"flaticon-home\"></i></div><h5 class=\"title py-3\"><a href=\"#\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var36 := `Facilitare intermediere`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var37 := `Timpul nostru este dedicat 100% pentru oferirea de servicii profesionale`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></div><div class=\"col-xl-3 col-lg-4 col-sm-6\"><div class=\"offer_item_2 mb_30 text-center wow fadeInRight\" data-wow-delay=\"200ms\" data-wow-duration=\"1000ms\"><div class=\"icon_large icon mb-2\"><i class=\"flaticon-connections\"></i></div><h5 class=\"title py-3\"><a href=\"#\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var38 := `Best Deal`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var39 := `Ne asigurăm de cea mai bună ofertă`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var39)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -526,61 +554,7 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var34 := ` Offer Part End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><!--")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var35 := ` info Banner `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var35)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><section class=\"full_row py_80 overlay_1 bg_img_3\"><div class=\"container\"><div class=\"row\"><div class=\"banner_1 text-center\"><span class=\"text_white\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var36 := `Vrei să iți adaugi proprietatea in`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var37 := `baza noastră de date?`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><h2 class=\"title text_white my-4 text-capitalize\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var38 := `Te vom ajuta să-ți găsești clientul`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h2><a class=\"btn btn_primary\" href=\"/contact\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var39 := `Adaugă proprietate`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var39)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div></div></div></section><!--")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var40 := ` info Banner End `
+		templ_7745c5c3_Var40 := ` Offer Part End `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var40)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -589,8 +563,62 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var41 := ` Footer Section Start `
+		templ_7745c5c3_Var41 := ` info Banner `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var41)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><section class=\"full_row py_80 overlay_1 bg_img_3\"><div class=\"container\"><div class=\"row\"><div class=\"banner_1 text-center\"><span class=\"text_white\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var42 := `Vrei să iți adaugi proprietatea in`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var42)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var43 := `baza noastră de date?`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var43)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><h2 class=\"title text_white my-4 text-capitalize\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var44 := `Te vom ajuta să-ți găsești clientul`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var44)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h2><a class=\"btn btn_primary\" href=\"/contact\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var45 := `Adaugă proprietate`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var45)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div></div></div></section><!--")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var46 := ` info Banner End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var46)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><!--")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var47 := ` Footer Section Start `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var47)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -606,8 +634,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var42 := ` Footer Section End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var42)
+		templ_7745c5c3_Var48 := ` Footer Section End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var48)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -615,8 +643,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var43 := ` Find Part Satrt `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var43)
+		templ_7745c5c3_Var49 := ` Find Part Satrt `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var49)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -624,8 +652,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var44 := ` Find Part Satrt `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var44)
+		templ_7745c5c3_Var50 := ` Find Part Satrt `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var50)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -633,8 +661,8 @@ func Home(contents types.HomeIncludes, props types.HomeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var45 := ` Wrapper End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var45)
+		templ_7745c5c3_Var51 := ` Wrapper End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var51)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

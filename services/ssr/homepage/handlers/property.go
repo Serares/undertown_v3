@@ -9,32 +9,26 @@ import (
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
 	"github.com/Serares/ssr/homepage/views/includes"
-	"github.com/Serares/undertown_v3/utils"
 )
 
-type HomeHandler struct {
+type PropertyHandler struct {
 	Log         *slog.Logger
 	HomeService service.HomeService
 }
 
-func NewHomeHandler(log *slog.Logger, homeService service.HomeService) *HomeHandler {
+func NewPropertyHandler(log *slog.Logger, homeService service.HomeService) *HomeHandler {
 	return &HomeHandler{
 		Log:         log,
 		HomeService: homeService,
 	}
 }
 
-func (hh *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Got in the home function %s", r.URL.Path)
+func (hh *PropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("property handler %s", r.URL.Path)
 	if r.URL.Path == "/" {
 		switch r.Method {
 		case http.MethodGet:
-			properties, err := hh.HomeService.ListProperties()
-			if err != nil {
-				hh.Log.Error("error getting properties", "error", err)
-				utils.ReplyError(w, r, http.StatusInternalServerError, "error getting the properties")
-			}
-			viewHome(w, r, types.HomeProps{ErrorMessage: "", FeaturedProperties: properties})
+			viewProperty(w, r)
 		default:
 			message := "Method not supported"
 			hh.Log.Error(message)
@@ -46,7 +40,7 @@ func (hh *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO should this function be defined like this?
-func viewHome(w http.ResponseWriter, r *http.Request, props types.HomeProps) {
+func viewProperty(w http.ResponseWriter, r *http.Request) {
 	header := includes.Header("Page title")
 	preload := includes.Preload()
 	navbar := includes.Navbar()
@@ -58,5 +52,7 @@ func viewHome(w http.ResponseWriter, r *http.Request, props types.HomeProps) {
 		Navbar:  navbar,
 		Footer:  footer,
 		Scripts: scripts,
-	}, props).Render(r.Context(), w)
+	}, types.HomeProps{
+		ErrorMessage: "",
+	}).Render(r.Context(), w)
 }

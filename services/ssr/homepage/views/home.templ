@@ -115,58 +115,75 @@ templ Home(contents types.HomeIncludes, props types.HomeProps) {
 											</div>
 											<!--Filter List-->
 											<!-- Tab Content -->
-											<!--
-                                    <div class="row filter-list clearfix">
-                                        <% for(let featProp of featProperties) { %>
-                                        <div
-                                            class="column mix mix_all <%- featProp.tipProprietate %> col-lg-4 col-md-6">
-                                            <div class="property_grid_1 property_item bg-white mb_30">
-                                                <div class="zoom_effect_1">
-                                                    <div class="upper_1 bg_secondary text-white">
-                                                        <%- featProp.status === 1 ? 'Vanzare' : 'Inchiriere' %>
-                                                    </div>
-                                                    <div class="upper_2 bg_primary text-white">Recomandare</div>
-                                                    <a
-                                                        href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"><img
-                                                            src="/<%- featProp.thumbnail %>" alt="Image Not Found!"></a>
-                                                    <% if(featProp.createdTimeAgo !== ""){ %>
-                                                        <div class="upper_3 text_secondary">
-                                                            <%- featProp.createdTimeAgo %>
-                                                        </div>
-                                                    <% } %>
-                                                    
-                                                </div>
-                                                <div class="property_text p-3">
-                                                    <h5 class="title"><a
-                                                            href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"><%- featProp.titlu %></a>
-                                                    </h5>
-                                                    <span class="my-3 d-block"><i class="fas fa-map-marker-alt"></i>
-                                                        <%- featProp.adresa %></span>
-                                                    <div class="quantity">
-                                                        <ul>
-                                                            <% for(let carac in featProp.caracteristici){ %>
-
-                                                            <li><span><%- featProp.caracteristici[carac].key %></span>
-                                                                <%-featProp.caracteristici[carac].value %></li>
-                                                            <% } %>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="bed_area d-table w-100">
-                                                    <ul>
-                                                        <li><%- featProp.displayPrice %></li>
-                                                        <li class="icon_medium"><a href="#"><i
-                                                                    class="flaticon-like"></i></a> </li>
-                                                        <li class="icon_medium"><a href="#"><i
-                                                                    class="flaticon-connections"></i></a> </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <% }%>
-
-                                    </div>
-                                    -->
+											<div class="row filter-list clearfix">
+												for _,featProp := range props.FeaturedProperties {
+													<div
+ 														class="column mix mix_all <%- featProp.tipProprietate %> col-lg-4 col-md-6"
+													>
+														<div class="property_grid_1 property_item bg-white mb_30">
+															<div class="zoom_effect_1">
+																<div class="upper_1 bg_secondary text-white">
+																	// TODO have to add the property status to data model
+																	if featProp.Title == "1" {
+																		<div>'Vanzare'</div>
+																	} else {
+																		<div>'Cumparare'</div>
+																	}
+																</div>
+																<div class="upper_2 bg_primary text-white">Recomandare</div>
+																<a
+ 																	href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"
+																>
+																	<img
+ 																		src="/<%- featProp.thumbnail %>"
+ 																		alt="Image Not Found!"
+																	/>
+																</a>
+																// <% if(featProp.createdTimeAgo !== ""){ %>
+																//     <div class="upper_3 text_secondary">
+																//         <%- featProp.createdTimeAgo %>
+																//     </div>
+																// <% } %>
+															</div>
+															<div class="property_text p-3">
+																<h5 class="title">
+																	<a
+ 																		href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"
+																	>{ featProp.ID }</a>
+																</h5>
+																<span class="my-3 d-block">
+																	<i class="fas fa-map-marker-alt"></i>
+																	address
+																</span>
+																<div class="quantity">
+																	<ul>
+																		Other things
+																	</ul>
+																</div>
+															</div>
+															<div class="bed_area d-table w-100">
+																<ul>
+																	<li>TODO forgot to add the price in the data models</li>
+																	<li class="icon_medium">
+																		<a href="#">
+																			<i
+ 																				class="flaticon-like"
+																			></i>
+																		</a>
+																	</li>
+																	<li class="icon_medium">
+																		<a href="#">
+																			<i
+ 																				class="flaticon-connections"
+																			></i>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+													</div>
+												}
+											</div>
 											<!-- End tab content -->
 										</div>
 									</div>

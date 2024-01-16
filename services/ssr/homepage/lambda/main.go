@@ -16,11 +16,11 @@ func main() {
 	contactHandler := handlers.NewContactHandler(log)
 	homeHandler := handlers.NewHomeHandler(log)
 
-	// This is not advised to use in prod
-	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
+	// you might not need to create a route for the static assets
+	// the route is created in the cdk
 	mux.Handle("/contact", http.StripPrefix("/contact", contactHandler))
 	mux.Handle("/contact/", http.StripPrefix("/contact/", contactHandler))
-	// m.Handle("/property/{ID}", http.StripPrefix("/property/", contactHandler))
+	mux.Handle("/property/", http.StripPrefix("/property/", contactHandler))
 	mux.Handle("/", homeHandler)
 
 	algnhsa.ListenAndServe(mux, nil)
