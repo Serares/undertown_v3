@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/repositories/repository/types"
@@ -19,10 +20,6 @@ type IUsersRepository interface {
 	GetByEmail(ctx context.Context, email string) (*lite.User, error)
 	UpdateEmail(ctx context.Context, id string) error
 	CloseDbConnection(ctx context.Context) error
-	// Used for tests
-	// tryed it and it's not doing the thing
-	// maybe try again later
-	// BeginTx(ctx context.Context) (*sql.Tx, error)
 }
 
 type Users struct {
@@ -39,8 +36,9 @@ func NewUsersRepository() (*Users, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.SetConnMaxIdleTime(30 * time.Minute)
 	if err := db.Ping(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reaching the database %w", err)
 	}
 	dbQueries := lite.New(db)
 	return &Users{

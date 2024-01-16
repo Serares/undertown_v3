@@ -42,6 +42,21 @@ func main() {
 		Env:                theEnv,
 	})
 
+	ssrLambda := stacks.SSR(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRStackProps{
+		StackProps: awscdk.StackProps{
+			Env: env(),
+		},
+		Env: theEnv,
+	})
+
+	stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
+		StackProps: awscdk.StackProps{
+			Env: env(),
+		},
+		HomeLambdaUrl: ssrLambda,
+		Env:           theEnv,
+	})
+
 	app.Synth(nil)
 }
 

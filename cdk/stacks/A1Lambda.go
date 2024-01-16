@@ -12,6 +12,17 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
+type AuthEndpoints int
+
+const (
+	LoginEndpoint AuthEndpoints = iota
+	RegisterEndpoint
+)
+
+func (ae AuthEndpoints) String() string {
+	return [...]string{"login", "register"}[ae]
+}
+
 type A1LambdaProps struct {
 	awscdk.StackProps
 	// Vpc         awsec2.Vpc Deprecated
@@ -43,11 +54,7 @@ func A1Lambda(scope constructs.Construct, id string, props *A1LambdaProps) []Int
 		Bundling:     BundlingOptions,
 		Environment:  &dbCfg,
 		Role:         lambdaRole,
-		Timeout:      awscdk.Duration_Seconds(jsii.Number(60 * 2)),
-		// TODO read this
-		// if lambdas are part of a VPC they will need EIP's assigned to the subnets that lambdas are part of
-		// https://stackoverflow.com/questions/52992085/why-cant-an-aws-lambda-function-inside-a-public-subnet-in-a-vpc-connect-to-the/52994841#52994841
-
+		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 
 	// Login Lambda
@@ -59,18 +66,18 @@ func A1Lambda(scope constructs.Construct, id string, props *A1LambdaProps) []Int
 		Bundling:     BundlingOptions,
 		Environment:  &dbCfg,
 		Role:         lambdaRole,
-		Timeout:      awscdk.Duration_Seconds(jsii.Number(20)),
+		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 
 	lambdas = append(lambdas, IntegrationLambda{
 		goLambda:   &registerLambda,
-		path:       "register",
+		path:       RegisterEndpoint.String(),
 		method:     http.MethodPost,
-		authorizer: RegisterAuthorizer,
+		authorizer: RegisterAuthorizer.String(),
 	})
 	lambdas = append(lambdas, IntegrationLambda{
 		goLambda:   &loginLambda,
-		path:       "login",
+		path:       LoginEndpoint.String(),
 		method:     http.MethodPost,
 		authorizer: "",
 	})

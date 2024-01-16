@@ -80,3 +80,34 @@ Sqld is the engine that runs locally to test the database:
 
 `curl -s -d '{"statements": ["select 1"] }' \
         http://127.0.0.1:8000`
+
+❗TODO
+
+**Try to implement a database gracefull shutdown on SIGTERM or other kill signals**
+
+```
+func main() {
+    // Set up database connection
+    db, err := sql.Open("driver-name", "database-connection-string")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    // Set up channel to listen for SIGTERM
+    sigs := make(chan os.Signal, 1)
+    signal.Notify(sigs, syscall.SIGTERM)
+
+    // ... your server setup ...
+
+    // Goroutine to listen for the signal
+    go func() {
+        <-sigs
+        // Close database connection
+        db.Close()
+        os.Exit(0)
+    }()
+
+    // ... run your server ...
+}
+```

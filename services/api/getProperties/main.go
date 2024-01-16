@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
-	"github.com/Serares/undertown_v3/services/api/getProperty/handlers"
-	"github.com/Serares/undertown_v3/services/api/getProperty/service"
+	"github.com/Serares/undertown_v3/services/api/getProperties/handlers"
+	"github.com/Serares/undertown_v3/services/api/getProperties/service"
 	"github.com/joho/godotenv"
 )
 
@@ -22,7 +22,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3036"
+		port = "3035"
 	}
 
 	repo, err := repository.NewPropertiesRepo()
@@ -30,7 +30,7 @@ func main() {
 		log.Error("error creating the repository")
 		return
 	}
-	service := service.NewGetPropertyService(log, repo)
+	service := service.NewPropertiesService(log, repo)
 
 	gh := handlers.New(log, service)
 

@@ -11,10 +11,16 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
+type AuthorizerType int
+
 const (
-	CRUDAuthorizer     = "CrudAuthorizer"
-	RegisterAuthorizer = "RegisterAuthorizer"
+	CRUDAuthorizer AuthorizerType = iota
+	RegisterAuthorizer
 )
+
+func (at AuthorizerType) String() string {
+	return [...]string{"CrudAuthorizer", "RegisterAuthorizer"}[at]
+}
 
 type IntegrationLambda struct {
 	goLambda   *awslambdago.GoFunction
@@ -42,9 +48,7 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 	// Define the API Gateway
 	spaApi := awsapigateway.NewRestApi(stack, jsii.Sprintf("UndertownAPI-%s", props.Env), &awsapigateway.RestApiProps{
 		RestApiName: jsii.Sprintf("UndertownAPI-%s", props.Env),
-		DeployOptions: &awsapigateway.StageOptions{
-			TracingEnabled: jsii.Bool(true),
-		},
+		Deploy:      jsii.Bool(false),
 		// CloudWatchRole: jsii.Bool(true),
 	})
 	//Register Authorizer
@@ -71,14 +75,14 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 	})
 	// Define the SPA Authorizer
 	// this authorizer only checks the validity of a jwt
-	crudAuthorizer := awsapigateway.NewRequestAuthorizer(stack, jsii.String(CRUDAuthorizer), &awsapigateway.RequestAuthorizerProps{
+	crudAuthorizer := awsapigateway.NewRequestAuthorizer(stack, jsii.String(CRUDAuthorizer.String()), &awsapigateway.RequestAuthorizerProps{
 		Handler: apiAuthorizerLambda,
 		IdentitySources: &[]*string{
 			awsapigateway.IdentitySource_Header(jsii.String(authorizationHeader)),
 		},
 	})
 	// Define the Register Authorizer
-	registerAuth := awsapigateway.NewRequestAuthorizer(stack, jsii.String(RegisterAuthorizer), &awsapigateway.RequestAuthorizerProps{
+	registerAuth := awsapigateway.NewRequestAuthorizer(stack, jsii.String(RegisterAuthorizer.String()), &awsapigateway.RequestAuthorizerProps{
 		Handler: registerAuthorizerLambda,
 		IdentitySources: &[]*string{
 			awsapigateway.IdentitySource_Header(jsii.String(authorizationHeader)),
@@ -88,11 +92,11 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 	for _, lambda := range props.IntegrationLambdas {
 		var methodOptions *awsapigateway.MethodOptions
 		switch lambda.authorizer {
-		case CRUDAuthorizer:
+		case CRUDAuthorizer.String():
 			methodOptions = &awsapigateway.MethodOptions{
 				Authorizer: crudAuthorizer,
 			}
-		case RegisterAuthorizer:
+		case RegisterAuthorizer.String():
 			methodOptions = &awsapigateway.MethodOptions{
 				Authorizer: registerAuth,
 			}
@@ -128,5 +132,11 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		// }),
 	})
 	spaApi.SetDeploymentStage(stage)
+	for _, lambda := range props.IntegrationLambdas {
+		awscdk.NewCfnOutput(stack, jsii.Sprintf("UndertownAPIPath-%s", lambda.path), &awscdk.CfnOutputProps{
+			Value:      jsii.Sprintf("%s/%s", *spaApi.Url(), lambda.path),
+			ExportName: jsii.Sprintf("undertownAPIPath-%s", lambda.path),
+		})
+	}
 	return stack
 }

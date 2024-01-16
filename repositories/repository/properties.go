@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/repositories/repository/utils"
@@ -32,6 +33,10 @@ func NewPropertiesRepo() (*Properties, error) {
 	db, err := sql.Open("libsql", dbUrl)
 	if err != nil {
 		return nil, err
+	}
+	db.SetConnMaxIdleTime(30 * time.Minute)
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("error reaching the database %w", err)
 	}
 	// manage the resource usage of the db
 	dbQueries := lite.New(db)
@@ -90,6 +95,14 @@ func (d *Properties) List(ctx context.Context) ([]lite.Property, error) {
 		return make([]lite.Property, 0), fmt.Errorf("error listing properties: %v", err)
 	}
 
+	return properties, nil
+}
+
+func (d *Properties) ListFeatured(ctx context.Context) ([]lite.ListFeaturedPropertiesRow, error) {
+	properties, err := d.db.ListFeaturedProperties(ctx)
+	if err != nil {
+		return make([]lite.ListFeaturedPropertiesRow, 0), fmt.Errorf("error listing featured properties: %v", err)
+	}
 	return properties, nil
 }
 

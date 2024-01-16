@@ -98,3 +98,12 @@ WHERE humanReadableId = ?;
 SELECT *
 FROM properties
 ORDER BY created_at DESC;
+-- name: ListFeaturedProperties :many
+SELECT id,
+    humanReadableId,
+    created_at,
+    title,
+    thumbnail
+FROM properties
+where is_featured = 1
+ORDER BY created_at DESC;

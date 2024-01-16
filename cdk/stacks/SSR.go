@@ -1,91 +1,47 @@
 package stacks
 
 import (
+	"os"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	"github.com/aws/constructs-go/constructs/v10"
+	"github.com/aws/jsii-runtime-go"
 )
 
 type SSRStackProps struct {
 	awscdk.StackProps
+	Env string
 }
 
 // This might have to be created after the APIStack
 // because it needs to import a refference to the endpoint resources so it can call the CRUD operations
-func SSR(scope constructs.Construct, id string, props *SSRStackProps) awscdk.Stack {
+func SSR(scope constructs.Construct, id string, props *SSRStackProps) awslambda.FunctionUrl {
 	stack := awscdk.NewStack(scope, &id, nil)
-	return stack
-	// createPropertyLambda := awslambdago.NewGoFunction(stack, )
-
+	homeSsrEnvVars := map[string]*string{
+		"GET_PROPERTIES_URL": jsii.String(os.Getenv("")),
+		"GET_PROPERTY_URL":   jsii.String(os.Getenv("")),
+	}
 	// SSR
-	// homeLambda := awslambdago.NewGoFunction(stack, jsii.String("ServerSideRender"), &awslambdago.GoFunctionProps{
-	// 	Runtime:      awslambda.Runtime_PROVIDED_AL2(),
-	// 	MemorySize:   jsii.Number(1024),
-	// 	Architecture: awslambda.Architecture_ARM_64(),
-	// 	Entry:        jsii.String("../services/ssr/homepage/lambda"),
-	// 	Bundling:     bundlingOptions,
-	// 	// Environment: &map[string]*string{
-	// 	// 	"TABLE_NAME": db.TableName(),
-	// 	// },
-	// })
-	// // Add a Function URL.
-	// lambdaURL := homeLambda.AddFunctionUrl(&awslambda.FunctionUrlOptions{
-	// 	AuthType: awslambda.FunctionUrlAuthType_NONE,
-	// })
-	// awscdk.NewCfnOutput(stack, jsii.String("homeLambdaURL"), &awscdk.CfnOutputProps{
-	// 	ExportName: jsii.String("homeLambdaURL"),
-	// 	Value:      lambdaURL.Url(),
-	// })
+	// TODO how to import the api root path?
+	// this has to be part of the api
+	homeLambda := awslambdago.NewGoFunction(stack, jsii.Sprintf("ServerSideRender-%s", props.Env), &awslambdago.GoFunctionProps{
+		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
+		MemorySize:   jsii.Number(1024),
+		Architecture: awslambda.Architecture_ARM_64(),
+		Entry:        jsii.String("../services/ssr/homepage/lambda"),
+		Bundling:     BundlingOptions,
+		Environment:  &homeSsrEnvVars,
+	})
+	// Add a Function URL.
+	lambdaURL := homeLambda.AddFunctionUrl(&awslambda.FunctionUrlOptions{
+		AuthType: awslambda.FunctionUrlAuthType_NONE,
+	})
+	awscdk.NewCfnOutput(stack, jsii.String("ServerSideRenderLambdaUrl"), &awscdk.CfnOutputProps{
+		ExportName: jsii.Sprintf("ServerSideRenderLambdaUrl-%s", props.Env),
+		Value:      lambdaURL.Url(),
+	})
 
-	// // Allow CloudFront to read from the bucket.
-	// cfOAI := awscloudfront.NewOriginAccessIdentity(stack, jsii.String("cfnOriginAccessIdentity"), &awscloudfront.OriginAccessIdentityProps{})
-	// cfs := awsiam.NewPolicyStatement(&awsiam.PolicyStatementProps{})
-	// cfs.AddActions(jsii.String("s3:GetBucket*"))
-	// cfs.AddActions(jsii.String("s3:GetObject*"))
-	// cfs.AddActions(jsii.String("s3:List*"))
-	// cfs.AddResources(assetsBucket.BucketArn())
-	// cfs.AddResources(jsii.String(fmt.Sprintf("%v/*", *assetsBucket.BucketArn())))
-	// cfs.AddCanonicalUserPrincipal(cfOAI.CloudFrontOriginAccessIdentityS3CanonicalUserId())
-	// assetsBucket.AddToResourcePolicy(cfs)
-
-	// // Add a CloudFront distribution to route between the public directory and the Lambda function URL.
-	// lambdaURLDomain := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), lambdaURL.Url(), nil))
-	// lambdaOrigin := awscloudfrontorigins.NewHttpOrigin(lambdaURLDomain, &awscloudfrontorigins.HttpOriginProps{
-	// 	ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	// })
-	// cf := awscloudfront.NewDistribution(stack, jsii.String("customerFacing"), &awscloudfront.DistributionProps{
-	// 	DefaultBehavior: &awscloudfront.BehaviorOptions{
-	// 		AllowedMethods:       awscloudfront.AllowedMethods_ALLOW_ALL(),
-	// 		Origin:               lambdaOrigin,
-	// 		CachedMethods:        awscloudfront.CachedMethods_CACHE_GET_HEAD(),
-	// 		OriginRequestPolicy:  awscloudfront.OriginRequestPolicy_ALL_VIEWER_EXCEPT_HOST_HEADER(),
-	// 		CachePolicy:          awscloudfront.CachePolicy_CACHING_DISABLED(),
-	// 		ViewerProtocolPolicy: awscloudfront.ViewerProtocolPolicy_REDIRECT_TO_HTTPS,
-	// 	},
-	// 	PriceClass: awscloudfront.PriceClass_PRICE_CLASS_100,
-	// })
-
-	// // Add /assets* to the distribution backed by S3.
-	// assetsOrigin := awscloudfrontorigins.NewS3Origin(assetsBucket, &awscloudfrontorigins.S3OriginProps{
-	// 	// Get content from the / directory in the bucket.
-	// 	OriginPath:           jsii.String("/"),
-	// 	OriginAccessIdentity: cfOAI,
-	// })
-	// cf.AddBehavior(jsii.String("/assets*"), assetsOrigin, nil)
-
-	// // Export the domain.
-	// awscdk.NewCfnOutput(stack, jsii.String("cloudFrontDomain"), &awscdk.CfnOutputProps{
-	// 	ExportName: jsii.String("cloudfrontDomain"),
-	// 	Value:      cf.DomainName(),
-	// })
-
-	// // Deploy the contents of the ./assets directory to the S3 bucket.
-	// awss3deployment.NewBucketDeployment(stack, jsii.String("assetsDeployment"), &awss3deployment.BucketDeploymentProps{
-	// 	DestinationBucket: assetsBucket,
-	// 	Sources: &[]awss3deployment.ISource{
-	// 		awss3deployment.Source_Asset(jsii.String("../services/ssr/homepage/assets"), nil),
-	// 	},
-	// 	DestinationKeyPrefix: jsii.String("assets"),
-	// 	Distribution:         cf,
-	// 	DistributionPaths:    jsii.Strings("/assets*"),
-	// })
+	return lambdaURL
 }
