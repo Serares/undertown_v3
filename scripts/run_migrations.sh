@@ -14,7 +14,7 @@ if ! command -v goose &>/dev/null; then
 fi
 
 CONNECTION_STRING=""
-if IS_LOCAL; then
+if $IS_LOCAL; then
     CONNECTION_STRING="${DB_PROTOCOL}://${DB_HOST}:${DB_PORT}"
 else
     CONNECTION_STRING="${DB_PROTOCOL}://${DB_NAME}.${DB_HOST}?authToken=${TURSO_DB_TOKEN}"

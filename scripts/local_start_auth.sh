@@ -5,10 +5,10 @@ declare -a goModuleDirs=("services/api/register" "services/api/login")
 
 # Loop through each directory
 for dir in "${goModuleDirs[@]}"; do
-    echo "Starting server in $dir"
+    echo "Starting auth service in $dir"
     (
-        cd "$dir" || exit              # Change to the directory, exit if it fails
-        go run *.go 2>&1 >"logs.log" & # Run the Go server and redirect output to logs.log
+        cd "$dir" || exit                 # Change to the directory, exit if it fails
+        go run main.go 2>&1 >"logs.log" & # Run the Go server and redirect output to logs.log
     )
 done
 
