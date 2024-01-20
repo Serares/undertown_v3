@@ -23,6 +23,11 @@ INSERT INTO properties(
         other_utilities_underground_storage,
         other_utilities_storage,
         property_transaction,
+        property_type,
+        property_address,
+        property_surface,
+        property_description,
+        price,
         furnished_not,
         furnished_partially,
         furnished_complete,
@@ -41,6 +46,11 @@ INSERT INTO properties(
         heating_floor_heating
     )
 VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
         ?,
         ?,
         ?,
@@ -103,7 +113,23 @@ SELECT id,
     humanReadableId,
     created_at,
     title,
-    thumbnail
+    thumbnail,
+    price,
+    property_transaction
 FROM properties
-where is_featured = 1
+WHERE is_featured = 1
+ORDER BY created_at DESC;
+-- name: ListPropertiesByTransactionType :many
+SELECT id,
+    humanReadableId,
+    created_at,
+    title,
+    thumbnail,
+    price,
+    property_transaction,
+    property_address,
+    property_surface,
+    images
+FROM properties
+WHERE property_transaction = ?
 ORDER BY created_at DESC;

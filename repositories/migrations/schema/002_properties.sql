@@ -30,6 +30,13 @@ CREATE TABLE properties (
     other_utilities_underground_storage INTEGER NOT NULL,
     other_utilities_storage INTEGER NOT NULL,
     property_transaction TEXT CHECK(property_transaction IN ('SELL', 'RENT')) NOT NULL,
+    property_type TEXT CHECK(
+        property_type IN ('APARTMENT', 'HOUSE', 'STUDIO', 'LAND')
+    ) NOT NULL,
+    property_address TEXT NOT NULL,
+    property_surface INTEGER NOT NULL,
+    property_description TEXT NOT NULL,
+    price INTEGER NOT NULL,
     furnished_not INTEGER NOT NULL,
     furnished_partially INTEGER NOT NULL,
     furnished_complete INTEGER NOT NULL,

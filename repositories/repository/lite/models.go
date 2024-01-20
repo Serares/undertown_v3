@@ -32,6 +32,11 @@ type Property struct {
 	OtherUtilitiesUndergroundStorage int64
 	OtherUtilitiesStorage            int64
 	PropertyTransaction              string
+	PropertyType                     string
+	PropertyAddress                  string
+	PropertySurface                  int64
+	PropertyDescription              string
+	Price                            int64
 	FurnishedNot                     int64
 	FurnishedPartially               int64
 	FurnishedComplete                int64
