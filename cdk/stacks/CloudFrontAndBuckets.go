@@ -67,6 +67,15 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 	cf.AddBehavior(jsii.String("/assets*"), assetsOrigin, nil)
 
+	// Add /properties origins chirii|vanzari
+	chiriiOrigin := awscloudfrontorigins.NewHttpOrigin(lambdaURLDomain, &awscloudfrontorigins.HttpOriginProps{
+		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
+	})
+	cf.AddBehavior(jsii.String("/chirii"), chiriiOrigin, nil)
+	vanzariOrigin := awscloudfrontorigins.NewHttpOrigin(lambdaURLDomain, &awscloudfrontorigins.HttpOriginProps{
+		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
+	})
+	cf.AddBehavior(jsii.String("/vanzari"), vanzariOrigin, nil)
 	// // Export the domain.
 	awscdk.NewCfnOutput(stack, jsii.String("cloudFrontDomain"), &awscdk.CfnOutputProps{
 		ExportName: jsii.String("cloudfrontDomain"),

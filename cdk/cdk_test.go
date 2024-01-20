@@ -6,13 +6,16 @@ import (
 	"testing"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	"github.com/aws/aws-cdk-go/awscdk/v2/assertions"
-	"github.com/aws/jsii-runtime-go"
+	"github.com/joho/godotenv"
 )
 
 // example tests. To run these tests, uncomment this file along with the
 // example resource in cdk_test.go
 func TestCdkStack(t *testing.T) {
+	err := godotenv.Load(".env.dev")
+	if err != nil {
+		t.Errorf("Failed to load the .env.dev file")
+	}
 	// GIVEN
 	app := awscdk.NewApp(nil)
 	theEnv := "testing"
@@ -25,14 +28,14 @@ func TestCdkStack(t *testing.T) {
 		Env: theEnv,
 	})
 	lambdas := append(authLambdas, crudLambdas...)
-	stack := stacks.API(app, fmt.Sprintf("Undertown-API-%s", theEnv), &stacks.APIStackProps{
+	stacks.API(app, fmt.Sprintf("Undertown-API-%s", theEnv), &stacks.APIStackProps{
 		IntegrationLambdas: lambdas,
 		Env:                theEnv,
 	})
 	// THEN
-	template := assertions.Template_FromStack(stack, &assertions.TemplateParsingOptions{})
+	// template := assertions.Template_FromStack(stack, &assertions.TemplateParsingOptions{})
 
-	template.HasResourceProperties(jsii.String("AWS::SQS::Queue"), map[string]interface{}{
-		"VisibilityTimeout": 300,
-	})
+	// template.HasResourceProperties(jsii.String("AWS::SQS::Queue"), map[string]interface{}{
+	// 	"VisibilityTimeout": 300,
+	// })
 }

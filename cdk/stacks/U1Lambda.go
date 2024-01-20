@@ -22,7 +22,7 @@ const (
 )
 
 func (ce CrudEndpoints) String() string {
-	return [...]string{"property", "properties", "property"}[ce]
+	return [...]string{"addProperty", "getProperties", "getProperty"}[ce]
 }
 
 type U1LambdaProps struct {
@@ -63,22 +63,22 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) []Int
 		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 
-	getProperties := awslambdago.NewGoFunction(stack, jsii.Sprintf("AddProperty-%s", props.Env), &awslambdago.GoFunctionProps{
+	getProperties := awslambdago.NewGoFunction(stack, jsii.Sprintf("GetProperties-%s", props.Env), &awslambdago.GoFunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
 		MemorySize:   jsii.Number(1024),
 		Architecture: awslambda.Architecture_ARM_64(),
-		Entry:        jsii.String("../services/api/addProperty/lambda"),
+		Entry:        jsii.String("../services/api/getProperties/lambda"),
 		Bundling:     BundlingOptions,
 		Environment:  &lambdasEnvVars,
 		Role:         lambdaRole,
 		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 
-	getProperty := awslambdago.NewGoFunction(stack, jsii.Sprintf("AddProperty-%s", props.Env), &awslambdago.GoFunctionProps{
+	getProperty := awslambdago.NewGoFunction(stack, jsii.Sprintf("GetProperty-%s", props.Env), &awslambdago.GoFunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
 		MemorySize:   jsii.Number(1024),
 		Architecture: awslambda.Architecture_ARM_64(),
-		Entry:        jsii.String("../services/api/addProperty/lambda"),
+		Entry:        jsii.String("../services/api/getProperty/lambda"),
 		Bundling:     BundlingOptions,
 		Environment:  &lambdasEnvVars,
 		Role:         lambdaRole,

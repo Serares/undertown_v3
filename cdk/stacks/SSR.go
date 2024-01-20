@@ -12,16 +12,27 @@ import (
 
 type SSRStackProps struct {
 	awscdk.StackProps
-	Env string
+	ExportedPaths ExportedApiPathResources
+	Env           string
+}
+
+type SSRStackReturn struct {
+	LambdaUrl awslambda.FunctionUrl
+	Stack     awscdk.Stack
 }
 
 // This might have to be created after the APIStack
 // because it needs to import a refference to the endpoint resources so it can call the CRUD operations
-func SSR(scope constructs.Construct, id string, props *SSRStackProps) awslambda.FunctionUrl {
+func SSR(scope constructs.Construct, id string, props *SSRStackProps) SSRStackReturn {
 	stack := awscdk.NewStack(scope, &id, nil)
+
+	getPropertiesUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", GetProperties.String(), props.Env))
+	getPropertyUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", GetProperty.String(), props.Env))
+
 	homeSsrEnvVars := map[string]*string{
-		"GET_PROPERTIES_URL": jsii.String(os.Getenv("")),
-		"GET_PROPERTY_URL":   jsii.String(os.Getenv("")),
+		"GET_PROPERTIES_URL": getPropertiesUrl,
+		"GET_PROPERTY_URL":   getPropertyUrl,
+		"JWT_SECRET":         jsii.String(os.Getenv("JWT_SECRET")),
 	}
 	// SSR
 	// TODO how to import the api root path?
@@ -43,5 +54,8 @@ func SSR(scope constructs.Construct, id string, props *SSRStackProps) awslambda.
 		Value:      lambdaURL.Url(),
 	})
 
-	return lambdaURL
+	return SSRStackReturn{
+		LambdaUrl: lambdaURL,
+		Stack:     stack,
+	}
 }

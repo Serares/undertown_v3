@@ -64,9 +64,16 @@ func A1Lambda(scope constructs.Construct, id string, props *A1LambdaProps) []Int
 		Architecture: awslambda.Architecture_ARM_64(),
 		Entry:        jsii.String("../services/api/login/lambda"),
 		Bundling:     BundlingOptions,
-		Environment:  &dbCfg,
-		Role:         lambdaRole,
-		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
+		Environment: &map[string]*string{
+			"DB_HOST":        jsii.String(os.Getenv("DB_HOST")),
+			"DB_NAME":        jsii.String(os.Getenv("DB_NAME")),
+			"DB_PROTOCOL":    jsii.String(os.Getenv("DB_PROTOCOL")),
+			"TURSO_DB_TOKEN": jsii.String(os.Getenv("TURSO_DB_TOKEN")),
+			"JWT_SECRET":     jsii.String(os.Getenv("JWT_SECRET")),
+		},
+		// todo have to add the JWT_SECRET IN HERE
+		Role:    lambdaRole,
+		Timeout: awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 
 	lambdas = append(lambdas, IntegrationLambda{

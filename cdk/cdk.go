@@ -34,7 +34,7 @@ func main() {
 		Env: theEnv,
 	})
 	lambdas := append(authLambdas, crudLambdas...)
-	stacks.API(app, fmt.Sprintf("Undertown-API-%s", theEnv), &stacks.APIStackProps{
+	apiStack := stacks.API(app, fmt.Sprintf("Undertown-API-%s", theEnv), &stacks.APIStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
@@ -42,18 +42,20 @@ func main() {
 		Env:                theEnv,
 	})
 
-	ssrLambdaUrl := stacks.SSR(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRStackProps{
+	ssrStack := stacks.SSR(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
 		Env: theEnv,
 	})
 
+	ssrStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway getProperty and getProperties paths"))
+
 	stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
-		HomeLambdaUrl: ssrLambdaUrl,
+		HomeLambdaUrl: ssrStack.LambdaUrl,
 		Env:           theEnv,
 	})
 

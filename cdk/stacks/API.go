@@ -1,6 +1,7 @@
 package stacks
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
@@ -35,10 +36,13 @@ type APIStackProps struct {
 	Env                string
 }
 
+type ExportedApiPathResources map[string]string
+
 // The API Gateway resources and deployments
 func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Stack {
 	var authorizationHeader = "Authorization"
 	var JwtSecret = os.Getenv("JWT_SECRET")
+	var registratorSecret = os.Getenv("REGISTRATOR_SECRET")
 	var sprops awscdk.StackProps
 	if props != nil {
 		sprops = props.StackProps
@@ -59,7 +63,8 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		Entry:        jsii.String("../services/api/registerAuthorizer/lambda"),
 		Bundling:     BundlingOptions,
 		Environment: &map[string]*string{
-			"JWT_SECRET": &JwtSecret,
+			"JWT_SECRET":         &JwtSecret,
+			"REGISTRATOR_SECRET": &registratorSecret,
 		},
 	})
 	// API Authorizer lambda
@@ -132,11 +137,13 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		// }),
 	})
 	spaApi.SetDeploymentStage(stage)
+	var exportedPaths = make(ExportedApiPathResources)
 	for _, lambda := range props.IntegrationLambdas {
 		awscdk.NewCfnOutput(stack, jsii.Sprintf("UndertownAPIPath-%s", lambda.path), &awscdk.CfnOutputProps{
-			Value:      jsii.Sprintf("%s/%s", *spaApi.Url(), lambda.path),
-			ExportName: jsii.Sprintf("undertownAPIPath-%s", lambda.path),
+			Value:      jsii.Sprintf("%s", *spaApi.UrlForPath(jsii.String("/" + lambda.path))),
+			ExportName: jsii.Sprintf("%s-%s", lambda.path, props.Env),
 		})
+		exportedPaths[lambda.path] = fmt.Sprintf("%s/%s/%s", *spaApi.Url(), *stage.StageName(), lambda.path)
 	}
 	return stack
 }
