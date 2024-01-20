@@ -1,8 +1,9 @@
 package views
 
 import "github.com/Serares/ssr/homepage/types"
+import "fmt"
 
-templ Home(contents types.HomeIncludes, props types.HomeProps) {
+templ Home(contents types.BasicIncludes, props types.HomeProps) {
 	<style type="text/css">
 		.bootstrap-select .dropdown-item {
 		padding: 0 8px;
@@ -113,6 +114,9 @@ templ Home(contents types.HomeIncludes, props types.HomeProps) {
 													<li class="filter" data-role="button" data-filter=".3">Garsoniera</li>
 												</ul>
 											</div>
+											if props.ErrorMessage != "" {
+												<div>Error getting the properties</div>
+											}
 											<!--Filter List-->
 											<!-- Tab Content -->
 											<div class="row filter-list clearfix">
@@ -124,7 +128,7 @@ templ Home(contents types.HomeIncludes, props types.HomeProps) {
 															<div class="zoom_effect_1">
 																<div class="upper_1 bg_secondary text-white">
 																	// TODO have to add the property status to data model
-																	if featProp.Title == "1" {
+																	if featProp.TransactionType == "SELL" {
 																		<div>'Vanzare'</div>
 																	} else {
 																		<div>'Cumparare'</div>
@@ -132,24 +136,24 @@ templ Home(contents types.HomeIncludes, props types.HomeProps) {
 																</div>
 																<div class="upper_2 bg_primary text-white">Recomandare</div>
 																<a
- 																	href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"
+ 																	href={ templ.URL("/property/" + featProp.PropertyPathUrl) }
 																>
 																	<img
- 																		src="/<%- featProp.thumbnail %>"
+ 																		src={ fmt.Sprintf("/assets/%s", featProp.Thumbnail) }
  																		alt="Image Not Found!"
 																	/>
 																</a>
-																// <% if(featProp.createdTimeAgo !== ""){ %>
-																//     <div class="upper_3 text_secondary">
-																//         <%- featProp.createdTimeAgo %>
-																//     </div>
-																// <% } %>
+																if featProp.CreatedTime != "" {
+																	<div class="upper_3 text_secondary">
+																		{ featProp.CreatedTime }
+																	</div>
+																}
 															</div>
 															<div class="property_text p-3">
 																<h5 class="title">
 																	<a
- 																		href="/<%- featProp.status == 2 ? 'inchiriere' : 'vanzare' %>/<%- featProp._id %>"
-																	>{ featProp.ID }</a>
+ 																		href={ templ.URL(fmt.Sprintf("/property/%s", featProp.PropertyPathUrl)) }
+																	>{ featProp.Title }</a>
 																</h5>
 																<span class="my-3 d-block">
 																	<i class="fas fa-map-marker-alt"></i>
@@ -163,7 +167,7 @@ templ Home(contents types.HomeIncludes, props types.HomeProps) {
 															</div>
 															<div class="bed_area d-table w-100">
 																<ul>
-																	<li>TODO forgot to add the price in the data models</li>
+																	<li>{ featProp.DisplayPrice }</li>
 																	<li class="icon_medium">
 																		<a href="#">
 																			<i

@@ -1,0 +1,53 @@
+package views
+
+import "github.com/Serares/ssr/homepage/types"
+
+templ NotFound(contents types.BasicIncludes) {
+	<html lang="en">
+		@contents.Header
+		<body class="page-load">
+			@contents.Preload
+			<!-- Wrapper Start -->
+			<div id="page_wrapper" class="container-fluid">
+				<div class="row">
+					<header id="header" class="w-100 bg_white nav-on-top">
+						<!-- Nav Header Start -->
+						@contents.Navbar
+						<!-- Nav Header End -->
+					</header>
+					<!-- Banner Section Start -->
+					@contents.BannerSection
+					<!-- Banner Section End -->
+					<!-- Error Section Start -->
+					<section class="py_100 bg_gray full_row">
+						<div class="container">
+							<div class="row">
+								<div class="col-md-12">
+									<div class="error_area text-center">
+										<div class="page_error text_primary">404</div>
+										<h4 class="my-4">Oops This Page Could Not Be Found !</h4>
+										<p>
+											The Page you looking for does not appear to exist Please go back or
+											<br/>
+											head on over our homepage to choose a new direction
+										</p>
+										<a href="/" class="btn btn_primary">Back To Home</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<!-- Error Section End -->
+					<!-- Footer Section Start -->
+					@contents.Footer
+					<!-- Footer Section End -->
+					<!-- Find Part Satrt -->
+					<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
+					<!-- Find Part Satrt -->
+				</div>
+			</div>
+			<!-- Wrapper End -->
+			@contents.Scripts
+		</body>
+	</html>
+}

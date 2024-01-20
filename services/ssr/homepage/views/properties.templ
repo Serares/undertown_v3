@@ -1,0 +1,273 @@
+package views
+
+import "github.com/Serares/ssr/homepage/types"
+import "fmt"
+
+templ Properties(contents types.BasicIncludes, props types.PropertiesProps) {
+	<html lang="en">
+		@contents.Header
+		<body class="page-load">
+			@contents.Preload
+			<!-- Wrapper Start -->
+			<!-- Wrapper Start -->
+			<div id="page_wrapper" class="container-fluid">
+				<div class="row">
+					<header id="header" class="w-100 bg_white nav-on-top">
+						<!-- Nav Header Start -->
+						@contents.Navbar
+						<!-- Nav Header End -->
+					</header>
+					<!-- Banner Section Start -->
+					@contents.BannerSection
+					<!-- Banner Section End -->
+					<!-- Property List Start -->
+					<section class="full_row py_80 bg_gray">
+						<div class="container">
+							<div class="row">
+								<!-- TODO add filter 
+								// <div class="col-lg-4">
+								// 	<div class="property_sidebar">
+								// 		<div class="property_form sidebar-widget">
+								// 			<form class="price-filter" id="filter_form">
+								// 				<div class="row">
+								// 					<div class="col-lg-12 col-sm-8">
+								// 						<p>Căutat după:</p>
+								// 					</div>
+								// 					<div class="col-lg-12 col-sm-8">
+								// 						<input
+ 								// 							id="search_input"
+ 								// 							value="<%-search_input%>"
+ 								// 							name="search_input"
+ 								// 							class="form-control mb-4"
+ 								// 							type="text"
+ 								// 							placeholder="Caută o adresă, Ex: Dristor"
+								// 						/>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<h4 class="widget-title mb-4">Preț</h4>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<div class="price_range mb-5">
+								// 							<div class="price-filter">
+								// 								<span class="price-slider">
+								// 									<input
+ 								// 										class="filter_price"
+ 								// 										type="text"
+ 								// 										name="price"
+ 								// 										value="0;<%- maxPrice %>"
+								// 									/>
+								// 								</span>
+								// 							</div>
+								// 						</div>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<h4 class="widget-title mb-4">Suprafață</h4>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<div class="area_range mb-5">
+								// 							<div class="area-filter">
+								// 								<span class="area-slider">
+								// 									<input
+ 								// 										class="area_filter"
+ 								// 										type="text"
+ 								// 										name="area"
+ 								// 										value="0;10000"
+								// 									/>
+								// 								</span>
+								// 							</div>
+								// 						</div>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<h4 class="widget-title mb-4">Filtre</h4>
+								// 					</div>
+								// 					 TODO dynamically crete those fields
+								// 					<div class="col-lg-12 col-md-6">
+								// 						<div class="form-group">
+								// 							<select class="selectpicker form-control" name="property_status">
+								// 								<option selected disabled>Locuinte Mobilate</option>
+								// 								<option value="0">Nu</option>
+								// 								<option value="1">Da</option>
+								// 								<option value="-1">Oricare</option>
+								// 							</select>
+								// 						</div>
+								// 					</div>
+								// 					<div class="col-lg-12 col-md-6">
+								// 						<div class="form-group"></div>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<h4 class="widget-title mb-4">Etaj</h4>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<div class="price_range mb-5">
+								// 							<div class="etaj-filter">
+								// 								<span class="etaj-slider">
+								// 									<input
+ 								// 										class="etaj_filter"
+ 								// 										type="text"
+ 								// 										name="etaj"
+ 								// 										value="0;<%- maxPrice %>"
+								// 									/>
+								// 								</span>
+								// 							</div>
+								// 						</div>
+								// 					</div>
+								// 					<div class="col-lg-6 col-md-6">
+								// 						<div class="form-group">
+								// 							<select class="selectpicker form-control" name="camere">
+								// 								<option selected disabled>Nr Camere</option>
+								// 								<option>1</option>
+								// 								<option>2</option>
+								// 								<option>3</option>
+								// 								<option value="4">4+</option>
+								// 								<option value="-1">Oricate</option>
+								// 							</select>
+								// 						</div>
+								// 					</div>
+								// 					<div class="col-lg-6 col-md-6">
+								// 						<div class="form-group">
+								// 							<select class="selectpicker form-control" name="bai">
+								// 								<option selected disabled>Nr băi</option>
+								// 								<option>1</option>
+								// 								<option>2</option>
+								// 								<option value="3">3+</option>
+								// 								<option value="-1">Oricate</option>
+								// 							</select>
+								// 						</div>
+								// 					</div>
+								// 					<div class="col-lg-12">
+								// 						<button
+ 								// 							name="search"
+ 								// 							class="btn btn_primary w-100"
+ 								// 							type="submit"
+								// 						>caută</button>
+								// 					</div>
+								// 				</div>
+								// 			</form>
+								// 		</div>
+								// 	</div>
+								// </div>
+								-->
+								<div class="col-lg-8">
+									<div class="row">
+										<div class="col-md-12">
+											<div class="property_sorting mb_30 d-inline-block w-100 mt_md_50">
+												<form method="GET" action={ templ.SafeURL(props.Path) } class="property_filter" id="sort_form">
+													<div class="col-lg-6 col-md-6">
+														<p class="properties_result">
+															<span class="p_count"></span>
+														</p>
+													</div>
+													<ul class="float-right">
+														<li>
+															<span>Sorteaza:</span>
+															// TODO get the action path from the renderer props (chirii/vanzari)
+															<select
+ 																class="selectpicker form-control"
+ 																data-width="fit"
+ 																name="sort_order"
+ 																id="select_sort_type"
+															>
+																<option selected disabled>Default Order</option>
+																<option value="price/desc">Preț (desc)</option>
+																<option value="price/asc">Preț (cres)</option>
+																<option value="surface/asc">Suprafață (cresc)</option>
+																<option value="surface/desc">Suprafață (desc)</option>
+																<option value="createdAt/desc">Data publicării (desc)</option>
+															</select>
+														</li>
+													</ul>
+												</form>
+											</div>
+										</div>
+									</div>
+									<!-- Property List Start -->
+									<div class="row" id="properties-row">
+										<div>
+											for _, property := range props.Properties {
+												<div class="col-md-12">
+													<div class="property_list_1 property_item bg-white mb_30">
+														<div class="zoom_effect_1">
+															<a
+ 																href="/${createPropertyPath(property.status)}/${
+        property._id
+      }"
+															>
+																<img src="/${property.thumbnail}" alt="Image Found"/>
+															</a>
+															<div class="upper_2">
+																<i class="far fa-images"></i>
+																<span>
+																	{  fmt.Sprint(property.ImagesNumber) }
+																</span>
+															</div>
+														</div>
+														<div class="float-right property_list_details p-3">
+															<div class="property_text">
+																<h5 class="title">
+																	<a
+ 																		href="/${createPropertyPath(
+                                      property.status
+                                    )}/${property._id}"
+																	>{ property.Title }</a>
+																</h5>
+																<span class="my-3 d-block">
+																	<i class="fas fa-map-marker-alt"></i>
+																	{ property.Address }
+																</span>
+																<!-- caracteristici prev -->
+																<div class="quantity">
+																	<ul></ul>
+																</div>
+															</div>
+															<div class="bed_area d-table w-100">
+																<ul>
+																	<li>{ property.DisplayPrice }</li>
+																	<li>
+																		<a
+ 																			href="/${createPropertyPath(
+                                      property.status
+                                    )}/${property._id}"
+																		>
+																			<button
+ 																				type="button"
+ 																				class="mx-5 btn btn-primary"
+																			>Detalii</button>
+																		</a>
+																	</li>
+																	<li class="icon_medium">
+																		<a href="#">
+																			<i class="flaticon-like"></i>
+																		</a>
+																	</li>
+																</ul>
+															</div>
+														</div>
+													</div>
+												</div>
+											}
+										</div>
+									</div>
+									<!-- End Property list -->
+								</div>
+							</div>
+						</div>
+					</section>
+					<!-- Property List End -->
+					<!-- Footer Section Start -->
+					@contents.Footer
+					<!-- Footer Section End -->
+					<!-- Find Part Satrt -->
+					<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
+					<!-- Find Part Satrt -->
+				</div>
+				// <input type="hidden" value="<%-maxPrice%>" id="max_price_input"/>
+				// <input type="hidden" value="<%-search_status%>" id="search_status"/>
+				// <input type="hidden" value="<%-property_type%>" id="property_type"/>
+			</div>
+			<!-- Wrapper End -->
+			@contents.Scripts
+			// todo implement everyting serverside 
+			<script src="/assets/js/custom/sort.js"></script>
+		</body>
+	</html>
+}

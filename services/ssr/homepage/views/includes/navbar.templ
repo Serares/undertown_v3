@@ -1,6 +1,8 @@
 package includes
 
-templ Navbar() {
+import "github.com/Serares/ssr/homepage/types"
+
+templ Navbar(props types.NavbarProps) {
 	<span>
 		<link rel="stylesheet" href="/assets/css/nav-bar.css"/>
 		<div class="main_header_1">
@@ -31,7 +33,40 @@ templ Navbar() {
  									class="navbar-toggler-icon"
 								></span>
 							</button>
-							<div class="collapse navbar-collapse" id="navbarSupportedContent"></div>
+							<div class="collapse navbar-collapse" id="navbarSupportedContent">
+								<ul class="navbar-nav ml-5">
+									<li class="nav-item">
+										<a
+ 											class={ "nav-link", templ.KV("active", props.Path == "/") }
+ 											href="/"
+										>Acasa</a>
+									</li>
+									<li class="nav-item">
+										<a
+ 											class={ "nav-link" ,templ.KV("active", props.Path == "/chirii/") }
+ 											href="/chirii/"
+										>Chirii</a>
+									</li>
+									<li class="nav-item">
+										<a
+ 											class={ "nav-link" ,templ.KV("active", props.Path == "/vanzari/") }
+ 											href="/vanzari/"
+										>Vanzari</a>
+									</li>
+									<li class="nav-item">
+										<a
+ 											class={ "nav-link" ,templ.KV("active", props.Path == "/about/") }
+ 											href="/about/"
+										>Despre noi</a>
+									</li>
+									<li class="nav-item">
+										<a
+ 											class={ "nav-link" ,templ.KV("active", props.Path == "/contact/") }
+ 											href="/contact/"
+										>Contact</a>
+									</li>
+								</ul>
+							</div>
 						</nav>
 					</div>
 				</div>

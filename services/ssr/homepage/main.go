@@ -31,15 +31,16 @@ func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	client := service.NewHomeClient(log)
 	homeService := service.NewHomeService(log, client)
+	propertiesService := service.NewPropertiesService(log, client)
+
 	m := http.NewServeMux()
-	contactHandler := handlers.NewContactHandler(log)
+	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService)
 	homeHandler := handlers.NewHomeHandler(log, *homeService)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
-	m.Handle("/contact", http.StripPrefix("/contact", contactHandler))
-	m.Handle("/contact/", http.StripPrefix("/contact/", contactHandler))
-	m.Handle("/property/", http.StripPrefix("/property/", contactHandler))
+	m.Handle("/chirii/", propertiesHandler)
+	m.Handle("/vanzari/", propertiesHandler)
 	m.Handle("/", homeHandler)
 
 	server := &http.Server{

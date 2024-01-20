@@ -6,22 +6,25 @@ import (
 	"os"
 
 	"github.com/Serares/ssr/homepage/handlers"
+	"github.com/Serares/ssr/homepage/service"
 	"github.com/akrylysov/algnhsa"
 )
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	mux := http.NewServeMux()
+	client := service.NewHomeClient(log)
+	homeService := service.NewHomeService(log, client)
+	propertiesService := service.NewPropertiesService(log, client)
 
-	contactHandler := handlers.NewContactHandler(log)
-	homeHandler := handlers.NewHomeHandler(log)
+	m := http.NewServeMux()
+	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService)
+	homeHandler := handlers.NewHomeHandler(log, *homeService)
 
-	// you might not need to create a route for the static assets
-	// the route is created in the cdk
-	mux.Handle("/contact", http.StripPrefix("/contact", contactHandler))
-	mux.Handle("/contact/", http.StripPrefix("/contact/", contactHandler))
-	mux.Handle("/property/", http.StripPrefix("/property/", contactHandler))
-	mux.Handle("/", homeHandler)
+	// This is not advised to use in prod
+	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
+	m.Handle("/chirii/", propertiesHandler)
+	m.Handle("/vanzari/", propertiesHandler)
+	m.Handle("/", homeHandler)
 
-	algnhsa.ListenAndServe(mux, nil)
+	algnhsa.ListenAndServe(m, nil)
 }
