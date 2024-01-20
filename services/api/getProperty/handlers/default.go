@@ -9,6 +9,10 @@ import (
 	"github.com/Serares/undertown_v3/utils"
 )
 
+type PropertyResponse struct {
+	Results []lite.Property
+}
+
 type IGetPropertyService interface {
 	GetPropertyByHumanReadableId(ctx context.Context, humanReadableId string) (lite.Property, error)
 	GetPropertyById(context.Context, string) (lite.Property, error)
@@ -30,6 +34,7 @@ func (gp GetPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		q := r.URL.Query()
+		// ❗the propertyId here is the humanReadableId
 		if _, ok := q["propertyId"]; ok {
 			theId := q["propertyId"][0]
 			gp.Log.Info("the query param", "params", q["propertyId"][0])
@@ -39,7 +44,10 @@ func (gp GetPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				utils.ReplyError(w, r, http.StatusInternalServerError, "can't get the property")
 				return
 			}
-			utils.ReplySuccess(w, r, http.StatusAccepted, property)
+			response := PropertyResponse{
+				Results: []lite.Property{property},
+			}
+			utils.ReplySuccess(w, r, http.StatusAccepted, response)
 			return
 		}
 	}

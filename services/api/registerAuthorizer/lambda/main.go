@@ -9,19 +9,18 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequestTypeRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
 	token := event.Headers["Authorization"]
-	err := godotenv.Load("../.env.local")
+	// err := godotenv.Load("../.env.local")
 	secret := os.Getenv("JWT_SECRET")
 	registratorSecret := os.Getenv("REGISTRATOR_SECRET")
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	log.Info("The event object", "event", event)
-	if err != nil {
-		log.Debug("env file is used only for local testing")
-	}
+	// if err != nil {
+	// 	log.Debug("env file is used only for local testing")
+	// }
 	// Parse the JWT
 	claims := utils.JWTClaims{}
 	parsedToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
@@ -32,6 +31,7 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 		return []byte(secret), nil
 	})
 	if err != nil || !parsedToken.Valid {
+		log.Error("the error", err)
 		// Return a policy document that denies access
 		return generatePolicy("user", "Deny", event.MethodArn), nil
 	}

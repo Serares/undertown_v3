@@ -47,12 +47,12 @@ func (ss *Submit) ProcessProperty(ctx context.Context, property *types.POSTPrope
 
 	humanReadableId := util.HumanReadableId(property.PropertyTransaction)
 	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
-		ID:                               propertyId,
+		ID: propertyId,
+		// UserID: , TODO
 		Humanreadableid:                  humanReadableId,
 		Title:                            property.Title,
 		Floor:                            property.Floor,
 		Images:                           arrayToString(property.Images),
-		UserID:                           property.UserId,
 		Thumbnail:                        property.Thumbnail,
 		IsFeatured:                       booleanToInt(property.IsFeatured),
 		EnergyClass:                      property.EnergyClass,
@@ -68,6 +68,11 @@ func (ss *Submit) ProcessProperty(ctx context.Context, property *types.POSTPrope
 		OtherUtilitiesUndergroundStorage: booleanToInt(property.OtherUtilitiesUndergroundStorage),
 		OtherUtilitiesStorage:            booleanToInt(property.OtherUtilitiesStorage),
 		PropertyTransaction:              property.PropertyTransaction.String(),
+		PropertyDescription:              property.PropertyDescription,
+		PropertyType:                     property.PropertyType,
+		PropertyAddress:                  property.PropertyAddress,
+		PropertySurface:                  int64(property.PropertySurface),
+		Price:                            int64(property.Price),
 		FurnishedNot:                     booleanToInt(property.FurnishedNot),
 		FurnishedPartially:               booleanToInt(property.FurnishedPartially),
 		FurnishedComplete:                booleanToInt(property.FurnishedComplete),

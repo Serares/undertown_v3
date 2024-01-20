@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -12,6 +13,7 @@ func TestAuthorization(t *testing.T) {
 	// create a struct of [string]string
 	headersStruct := make(map[string]string)
 	headersStruct["Authorization"] = jwt
+	os.Setenv("JWT_SECRET", "myjwtsecret")
 	// request event
 	event := events.APIGatewayCustomAuthorizerRequestTypeRequest{
 		Headers: headersStruct,

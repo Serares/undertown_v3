@@ -14,14 +14,18 @@ type FeaturedPropertiesResponse struct {
 	Results []lite.ListFeaturedPropertiesRow
 }
 
-// TODO the property has to be striped of some columns (user_id and id)
 type PropertiesResponse struct {
 	Results []lite.Property
+}
+
+type PropertiesByTransactionType struct {
+	Results []lite.ListPropertiesByTransactionTypeRow
 }
 
 type IGetPropertiesService interface {
 	ListFeaturedProperties(context.Context) (*[]lite.ListFeaturedPropertiesRow, error)
 	ListProperties(context.Context) (*[]lite.Property, error)
+	ListPropertiesByTransactionType(ctx context.Context, transactionType string) (*[]lite.ListPropertiesByTransactionTypeRow, error)
 }
 
 type GetPropertiesHandler struct {
@@ -44,33 +48,40 @@ func (gh GetPropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		q := r.URL.Query()
 
 		if _, ok := q["featured"]; ok {
-			properties, err := gh.GetPropertiesService.ListFeaturedProperties(r.Context())
-			if err != nil {
-				gh.Log.Error("error trying to get featured properties", "error", err)
-				utils.ReplyError(w, r, http.StatusInternalServerError, fmt.Sprintf("error trying to get the featured properties %v", err))
+			if q["featured"][0] == "true" {
+				properties, err := gh.GetPropertiesService.ListFeaturedProperties(r.Context())
+				if err != nil {
+					gh.Log.Error("error trying to get featured properties", "error", err)
+					utils.ReplyError(w, r, http.StatusInternalServerError, fmt.Sprintf("error trying to get the featured properties %v", err))
+					return
+				}
+				response := FeaturedPropertiesResponse{
+					Results: *properties,
+				}
+
+				utils.ReplySuccess(w, r, http.StatusOK, response)
 				return
 			}
-			response := FeaturedPropertiesResponse{
-				Results: *properties,
+		}
+
+		// TODO should you support both featured and propertyType filters?
+		if _, ok := q["transactionType"]; ok {
+			if q["transactionType"][0] != "" {
+				var transactionType string = q["transactionType"][0]
+				properties, err := gh.GetPropertiesService.ListPropertiesByTransactionType(r.Context(), transactionType)
+				if err != nil {
+					gh.Log.Error("error trying to get featured properties", "error", err)
+					utils.ReplyError(w, r, http.StatusInternalServerError, fmt.Sprintf("error trying to get the featured properties %v", err))
+					return
+				}
+				response := PropertiesByTransactionType{
+					Results: *properties,
+				}
+
+				utils.ReplySuccess(w, r, http.StatusOK, response)
+				return
 			}
-
-			utils.ReplySuccess(w, r, http.StatusOK, response)
-			return
 		}
-
-		properties, err := gh.GetPropertiesService.ListProperties(r.Context())
-		if err != nil {
-			gh.Log.Error("error trying to get featured properties", "error", err)
-			utils.ReplyError(w, r, http.StatusInternalServerError, fmt.Sprintf("error trying to get the featured properties %v", err))
-			return
-		}
-		response := PropertiesResponse{
-			Results: *properties,
-		}
-
-		utils.ReplySuccess(w, r, http.StatusOK, response)
-		return
 	}
 	utils.ReplyError(w, r, http.StatusMethodNotAllowed, "")
-	return
 }

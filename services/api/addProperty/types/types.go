@@ -10,26 +10,31 @@ type POSTSuccessResponse struct {
 }
 
 type POSTProperty struct {
-	Title                            string   `json:"title"`
-	Floor                            int64    `json:"floor"`
-	Images                           []string `json:"images"`
-	Thumbnail                        string   `json:"thumbnail"`
-	UserId                           string   `json:"userid"`
-	IsFeatured                       bool     `json:"isFeatured"`
-	EnergyClass                      string   `json:"energyClass"`
-	EnergyConsumptionPrimary         string   `json:"energyConsumptionPrimary"`
-	EnergyEmissionsIndex             string   `json:"energyEmissionsIndex"`
-	EnergyConsumptionGreen           string   `json:"energyConsumptionGreen"`
-	DestinationResidential           bool     `json:"destinationResidential"`
-	DestinationCommercial            bool     `json:"destinationCommercial"`
-	DestinationOffice                bool     `json:"destinationOffice"`
-	DestinationHoliday               bool     `json:"destinationHoliday"`
-	OtherUtilitiesTerrance           bool     `json:"otherUtilitiesTerrance"`
-	OtherUtilitiesServiceToilet      bool     `json:"otherUtilitiesServiceToilet"`
-	OtherUtilitiesUndergroundStorage bool     `json:"otherUtilitiesUndergroudStorage"`
-	OtherUtilitiesStorage            bool     `json:"OtherUtilitiesStorage"`
+	Title     string   `json:"title"`
+	Floor     int64    `json:"floor"`
+	Images    []string `json:"images"`
+	Thumbnail string   `json:"thumbnail"`
+	// UserId                           string   `json:"userid"` // this is added by the authorizer to the request context
+	IsFeatured                       bool   `json:"isFeatured"`
+	EnergyClass                      string `json:"energyClass"`
+	EnergyConsumptionPrimary         string `json:"energyConsumptionPrimary"`
+	EnergyEmissionsIndex             string `json:"energyEmissionsIndex"`
+	EnergyConsumptionGreen           string `json:"energyConsumptionGreen"`
+	DestinationResidential           bool   `json:"destinationResidential"`
+	DestinationCommercial            bool   `json:"destinationCommercial"`
+	DestinationOffice                bool   `json:"destinationOffice"`
+	DestinationHoliday               bool   `json:"destinationHoliday"`
+	OtherUtilitiesTerrance           bool   `json:"otherUtilitiesTerrance"`
+	OtherUtilitiesServiceToilet      bool   `json:"otherUtilitiesServiceToilet"`
+	OtherUtilitiesUndergroundStorage bool   `json:"otherUtilitiesUndergroudStorage"`
+	OtherUtilitiesStorage            bool   `json:"otherUtilitiesStorage"`
 	// TODO this might be a issue when trying to unmarshal
 	PropertyTransaction     types.TransactionType `json:"propertyTransaction"`
+	PropertyType            string                `json:"propertyType"`
+	PropertyAddress         string                `json:"propertyAddress"`
+	PropertySurface         int                   `json:"propertySurface"`
+	PropertyDescription     string                `json:"propertyDescription"`
+	Price                   int                   `json:"price"`
 	FurnishedNot            bool                  `json:"furnishedNot"`
 	FurnishedPartially      bool                  `json:"furnishedPartially"`
 	FurnishedComplete       bool                  `json:"furnishedComplete"`

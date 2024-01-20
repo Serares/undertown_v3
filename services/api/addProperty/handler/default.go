@@ -9,6 +9,7 @@ import (
 	"github.com/Serares/undertown_v3/services/api/addProperty/service"
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/akrylysov/algnhsa"
 )
 
 type AddPropertyHandler struct {
@@ -26,7 +27,11 @@ func New(log *slog.Logger, ss service.Submit) *AddPropertyHandler {
 func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		var property types.POSTProperty
-
+		theRequest, ok := algnhsa.APIGatewayV1RequestFromContext(r.Context())
+		if !ok {
+			h.Log.Info("Nothing to add to the request")
+		}
+		h.Log.Info("This is the request: ", "request:", theRequest)
 		if err := json.NewDecoder(r.Body).Decode(&property); err != nil {
 			message := fmt.Sprintf("Invalid JSON: %v", err)
 			utils.ReplyError(w, r, http.StatusInternalServerError, message)
