@@ -1,0 +1,11 @@
+.MapStyle {
+    height: 400px;
+    width: 600px;
+    margin: auto;
+}
+
+@media screen and (max-width:900px){
+    .MapStyle{
+        width:70vw;
+    }
+}

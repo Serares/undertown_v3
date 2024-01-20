@@ -1,0 +1,10 @@
+.ImageElement {
+    max-width: 300px;
+    cursor: pointer;
+}
+
+.ImagesInputsWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}

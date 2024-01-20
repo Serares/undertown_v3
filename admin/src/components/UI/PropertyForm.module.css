@@ -1,0 +1,10 @@
+
+.ThumbImage {
+    width: 200px;
+    cursor: pointer;
+}
+
+.Form {
+    max-width: 900px;
+    margin: auto;
+}

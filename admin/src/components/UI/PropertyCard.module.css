@@ -1,0 +1,20 @@
+.PropertyCard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    box-sizing: content-box;
+    border: 2px solid #007bff;
+    margin: 0.2rem;
+    padding: 0.3rem;
+}
+
+.CarouselContainer {
+    max-width: 330px;
+    height: 100%;
+}
+
+@media screen and (max-width:850px) {
+    .PropertyCard{
+        flex-direction: column;
+    }
+}
