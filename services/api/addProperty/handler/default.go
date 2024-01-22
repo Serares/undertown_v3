@@ -1,15 +1,14 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/Serares/undertown_v3/services/api/addProperty/service"
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/Serares/undertown_v3/utils"
-	"github.com/akrylysov/algnhsa"
 )
 
 type AddPropertyHandler struct {
@@ -26,33 +25,43 @@ func New(log *slog.Logger, ss service.Submit) *AddPropertyHandler {
 
 func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		var property types.POSTProperty
-		theRequest, ok := algnhsa.APIGatewayV1RequestFromContext(r.Context())
-		if !ok {
-			h.Log.Info("Nothing to add to the request")
-		}
-		h.Log.Info("This is the request: ", "request:", theRequest)
-		if err := json.NewDecoder(r.Body).Decode(&property); err != nil {
-			message := fmt.Sprintf("Invalid JSON: %v", err)
-			utils.ReplyError(w, r, http.StatusInternalServerError, message)
+		const maxFileUpload = 10 << 20
+		var err error
+		var isLocal = os.Getenv("IS_LOCAL")
+		var imagesPaths []string
+		if err := r.ParseMultipartForm(maxFileUpload); err != nil {
+			utils.ReplyError(w, r, http.StatusExpectationFailed, "files are too large")
 			return
 		}
-		id, hrID, err := h.SubmitService.ProcessProperty(r.Context(), &property)
+
+		files := r.MultipartForm.File["images"]
 		if err != nil {
-			h.Log.Error("Error processing the property", "url", r.URL, "method", r.Method, "status:", http.StatusInternalServerError, "error:", err)
-			utils.ReplyError(w, r, http.StatusInternalServerError, fmt.Sprintf("error trying to persist the order with error: %v", err))
-			return
+			utils.ReplyError(w, r, http.StatusInternalServerError, "error uploading file to s3")
 		}
-		successReply := types.POSTSuccessResponse{
-			PropertyId:      id,
-			HumanReadableId: hrID,
+		if isLocal == "true" {
+			imagesPaths, err = h.SubmitService.ProcessPropertyImagesLocal(r.Context(), files)
+		} else {
+			imagesPaths, err = h.SubmitService.ProcessPropertyImages(r.Context(), files)
 		}
-		err = utils.ReplySuccess(w, r, http.StatusCreated, successReply)
 		if err != nil {
-			h.Log.Error("error trying to reply to the request", "error", err)
+			h.Log.Error("error on processing the images", "error", err)
+			utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the images")
 		}
+
+		h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm)
+		fmt.Printf("Uploaded File:")
+
 		return
 	}
+	// successReply := types.POSTSuccessResponse{
+	// 	PropertyId:      id,
+	// 	HumanReadableId: hrID,
+	// }
+	// err = utils.ReplySuccess(w, r, http.StatusCreated, successReply)
+	// if err != nil {
+	// 	h.Log.Error("error trying to reply to the request", "error", err)
+	// }
+	// return
 	utils.ReplyError(w, r, http.StatusMethodNotAllowed, types.ErrorMethodNotSupported)
 	return
 }

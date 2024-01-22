@@ -8,4 +8,6 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.0
 )
 
+require github.com/stretchr/testify v1.8.4 // indirect
+
 replace github.com/Serares/undertown_v3/utils => ../../../utils

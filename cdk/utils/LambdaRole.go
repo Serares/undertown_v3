@@ -6,8 +6,8 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-func CreateLambdaBasicRole(stack constructs.Construct, env string) awsiam.Role {
-	basicLambdaRole := awsiam.NewRole(stack, jsii.Sprintf("UndertownLambda-%s", env), &awsiam.RoleProps{
+func CreateLambdaBasicRole(stack constructs.Construct, id, env string) awsiam.Role {
+	basicLambdaRole := awsiam.NewRole(stack, jsii.Sprintf("%s-%s", id, env), &awsiam.RoleProps{
 		// TODO think about if this needs to apply the least priviledge principle
 		AssumedBy: awsiam.NewServicePrincipal(jsii.String("lambda.amazonaws.com"), nil),
 	})

@@ -19,6 +19,7 @@ func main() {
 		panic(err)
 	}
 	app := awscdk.NewApp(nil)
+	assetsBucket := stacks.AssetsBucket(app, "assets-bucket")
 
 	authLambdas := stacks.A1Lambda(app, fmt.Sprintf("A1Lambda-%s", theEnv), &stacks.A1LambdaProps{
 		StackProps: awscdk.StackProps{
@@ -31,9 +32,10 @@ func main() {
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
-		Env: theEnv,
+		Env:          theEnv,
+		AssetsBucket: assetsBucket.Bucket,
 	})
-	lambdas := append(authLambdas, crudLambdas...)
+	lambdas := append(authLambdas, crudLambdas.Lambdas...)
 	apiStack := stacks.API(app, fmt.Sprintf("Undertown-API-%s", theEnv), &stacks.APIStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
@@ -51,13 +53,17 @@ func main() {
 
 	ssrStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway getProperty and getProperties paths"))
 
-	stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
+	cfStack := stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
 		HomeLambdaUrl: ssrStack.LambdaUrl,
 		Env:           theEnv,
+		AssetsBucket:  assetsBucket.Bucket,
+		OAI:           assetsBucket.OAI,
 	})
+	crudLambdas.Stack.AddDependency(assetsBucket.Stack, jsii.String("CRUD lambdas need the Assets bucket stack deployed first"))
+	cfStack.AddDependency(assetsBucket.Stack, jsii.String("needs the bucket to be deployed first"))
 
 	app.Synth(nil)
 }

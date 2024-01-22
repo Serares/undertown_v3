@@ -44,7 +44,7 @@ func A1Lambda(scope constructs.Construct, id string, props *A1LambdaProps) []Int
 		sprops = props.StackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
-	lambdaRole := utils.CreateLambdaBasicRole(stack, props.Env)
+	lambdaRole := utils.CreateLambdaBasicRole(stack, "lambdaBasicRoleA1", props.Env)
 
 	registerLambda := awslambdago.NewGoFunction(stack, jsii.Sprintf("Register-%s", props.Env), &awslambdago.GoFunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),

@@ -52,3 +52,9 @@ type POSTProperty struct {
 	HeatingInfraredPanels   bool                  `json:"heatingInfraredPanels"`
 	HeatingFloorHeating     bool                  `json:"heatingFloorHeating"`
 }
+
+type POSTFormData struct {
+	Title  string
+	Images []string
+	Floor  int64
+}
