@@ -73,7 +73,7 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	awss3deployment.NewBucketDeployment(stack, jsii.String("assetsDeployment"), &awss3deployment.BucketDeploymentProps{
 		DestinationBucket: assetsBucket,
 		Sources: &[]awss3deployment.ISource{
-			awss3deployment.Source_Asset(jsii.String("../services/ssr/homepage/assets"), nil),
+			awss3deployment.Source_Asset(jsii.String("../services/ssr/assets"), nil),
 		},
 		DestinationKeyPrefix: jsii.String("assets"),
 		Distribution:         cf,

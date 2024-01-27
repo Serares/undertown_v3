@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Jumbotron } from 'react-bootstrap';
+import { Button, Accordion } from 'react-bootstrap';
 
 function Logout(props) {
 
@@ -23,11 +23,11 @@ function Logout(props) {
 
     return (
         <div className="logout">
-            <Jumbotron>
+            <Accordion>
                 Sigur vrei sa te deloghezi?
             <Button onClick={postLogout} variant="primary">Da</Button>
                 <Button onClick={redirectToAdmin} variant="warning">Nu, mai am treaba</Button>
-            </Jumbotron>
+            </Accordion>
         </div>
     )
 

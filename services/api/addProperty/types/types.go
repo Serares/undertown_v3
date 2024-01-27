@@ -9,11 +9,12 @@ type POSTSuccessResponse struct {
 	HumanReadableId string
 }
 
-type POSTProperty struct {
-	Title     string   `json:"title"`
-	Floor     int64    `json:"floor"`
-	Images    []string `json:"images"`
-	Thumbnail string   `json:"thumbnail"`
+// This is the "property" field that's send as a multipart form data POST request
+type RequestProperty struct {
+	Title string `json:"title"`
+	Floor int64  `json:"floor"`
+	// Images []string `json:"images"`
+	// Thumbnail string   `json:"thumbnail"`
 	// UserId                           string   `json:"userid"` // this is added by the authorizer to the request context
 	IsFeatured                       bool   `json:"isFeatured"`
 	EnergyClass                      string `json:"energyClass"`

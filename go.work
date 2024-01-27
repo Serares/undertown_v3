@@ -1,4 +1,4 @@
-go 1.21.4
+go 1.21.6
 
 use (
 	./cdk
@@ -10,6 +10,8 @@ use (
 	./services/api/login
 	./services/api/register
 	./services/api/registerAuthorizer
+	./services/ssr/admin
 	./services/ssr/homepage
+	./services/ssr/includes
 	./utils
 )

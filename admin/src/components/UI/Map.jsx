@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import classes from './Map.module.css';
 
 const LeafletMap = (props) => {
@@ -48,13 +48,13 @@ const LeafletMap = (props) => {
 
     return (<div className={classes.MapStyle}>
         <input type="hidden" name="location_coordonates" value={createLocationValue()} />
-        <Map center={position} zoom={zoom} onclick={handleClick} >
+        <MapContainer center={position} zoom={zoom} onclick={handleClick} >
             <TileLayer
                 attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
                 url="https://api.mapbox.com/styles/v1/empten/ck9qwupj76bgi1ipde38gjsmg/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZW1wdGVuIiwiYSI6ImNrOXF3eWh0azBvbXkzbHFjMWNoY2x1NzIifQ.xolL5C6kDqZvZzRFoCmdMg"
             />
             {marker}
-        </Map>
+        </MapContainer>
     </div>)
 }
 

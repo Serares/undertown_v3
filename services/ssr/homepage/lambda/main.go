@@ -21,7 +21,9 @@ func main() {
 	homeHandler := handlers.NewHomeHandler(log, *homeService)
 
 	// This is not advised to use in prod
-	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
+	// Lambda doesn't need to handle the route for assets
+	// the route is handled by cloudfront
+	// m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	m.Handle("/chirii/", propertiesHandler)
 	m.Handle("/vanzari/", propertiesHandler)
 	m.Handle("/", homeHandler)

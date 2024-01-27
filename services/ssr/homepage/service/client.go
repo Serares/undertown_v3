@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -99,8 +98,8 @@ func (ssrc *SSRClient) generateJwt() (string, error) {
 		return "", fmt.Errorf("error generating the jwt %w", err)
 	}
 
-	base64Token := base64.RawStdEncoding.EncodeToString([]byte(tokenString))
-	return base64Token, nil
+	// base64Token := base64.RawStdEncoding.EncodeToString([]byte(tokenString))
+	return tokenString, nil
 }
 
 func (ssrc *SSRClient) ListFeaturedProperties(url string) ([]lite.ListFeaturedPropertiesRow, error) {

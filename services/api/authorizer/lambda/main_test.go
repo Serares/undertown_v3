@@ -9,7 +9,7 @@ import (
 )
 
 func TestAuthorization(t *testing.T) {
-	jwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjMxMjMyMTMiLCJlbWFpbCI6InJlZ2lzdHJhdG9yQGVtYWlsLmNvbSIsImlzYWRtaW4iOnRydWV9.kwUih83NOKaBC9AA2GB3HjFXBqWAsdhMl5pfz7tNOQ0"
+	jwt := "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmxiV0ZwYkNJNkluUmxjM1JBWlcxaGFXd3VZMjl0SWl3aWRYTmxja2xrSWpvaVpEbGlORGhrTTJNdFpETm1aaTAwT0dNMkxUaGxOVGN0TjJGaFpXWTJNRGRoTkRZeUlpd2lhWE5oWkcxcGJpSTZkSEoxWlN3aWFYTnpjM0lpT21aaGJITmxmUS5iSW15eGlRd25rblRyV0Eyby0yLWMwU0N0S3liMVNIN1NrRlNvdXItRWdN"
 	// create a struct of [string]string
 	headersStruct := make(map[string]string)
 	headersStruct["Authorization"] = jwt

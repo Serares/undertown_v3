@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { Jumbotron, Navbar, Nav } from 'react-bootstrap';
+import { Accordion } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-
+import {Navbar} from '../../components/UI/Navbar'
 import classes from './Layout.module.css';
 // enclosing other components
 
@@ -12,7 +12,8 @@ const Layout = (props) => {
         'Admin': '',
         'Adauga Proprietate': 'add',
         'Asteptare aprobare': 'submissions',
-        'Logout': 'logout'
+        'Logout': 'logout',
+        'Login' : 'login'
     }
 
     function renderNavLinks() {
@@ -31,18 +32,9 @@ const Layout = (props) => {
     }
 
     return (
-        <Jumbotron style={{ backgroundColor: '#fff' }} >
-            <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
-                <Navbar.Brand>Admin</Navbar.Brand>
-                <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-                <Navbar.Collapse id="responsive-navbar-nav">
-                    <Nav className="mr-auto">
-                        {renderNavLinks()}
-                    </Nav>
-                </Navbar.Collapse>
-            </Navbar>
+        <Accordion style={{ backgroundColor: '#fff' }} >
             {props.children}
-        </Jumbotron>
+        </Accordion>
 
     )
 

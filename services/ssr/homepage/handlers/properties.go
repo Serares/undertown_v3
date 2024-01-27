@@ -9,7 +9,7 @@ import (
 	"github.com/Serares/ssr/homepage/service"
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	"github.com/Serares/ssr/homepage/views/includes"
+	"github.com/Serares/ssr/includes/components"
 )
 
 type PropertiesHandler struct {
@@ -82,15 +82,15 @@ func resolveClientSortDirection(sortDirection string) string {
 // TODO should this function be defined like this?
 func viewProperties(w http.ResponseWriter, r *http.Request, props types.PropertiesProps, navbarProps types.NavbarProps, bannerProps types.BannerSectionProps) {
 
-	header := includes.Header(bannerProps.Title)
-	preload := includes.Preload()
-	navbar := includes.Navbar(navbarProps)
-	footer := includes.Footer()
-	scripts := includes.Scripts()
+	header := components.Header(bannerProps.Title)
+	preload := components.Preload()
+	navbar := components.Navbar(navbarProps)
+	footer := components.Footer()
+	scripts := components.Scripts()
 	views.Properties(types.BasicIncludes{
 		Header:        header,
 		Preload:       preload,
-		BannerSection: includes.BannerSection(bannerProps),
+		BannerSection: components.BannerSection(bannerProps),
 		Navbar:        navbar,
 		Footer:        footer,
 		Scripts:       scripts,

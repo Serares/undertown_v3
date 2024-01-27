@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -10,8 +11,12 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	"github.com/Serares/undertown_v3/services/api/addProperty/types"
+	"github.com/Serares/undertown_v3/services/api/addProperty/util"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -153,58 +158,68 @@ func (ss *Submit) ProcessPropertyImages(ctx context.Context, files []*multipart.
 	return imagePaths, nil
 }
 
-func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form) (string, string, error) {
+func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
-	// var propertyTransaction types.TransactionType = multipartForm.Value["propertyTransaction"]
-	// humanReadableId := util.HumanReadableId()
-	// if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
-	// 	ID: propertyId,
-	// 	// UserID: , TODO
-	// 	Humanreadableid:                  humanReadableId,
-	// 	Title:                            property.Title,
-	// 	Floor:                            property.Floor,
-	// 	Images:                           arrayToString(property.Images),
-	// 	Thumbnail:                        property.Thumbnail,
-	// 	IsFeatured:                       booleanToInt(property.IsFeatured),
-	// 	EnergyClass:                      property.EnergyClass,
-	// 	EnergyConsumptionPrimary:         property.EnergyConsumptionPrimary,
-	// 	EnergyEmissionsIndex:             property.EnergyEmissionsIndex,
-	// 	EnergyConsumptionGreen:           property.EnergyConsumptionGreen,
-	// 	DestinationResidential:           booleanToInt(property.DestinationResidential),
-	// 	DestinationCommercial:            booleanToInt(property.DestinationCommercial),
-	// 	DestinationOffice:                booleanToInt(property.DestinationOffice),
-	// 	DestinationHoliday:               booleanToInt(property.DestinationHoliday),
-	// 	OtherUtilitiesTerrance:           booleanToInt(property.OtherUtilitiesTerrance),
-	// 	OtherUtilitiesServiceToilet:      booleanToInt(property.OtherUtilitiesServiceToilet),
-	// 	OtherUtilitiesUndergroundStorage: booleanToInt(property.OtherUtilitiesUndergroundStorage),
-	// 	OtherUtilitiesStorage:            booleanToInt(property.OtherUtilitiesStorage),
-	// 	PropertyTransaction:              property.PropertyTransaction.String(),
-	// 	PropertyDescription:              property.PropertyDescription,
-	// 	PropertyType:                     property.PropertyType,
-	// 	PropertyAddress:                  property.PropertyAddress,
-	// 	PropertySurface:                  int64(property.PropertySurface),
-	// 	Price:                            int64(property.Price),
-	// 	FurnishedNot:                     booleanToInt(property.FurnishedNot),
-	// 	FurnishedPartially:               booleanToInt(property.FurnishedPartially),
-	// 	FurnishedComplete:                booleanToInt(property.FurnishedComplete),
-	// 	FurnishedLuxury:                  booleanToInt(property.FurnishedLuxury),
-	// 	InteriorNeedsRenovation:          booleanToInt(property.InteriorNeedsRenovation),
-	// 	InteriorHasRenovation:            booleanToInt(property.InteriorHasRenovation),
-	// 	InteriorGoodState:                booleanToInt(property.InteriorGoodState),
-	// 	HeatingTermoficare:               booleanToInt(property.HeatingTermoficare),
-	// 	HeatingCentralHeating:            booleanToInt(property.HeatingCentralHeating),
-	// 	HeatingBuilding:                  booleanToInt(property.HeatingBuilding),
-	// 	HeatingStove:                     booleanToInt(property.HeatingStove),
-	// 	HeatingRadiator:                  booleanToInt(property.HeatingRadiator),
-	// 	HeatingOtherElectrical:           booleanToInt(property.HeatingOtherElectrical),
-	// 	HeatingGasConvector:              booleanToInt(property.HeatingGasConvector),
-	// 	HeatingInfraredPanels:            booleanToInt(property.HeatingInfraredPanels),
-	// 	HeatingFloorHeating:              booleanToInt(property.HeatingFloorHeating),
-	// 	CreatedAt:                        time.Now().UTC(),
-	// 	UpdatedAt:                        time.Now().UTC(),
-	// }); err != nil {
-	// 	return "", "", fmt.Errorf("error trying to persist the order with error: %v", err)
-	// }
-	ss.Log.Info("the multipart form", multipartForm)
+	var property types.RequestProperty
+	jsonProperty, ok := multipartForm.Value["property"]
+	if !ok {
+		ss.Log.Error("json property not provided")
+		return "", "", fmt.Errorf("json property not provided")
+	}
+
+	if err := json.Unmarshal([]byte(jsonProperty[0]), &property); err != nil {
+		ss.Log.Error("error decoding the json property", "err", err)
+		return "", "", fmt.Errorf("error on json unmarshal")
+	}
+
+	humanReadableId := util.HumanReadableId(property.PropertyTransaction)
+	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
+		ID:                               propertyId,
+		UserID:                           userId,
+		Humanreadableid:                  humanReadableId,
+		Title:                            property.Title,
+		Floor:                            property.Floor,
+		Images:                           strings.Join(imagesPaths, ";"),
+		Thumbnail:                        imagesPaths[0],
+		IsFeatured:                       booleanToInt(property.IsFeatured),
+		EnergyClass:                      property.EnergyClass,
+		EnergyConsumptionPrimary:         property.EnergyConsumptionPrimary,
+		EnergyEmissionsIndex:             property.EnergyEmissionsIndex,
+		EnergyConsumptionGreen:           property.EnergyConsumptionGreen,
+		DestinationResidential:           booleanToInt(property.DestinationResidential),
+		DestinationCommercial:            booleanToInt(property.DestinationCommercial),
+		DestinationOffice:                booleanToInt(property.DestinationOffice),
+		DestinationHoliday:               booleanToInt(property.DestinationHoliday),
+		OtherUtilitiesTerrance:           booleanToInt(property.OtherUtilitiesTerrance),
+		OtherUtilitiesServiceToilet:      booleanToInt(property.OtherUtilitiesServiceToilet),
+		OtherUtilitiesUndergroundStorage: booleanToInt(property.OtherUtilitiesUndergroundStorage),
+		OtherUtilitiesStorage:            booleanToInt(property.OtherUtilitiesStorage),
+		PropertyTransaction:              property.PropertyTransaction.String(),
+		PropertyDescription:              property.PropertyDescription,
+		PropertyType:                     property.PropertyType,
+		PropertyAddress:                  property.PropertyAddress,
+		PropertySurface:                  int64(property.PropertySurface),
+		Price:                            int64(property.Price),
+		FurnishedNot:                     booleanToInt(property.FurnishedNot),
+		FurnishedPartially:               booleanToInt(property.FurnishedPartially),
+		FurnishedComplete:                booleanToInt(property.FurnishedComplete),
+		FurnishedLuxury:                  booleanToInt(property.FurnishedLuxury),
+		InteriorNeedsRenovation:          booleanToInt(property.InteriorNeedsRenovation),
+		InteriorHasRenovation:            booleanToInt(property.InteriorHasRenovation),
+		InteriorGoodState:                booleanToInt(property.InteriorGoodState),
+		HeatingTermoficare:               booleanToInt(property.HeatingTermoficare),
+		HeatingCentralHeating:            booleanToInt(property.HeatingCentralHeating),
+		HeatingBuilding:                  booleanToInt(property.HeatingBuilding),
+		HeatingStove:                     booleanToInt(property.HeatingStove),
+		HeatingRadiator:                  booleanToInt(property.HeatingRadiator),
+		HeatingOtherElectrical:           booleanToInt(property.HeatingOtherElectrical),
+		HeatingGasConvector:              booleanToInt(property.HeatingGasConvector),
+		HeatingInfraredPanels:            booleanToInt(property.HeatingInfraredPanels),
+		HeatingFloorHeating:              booleanToInt(property.HeatingFloorHeating),
+		CreatedAt:                        time.Now().UTC(),
+		UpdatedAt:                        time.Now().UTC(),
+	}); err != nil {
+		return "", "", fmt.Errorf("error trying to persist the order with error: %v", err)
+	}
 	return propertyId, "humanReadableId", nil
 }

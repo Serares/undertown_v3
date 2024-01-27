@@ -8,7 +8,7 @@ import (
 	"github.com/Serares/ssr/homepage/service"
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	"github.com/Serares/ssr/homepage/views/includes"
+	"github.com/Serares/ssr/includes/components"
 )
 
 type HomeHandler struct {
@@ -48,11 +48,11 @@ func (hh *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // TODO should this function be defined like this?
 func viewHome(w http.ResponseWriter, r *http.Request, props types.HomeProps, navbarProps types.NavbarProps) {
-	header := includes.Header("UNDERTOWN")
-	preload := includes.Preload()
-	navbar := includes.Navbar(navbarProps)
-	footer := includes.Footer()
-	scripts := includes.Scripts()
+	header := components.Header("UNDERTOWN")
+	preload := components.Preload()
+	navbar := components.Navbar(navbarProps)
+	footer := components.Footer()
+	scripts := components.Scripts()
 	views.Home(types.BasicIncludes{
 		Header:  header,
 		Preload: preload,

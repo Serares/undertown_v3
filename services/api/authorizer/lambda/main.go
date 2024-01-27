@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"log/slog"
 	"os"
 
@@ -13,7 +12,7 @@ import (
 )
 
 func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequestTypeRequest) (events.APIGatewayCustomAuthorizerResponse, error) {
-	base64Token := event.Headers["Authorization"]
+	token := event.Headers["Authorization"]
 	// err := godotenv.Load("../.env.local")
 	secret := os.Getenv("JWT_SECRET")
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -22,10 +21,10 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 	// 	log.Debug("env file is used only for local testing")
 	// }
 	// If the token exists it has to be base64 decoded
-	token, err := base64.RawStdEncoding.DecodeString(base64Token)
-	if err != nil {
-		log.Error("error trying to base64 decode the Authorization token")
-	}
+	// token, err := base64.RawStdEncoding.DecodeString(base64Token)
+	// if err != nil {
+	// 	log.Error("error trying to base64 decode the Authorization token", err)
+	// }
 	// Parse the JWT
 	claims := utils.JWTClaims{}
 	parsedToken, err := jwt.ParseWithClaims(string(token), &claims, func(token *jwt.Token) (interface{}, error) {

@@ -56,9 +56,9 @@ func (ls *LoginService) LoginUser(ctx context.Context, email string, password st
 	if err != nil {
 		return "", fmt.Errorf("error while generating token %w", err)
 	}
-	// convert token to base64
-	tokenInBase64 := base64.RawStdEncoding.EncodeToString([]byte(token))
-	return tokenInBase64, nil
+	// TODO convert token to base64
+	// tokenInBase64 := base64.RawStdEncoding.EncodeToString([]byte(token))
+	return token, nil
 }
 
 func (ls *LoginService) searchUserByEmail(ctx context.Context, email string) (*lite.User, error) {

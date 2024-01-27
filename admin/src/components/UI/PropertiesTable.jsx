@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Jumbotron } from 'react-bootstrap';
+import { Accordion } from 'react-bootstrap';
 import PropertyCard from './PropertyCard';
 import classes from './PropertiesTable.module.css';
 
@@ -37,9 +37,9 @@ const PropertiesTable = (props) => {
 
     return (
         <div className={classes.PropertiesTable}>
-            <Jumbotron>
+            <Accordion>
                 {createPropertiesRows()}
-            </Jumbotron>
+            </Accordion>
         </div>
     )
 

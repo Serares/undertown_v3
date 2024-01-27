@@ -7,7 +7,7 @@ import (
 
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	"github.com/Serares/ssr/homepage/views/includes"
+	"github.com/Serares/ssr/includes/components"
 )
 
 type PropertyHandler struct {
@@ -39,14 +39,14 @@ func (hh *PropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // TODO should this function be defined like this?
 func viewProperty(w http.ResponseWriter, r *http.Request, bannerProps types.BannerSectionProps) {
-	header := includes.Header("Page title")
-	preload := includes.Preload()
-	navbar := includes.Navbar(types.NavbarProps{})
-	footer := includes.Footer()
-	scripts := includes.Scripts()
+	header := components.Header("Page title")
+	preload := components.Preload()
+	navbar := components.Navbar(types.NavbarProps{})
+	footer := components.Footer()
+	scripts := components.Scripts()
 	views.Home(types.BasicIncludes{
 		Header:        header,
-		BannerSection: includes.BannerSection(bannerProps),
+		BannerSection: components.BannerSection(bannerProps),
 		Preload:       preload,
 		Navbar:        navbar,
 		Footer:        footer,
