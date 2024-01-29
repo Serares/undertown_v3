@@ -1,10 +1,10 @@
 package service
 
-import "github.com/Serares/undertown_v3/repositories/repository/lite"
+import (
+	"io"
+)
 
-type ISSRClient interface {
-	AddProperty(params lite.AddPropertyParams) ([]lite.ListFeaturedPropertiesRow, error)
-	Login(email, password string) (string, error)
-	UpdateProperty() error // todo have to implement the update lambda
-	GetProperty(id string) (lite.Property, error)
+type ISSRAdminClient interface {
+	AddProperty(body io.Reader, url, authToken string) error
+	Login(email, password, url string) (string, error)
 }

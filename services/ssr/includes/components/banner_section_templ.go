@@ -10,7 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/Serares/ssr/homepage/types"
+import "github.com/Serares/ssr/includes/types"
 
 func BannerSection(props types.BannerSectionProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {

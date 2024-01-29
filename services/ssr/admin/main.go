@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/Serares/ssr/admin/handlers"
+	"github.com/Serares/ssr/admin/service"
 	"github.com/joho/godotenv"
 )
 
@@ -21,14 +23,16 @@ func main() {
 		port = "4031"
 	}
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	client := service.NewHomeClient(log)
-
+	client := service.NewAdminClient(log)
+	loginService := service.NewLoginService(log, client)
+	submitService := service.NewSubmitService(log, client)
 	m := http.NewServeMux()
-
+	loginHanlder := handlers.NewLoginHandler(log, loginService)
+	submitHandler := handlers.NewSubmitHandler(log, submitService)
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
-	m.Handle("/login/", propertiesHandler)
-	m.Handle("/submit/", propertiesHandler)
+	m.Handle("/login/", loginHanlder)
+	m.Handle("/submit/", submitHandler)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf("localhost:%s", port),

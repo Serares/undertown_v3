@@ -23,14 +23,6 @@ type ContactProps struct {
 	ErrorMessage string
 }
 
-type NavbarProps struct {
-	Path string
-}
-
-type BannerSectionProps struct {
-	Title string
-}
-
 type PropertiesProps struct {
 	// TODO
 	ErrorMessage string

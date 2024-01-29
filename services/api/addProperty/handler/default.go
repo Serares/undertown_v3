@@ -60,9 +60,13 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the images")
 		}
 
-		h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm, userId)
+		_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm, userId)
 		fmt.Printf("Uploaded File:")
-
+		if err != nil {
+			h.Log.Error("error on processing the property data", "error", err)
+			utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the property data")
+			return
+		}
 		return
 	}
 	// successReply := types.POSTSuccessResponse{
@@ -75,5 +79,4 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// }
 	// return
 	utils.ReplyError(w, r, http.StatusMethodNotAllowed, types.ErrorMethodNotSupported)
-	return
 }

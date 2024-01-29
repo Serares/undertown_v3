@@ -90,7 +90,7 @@ func TestPost(t *testing.T) {
 		t.Error("error reading the mock property file")
 	}
 	// unmarshal the property to be able to change it's fields
-	var parsedProperty types.POSTProperty
+	var parsedProperty types.RequestProperty
 	if err = json.NewDecoder(bytes.NewBuffer(mockProperty)).Decode(&parsedProperty); err != nil {
 		t.Error("failed to decode the mocked json")
 	}

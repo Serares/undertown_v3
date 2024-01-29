@@ -52,9 +52,10 @@ func booleanToInt(value bool) int64 {
 }
 
 func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
+	var localDirPath = "../../ssr/assets/uploads"
 	var imagePaths []string
 	var outErr bytes.Buffer
-	err := os.Mkdir("../../ssr/homepage/assets/uploads", 0755)
+	err := os.Mkdir(localDirPath, 0755)
 	if err != nil {
 		ss.Log.Error("Error creating the temp dir")
 	}
@@ -66,7 +67,7 @@ func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multi
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
-		filePath := fmt.Sprintf("%s/%s", "../../ssr/homepage/assets/uploads/", fileHeader.Filename)
+		filePath := fmt.Sprintf("%s/%s", localDirPath, fileHeader.Filename)
 		dst, err := os.Create(filePath)
 		if err != nil {
 			ss.Log.Error("error trying to create the file path")
@@ -76,7 +77,7 @@ func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multi
 			ss.Log.Error("error copying the file")
 		}
 		webpFileName := fileHeader.Filename + ".webp"
-		webpFilePath := fmt.Sprintf("%s/%s", "../../ssr/homepage/assets/uploads/", webpFileName)
+		webpFilePath := fmt.Sprintf("%s/%s", localDirPath, webpFileName)
 		// convert to webp
 		cmd := exec.Command("cwebp", "-q", "75", filePath, "-o", webpFilePath)
 		cmd.Stderr = &outErr
@@ -158,66 +159,86 @@ func (ss *Submit) ProcessPropertyImages(ctx context.Context, files []*multipart.
 	return imagePaths, nil
 }
 
+func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (string, error) {
+	featuresJson, err := json.Marshal(features)
+	if err != nil {
+		ss.Log.Error("error marshalling the features to json string")
+		return "", err
+	}
+	return string(featuresJson), nil
+}
+
 func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
-	var property types.RequestProperty
+	var requestProperty types.RequestProperty
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
 		ss.Log.Error("json property not provided")
 		return "", "", fmt.Errorf("json property not provided")
 	}
 
-	if err := json.Unmarshal([]byte(jsonProperty[0]), &property); err != nil {
+	if err := json.Unmarshal([]byte(jsonProperty[0]), &requestProperty); err != nil {
 		ss.Log.Error("error decoding the json property", "err", err)
 		return "", "", fmt.Errorf("error on json unmarshal")
 	}
+	// SEE lite.Property
+	// features is stored as a json string in the db
+	propertyFeatures := types.RequestFeatures{
+		Floor:                            requestProperty.Floor,
+		EnergyClass:                      requestProperty.EnergyClass,
+		EnergyConsumptionPrimary:         requestProperty.EnergyConsumptionPrimary,
+		EnergyEmissionsIndex:             requestProperty.EnergyEmissionsIndex,
+		EnergyConsumptionGreen:           requestProperty.EnergyConsumptionGreen,
+		DestinationResidential:           requestProperty.DestinationResidential,
+		DestinationCommercial:            requestProperty.DestinationCommercial,
+		DestinationOffice:                requestProperty.DestinationOffice,
+		DestinationHoliday:               requestProperty.DestinationHoliday,
+		OtherUtilitiesTerrance:           requestProperty.OtherUtilitiesTerrance,
+		OtherUtilitiesServiceToilet:      requestProperty.OtherUtilitiesServiceToilet,
+		OtherUtilitiesUndergroundStorage: requestProperty.OtherUtilitiesUndergroundStorage,
+		OtherUtilitiesStorage:            requestProperty.OtherUtilitiesStorage,
+		FurnishedNot:                     requestProperty.FurnishedNot,
+		FurnishedPartially:               requestProperty.FurnishedPartially,
+		FurnishedComplete:                requestProperty.FurnishedComplete,
+		FurnishedLuxury:                  requestProperty.FurnishedLuxury,
+		InteriorNeedsRenovation:          requestProperty.InteriorNeedsRenovation,
+		InteriorHasRenovation:            requestProperty.InteriorHasRenovation,
+		InteriorGoodState:                requestProperty.InteriorGoodState,
+		HeatingTermoficare:               requestProperty.HeatingTermoficare,
+		HeatingCentralHeating:            requestProperty.HeatingCentralHeating,
+		HeatingBuilding:                  requestProperty.HeatingBuilding,
+		HeatingStove:                     requestProperty.HeatingStove,
+		HeatingRadiator:                  requestProperty.HeatingRadiator,
+		HeatingOtherElectrical:           requestProperty.HeatingOtherElectrical,
+		HeatingGasConvector:              requestProperty.HeatingGasConvector,
+		HeatingInfraredPanels:            requestProperty.HeatingInfraredPanels,
+		HeatingFloorHeating:              requestProperty.HeatingFloorHeating,
+	}
 
-	humanReadableId := util.HumanReadableId(property.PropertyTransaction)
+	features, err := ss.parsePropertyFeaturesToJson(propertyFeatures)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	humanReadableId := util.HumanReadableId(requestProperty.PropertyTransaction)
 	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
-		ID:                               propertyId,
-		UserID:                           userId,
-		Humanreadableid:                  humanReadableId,
-		Title:                            property.Title,
-		Floor:                            property.Floor,
-		Images:                           strings.Join(imagesPaths, ";"),
-		Thumbnail:                        imagesPaths[0],
-		IsFeatured:                       booleanToInt(property.IsFeatured),
-		EnergyClass:                      property.EnergyClass,
-		EnergyConsumptionPrimary:         property.EnergyConsumptionPrimary,
-		EnergyEmissionsIndex:             property.EnergyEmissionsIndex,
-		EnergyConsumptionGreen:           property.EnergyConsumptionGreen,
-		DestinationResidential:           booleanToInt(property.DestinationResidential),
-		DestinationCommercial:            booleanToInt(property.DestinationCommercial),
-		DestinationOffice:                booleanToInt(property.DestinationOffice),
-		DestinationHoliday:               booleanToInt(property.DestinationHoliday),
-		OtherUtilitiesTerrance:           booleanToInt(property.OtherUtilitiesTerrance),
-		OtherUtilitiesServiceToilet:      booleanToInt(property.OtherUtilitiesServiceToilet),
-		OtherUtilitiesUndergroundStorage: booleanToInt(property.OtherUtilitiesUndergroundStorage),
-		OtherUtilitiesStorage:            booleanToInt(property.OtherUtilitiesStorage),
-		PropertyTransaction:              property.PropertyTransaction.String(),
-		PropertyDescription:              property.PropertyDescription,
-		PropertyType:                     property.PropertyType,
-		PropertyAddress:                  property.PropertyAddress,
-		PropertySurface:                  int64(property.PropertySurface),
-		Price:                            int64(property.Price),
-		FurnishedNot:                     booleanToInt(property.FurnishedNot),
-		FurnishedPartially:               booleanToInt(property.FurnishedPartially),
-		FurnishedComplete:                booleanToInt(property.FurnishedComplete),
-		FurnishedLuxury:                  booleanToInt(property.FurnishedLuxury),
-		InteriorNeedsRenovation:          booleanToInt(property.InteriorNeedsRenovation),
-		InteriorHasRenovation:            booleanToInt(property.InteriorHasRenovation),
-		InteriorGoodState:                booleanToInt(property.InteriorGoodState),
-		HeatingTermoficare:               booleanToInt(property.HeatingTermoficare),
-		HeatingCentralHeating:            booleanToInt(property.HeatingCentralHeating),
-		HeatingBuilding:                  booleanToInt(property.HeatingBuilding),
-		HeatingStove:                     booleanToInt(property.HeatingStove),
-		HeatingRadiator:                  booleanToInt(property.HeatingRadiator),
-		HeatingOtherElectrical:           booleanToInt(property.HeatingOtherElectrical),
-		HeatingGasConvector:              booleanToInt(property.HeatingGasConvector),
-		HeatingInfraredPanels:            booleanToInt(property.HeatingInfraredPanels),
-		HeatingFloorHeating:              booleanToInt(property.HeatingFloorHeating),
-		CreatedAt:                        time.Now().UTC(),
-		UpdatedAt:                        time.Now().UTC(),
+		ID:                  propertyId,
+		UserID:              userId,
+		Humanreadableid:     humanReadableId,
+		Title:               requestProperty.Title,
+		Images:              strings.Join(imagesPaths, ";"),
+		Thumbnail:           imagesPaths[0],
+		IsFeatured:          booleanToInt(requestProperty.IsFeatured),
+		PropertyTransaction: requestProperty.PropertyTransaction.String(),
+		PropertyDescription: requestProperty.PropertyDescription,
+		PropertyType:        requestProperty.PropertyType,
+		PropertyAddress:     requestProperty.PropertyAddress,
+		PropertySurface:     int64(requestProperty.PropertySurface),
+		Price:               int64(requestProperty.Price),
+		Features:            features,
+		CreatedAt:           time.Now().UTC(),
+		UpdatedAt:           time.Now().UTC(),
 	}); err != nil {
 		return "", "", fmt.Errorf("error trying to persist the order with error: %v", err)
 	}
