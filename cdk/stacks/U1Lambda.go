@@ -128,6 +128,13 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 	})
 
 	lambdas = append(lambdas, IntegrationLambda{
+		goLambda:   &addProperty,
+		path:       AddProperty.String(),
+		method:     http.MethodPut,
+		authorizer: CRUDAuthorizer.String(),
+	})
+
+	lambdas = append(lambdas, IntegrationLambda{
 		goLambda:   &getProperties,
 		path:       GetProperties.String(),
 		method:     http.MethodGet,

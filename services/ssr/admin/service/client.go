@@ -68,21 +68,14 @@ func (ssrc *SSRAdminClient) sendRequest(url, method, contentType, token string,
 	return msg, nil
 }
 
-func (ssrc *SSRAdminClient) AddProperty(body io.Reader, url, authToken, contentType string) error {
+// ❗ This is used for both add and edit
+func (ssrc *SSRAdminClient) AddProperty(body io.Reader, url, authToken, contentType, method string) error {
 	// the body should already come as multipart from the client
-	_, err := ssrc.sendRequest(url, "POST", contentType, authToken, http.StatusOK, body)
+	_, err := ssrc.sendRequest(url, method, contentType, authToken, http.StatusOK, body)
 	if err != nil {
 		return err
 	}
 	// ssrc.Log.Debug("add property", slog.String("response", string(msg)))
-	return nil
-}
-
-func (ssrc *SSRAdminClient) EditProperty(body io.Reader, url, authToken, contentType string) error {
-	_, err := ssrc.sendRequest(url, "POST", contentType, authToken, http.StatusOK, body)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

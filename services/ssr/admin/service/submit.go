@@ -91,7 +91,7 @@ func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId strin
 			}
 		}
 	}
-	var url string
+	url := os.Getenv("SUBMIT_PROPERTY_URL")
 	// client := &http.Client{}
 	// request, err := http.NewRequest(http.MethodPost, submitUrl, &newReaderBuffer)
 	// if err != nil {
@@ -109,11 +109,9 @@ func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId strin
 	// s.Log.Info("response body", "response", string(byteResponse))
 	writer.Close()
 	if isEdit {
-		url = os.Getenv("EDIT_URL")
 		url = fmt.Sprintf("%s?propertyId=%s", url, humanReadableId)
-		return s.Client.EditProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType())
+		return s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType(), http.MethodPut)
 	} else {
-		url = os.Getenv("SUBMIT_PROPERTY_URL")
-		return s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType())
+		return s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType(), http.MethodPost)
 	}
 }

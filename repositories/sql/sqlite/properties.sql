@@ -77,14 +77,27 @@ SELECT id,
 FROM properties
 WHERE property_transaction = ?
 ORDER BY created_at DESC;
-
 -- name: UpdatePropertyImages :exec
-UPDATE properties 
+UPDATE properties
 set images = ?,
-thumbnail = ?
+    thumbnail = ?
 WHERE id = ?;
-
 -- name: UpdatePropertyFeatures :exec
-UPDATE properties 
+UPDATE properties
 set features = ?
 WHERE id = ?;
+-- name: UpdatePropertyFields :exec
+UPDATE properties
+set updated_at = ?,
+    title = ?,
+    images = ?,
+    thumbnail = ?,
+    is_featured = ?,
+    price = ?,
+    property_type = ?,
+    property_description = ?,
+    property_transaction = ?,
+    property_address = ?,
+    property_surface = ?,
+    features = ?
+WHERE humanReadableId = ?

@@ -11,7 +11,6 @@ use (
 	./services/api/login
 	./services/api/register
 	./services/api/registerAuthorizer
-	./services/api/updateProperty
 	./services/ssr/admin
 	./services/ssr/homepage
 	./services/ssr/includes

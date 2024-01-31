@@ -10,7 +10,10 @@ require (
 	github.com/joho/godotenv v1.5.1
 )
 
-require github.com/aws/aws-lambda-go v1.43.0 // indirect
+require (
+	github.com/aws/aws-lambda-go v1.44.0 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+)
 
 require (
 	github.com/Serares/undertown_v3/repositories/repository v0.0.0

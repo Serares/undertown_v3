@@ -19,6 +19,7 @@ type IPropertiesRepository interface {
 	List(ctx context.Context) ([]lite.Property, error)
 	DeleteByHumanReadableId(ctx context.Context, humanReadableId *string) error
 	CloseDbConnection(ctx context.Context) error
+	UpdateProperty(ctx context.Context, humanReadableId string, params lite.UpdatePropertyFieldsParams) error
 }
 
 type Properties struct {
@@ -125,6 +126,15 @@ func (d *Properties) DeleteByHumanReadableId(ctx context.Context, humanReadableI
 	}
 
 	return fmt.Errorf("error you did not provide a human readable id")
+}
+
+func (d *Properties) UpdateProperty(ctx context.Context, humanReadableId string, params lite.UpdatePropertyFieldsParams) error {
+	err := d.db.UpdatePropertyFields(ctx, params)
+	if err != nil {
+		return fmt.Errorf("failed to update the property features id: %s ; error: %w", humanReadableId, err)
+	}
+
+	return nil
 }
 
 func (d *Properties) CloseDbConnection(ctx context.Context) error {

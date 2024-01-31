@@ -168,6 +168,10 @@ func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (s
 	return string(featuresJson), nil
 }
 
+func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, humanReadableId string) error {
+
+}
+
 func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
 	var requestProperty types.RequestProperty

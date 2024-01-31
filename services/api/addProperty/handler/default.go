@@ -26,7 +26,7 @@ func New(log *slog.Logger, ss service.Submit) *AddPropertyHandler {
 }
 
 func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
+	if r.Method == http.MethodPost || r.Method == http.MethodPut {
 		var err error
 		var isLocal = os.Getenv("IS_LOCAL")
 		v1Request, ok := algnhsa.APIGatewayV1RequestFromContext(r.Context())
@@ -42,7 +42,7 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if userId == "" {
+		if userId == "" && isLocal == "true" {
 			userId = "c8fd42e9-7c8f-4bf0-b818-f6bb96304e92"
 		}
 
@@ -73,7 +73,18 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the images")
 		}
 
-		_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm, userId)
+		// TODO ❗
+		// this pattern of using conditionals seems a bit odd
+		// check if it's an edit request
+		// TODO move this to a PUT http method
+		q := r.URL.Query()
+		if _, ok := q["propertyId"]; ok {
+			humanReadableId := q["propertyId"][0]
+			err = h.SubmitService.ProcessPropertyUpdateData(r.Context(), imagesPaths, r.MultipartForm, humanReadableId)
+		} else {
+			_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm, userId)
+		}
+
 		fmt.Printf("Uploaded File:")
 		if err != nil {
 			h.Log.Error("error on processing the property data", "error", err)
