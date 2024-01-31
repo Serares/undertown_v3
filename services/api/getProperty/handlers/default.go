@@ -10,7 +10,7 @@ import (
 )
 
 type PropertyResponse struct {
-	Results []lite.Property
+	Results []lite.Property // it's always going to be one property
 }
 
 type IGetPropertyService interface {

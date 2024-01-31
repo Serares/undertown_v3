@@ -1,0 +1,20 @@
+package views
+
+import "github.com/Serares/ssr/admin/types"
+
+templ Dztest(contents types.BasicIncludes, props types.SubmitProps) {
+	<html>
+		<span>
+			<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+		</span>
+		<form id="upload-form" class="dropzone" enctype="multipart/form-data" action="/submit" method="POST">
+			<input type="email" name="email"/>
+			// <input type="file" name="images" multiple="multiple"/>
+			<input type="text" name="property"/>
+			<button type="submit">Submit</button>
+			<div class="previews"></div>
+		</form>
+		<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+		@contents.Scripts
+	</html>
+}

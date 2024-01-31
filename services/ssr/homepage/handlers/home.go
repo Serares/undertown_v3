@@ -8,7 +8,8 @@ import (
 	"github.com/Serares/ssr/homepage/service"
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	"github.com/Serares/ssr/includes/components"
+	"github.com/Serares/undertown_v3/ssr/includes/components"
+	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
 )
 
 type HomeHandler struct {
@@ -31,10 +32,10 @@ func (hh *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			properties, err := hh.HomeService.ListProperties()
 			if err != nil {
 				hh.Log.Error("error getting properties", "error", err)
-				viewHome(w, r, types.HomeProps{ErrorMessage: "Error getting the properties", FeaturedProperties: properties}, types.NavbarProps{Path: "/"})
+				viewHome(w, r, types.HomeProps{ErrorMessage: "Error getting the properties", FeaturedProperties: properties}, includesTypes.NavbarProps{Path: "/"})
 				return
 			}
-			viewHome(w, r, types.HomeProps{ErrorMessage: "", FeaturedProperties: properties}, types.NavbarProps{Path: "/"})
+			viewHome(w, r, types.HomeProps{ErrorMessage: "", FeaturedProperties: properties}, includesTypes.NavbarProps{Path: "/"})
 			return
 		default:
 			message := "Method not supported"
@@ -47,7 +48,7 @@ func (hh *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO should this function be defined like this?
-func viewHome(w http.ResponseWriter, r *http.Request, props types.HomeProps, navbarProps types.NavbarProps) {
+func viewHome(w http.ResponseWriter, r *http.Request, props types.HomeProps, navbarProps includesTypes.NavbarProps) {
 	header := components.Header("UNDERTOWN")
 	preload := components.Preload()
 	navbar := components.Navbar(navbarProps)

@@ -3,32 +3,38 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/signal"
+	"syscall"
 	"testing"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/services/api/addProperty/handler"
 	"github.com/Serares/undertown_v3/services/api/addProperty/service"
-	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/joho/godotenv"
 )
 
 func setupAPI(t *testing.T) (string, func()) {
 	t.Helper()
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
-		t.Error("error loading the .env.local file")
+		t.Error("error loading the .env file")
 	}
 	mockImage, err := os.Open("testdata/mockImage.jpg")
 	if err != nil {
 		t.Error("error reading the mock property file")
 	}
+	mockProperty, err := os.Open("testdata/postProperty.json")
+	if err != nil {
+		t.Error("error reading the mock property file")
+	}
+	defer mockProperty.Close()
 	defer mockImage.Close()
 	var requestBody bytes.Buffer
 	multipartWriter := multipart.NewWriter(&requestBody)
@@ -42,12 +48,16 @@ func setupAPI(t *testing.T) (string, func()) {
 	hh := handler.New(log, service)
 	ts := httptest.NewServer(hh)
 
-	titleField, err := multipartWriter.CreateFormField("title")
+	titleField, err := multipartWriter.CreateFormField("property")
 	if err != nil {
 		t.Errorf("error adding title field to the form")
 	}
 
-	_, err = titleField.Write([]byte("mock_title"))
+	propertyBytes, err := io.ReadAll(mockProperty)
+	if err != nil {
+		t.Error("error reading from the property reader %w", err)
+	}
+	_, err = titleField.Write(propertyBytes)
 	if err != nil {
 		t.Error("error adding mock value to title")
 	}
@@ -85,15 +95,15 @@ func setupAPI(t *testing.T) (string, func()) {
 
 // currently using psql with docker to test locally
 func TestPost(t *testing.T) {
-	mockProperty, err := os.ReadFile("testdata/postProperty.json")
-	if err != nil {
-		t.Error("error reading the mock property file")
-	}
-	// unmarshal the property to be able to change it's fields
-	var parsedProperty types.RequestProperty
-	if err = json.NewDecoder(bytes.NewBuffer(mockProperty)).Decode(&parsedProperty); err != nil {
-		t.Error("failed to decode the mocked json")
-	}
+	// mockProperty, err := os.ReadFile("testdata/postProperty.json")
+	// if err != nil {
+	// 	t.Error("error reading the mock property file")
+	// }
+	// // unmarshal the property to be able to change it's fields
+	// var parsedProperty types.RequestProperty
+	// if err = json.NewDecoder(bytes.NewBuffer(mockProperty)).Decode(&parsedProperty); err != nil {
+	// 	t.Error("failed to decode the mocked json")
+	// }
 
 	// cases := []struct {
 	// 	name           string
@@ -121,7 +131,12 @@ func TestPost(t *testing.T) {
 	// 	},
 	// }
 
-	_, cleanup := setupAPI(t)
+	url, cleanup := setupAPI(t)
+	fmt.Println("the add property url:", url)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	<-c
 	defer cleanup()
 
 	// for _, tc := range cases {

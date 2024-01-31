@@ -12,8 +12,7 @@ import (
 
 type SSRStackProps struct {
 	awscdk.StackProps
-	ExportedPaths ExportedApiPathResources
-	Env           string
+	Env string
 }
 
 type SSRStackReturn struct {

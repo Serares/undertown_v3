@@ -82,6 +82,19 @@ func (gh GetPropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 				return
 			}
 		}
+
+		properties, err := gh.GetPropertiesService.ListProperties(r.Context())
+		if err != nil {
+			gh.Log.Error("error trying to get list of properties", "error", err)
+			utils.ReplyError(w, r, http.StatusInternalServerError, fmt.Sprintf("error trying to get list of properties %v", err))
+			return
+		}
+		response := PropertiesResponse{
+			Results: *properties,
+		}
+
+		utils.ReplySuccess(w, r, http.StatusOK, response)
+		return
 	}
 	utils.ReplyError(w, r, http.StatusMethodNotAllowed, "")
 }

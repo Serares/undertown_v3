@@ -1,7 +1,8 @@
 package types
 
 type NavbarProps struct {
-	Path string
+	Path    string
+	IsAdmin bool
 }
 
 type BannerSectionProps struct {

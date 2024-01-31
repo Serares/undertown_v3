@@ -7,13 +7,13 @@ import (
 
 func CreateSqliteUrl() (string, error) {
 	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
+	// port := os.Getenv("DB_PORT")
 	protocol := os.Getenv("DB_PROTOCOL")
-	isLocal := os.Getenv("IS_LOCAL")
+	dbLocal := os.Getenv("DB_LOCAL")
 	dbName := os.Getenv("DB_NAME")
 	authToken := os.Getenv("TURSO_DB_TOKEN")
-	if isLocal == "true" {
-		return fmt.Sprintf("%s://%s:%s", protocol, host, port), nil
+	if dbLocal == "true" {
+		return host, nil
 	}
 
 	// return a turso url

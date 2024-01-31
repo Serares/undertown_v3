@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func ReplyError(w http.ResponseWriter, r *http.Request, status int, message string) {
@@ -41,4 +44,27 @@ func CheckIfStructIsEmpty(s interface{}) bool {
 		}
 	}
 	return true
+}
+
+func CreateDisplayPrice(price int64) string {
+	return strconv.Itoa(int(price)) + " €"
+}
+
+func CreateDisplayCreatedAt(createdAt time.Time) string {
+	passedTime := int(time.Since(createdAt).Hours() / 24)
+	if passedTime < 0 {
+		return "Adaugat recent"
+	}
+
+	if passedTime > 10 {
+		return ""
+	}
+
+	return fmt.Sprintf("Adaugat cu %d zile in urma", passedTime)
+}
+
+// ❗ The GET_PROPERTY backend should search for the propertyId query string
+func CreatePropertyPath(title, humanReadableId string) string {
+	replacedString := strings.ReplaceAll(title, " ", string('%'))
+	return strings.ToLower(replacedString) + strings.Join([]string{"?propertyId=", humanReadableId}, "")
 }

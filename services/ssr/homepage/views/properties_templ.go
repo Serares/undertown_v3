@@ -265,7 +265,7 @@ func Properties(contents types.BasicIncludes, props types.PropertiesProps) templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var11 := `Order:`
+		templ_7745c5c3_Var11 := `Sorteaza:`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

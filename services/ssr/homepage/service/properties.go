@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Serares/ssr/homepage/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/repositories/repository/types"
 	rootUtils "github.com/Serares/undertown_v3/utils"
@@ -105,9 +104,9 @@ func (ps *PropertiesService) ListProperties(props SortProps, transactionType str
 			Title:           featProp.Title,
 			TransactionType: featProp.PropertyTransaction,
 			Price:           featProp.Price,
-			DisplayPrice:    utils.CreateDisplayPrice(featProp.Price),
-			PropertyPathUrl: utils.CreatePropertyPath(featProp.Title, featProp.Humanreadableid),
-			CreatedTime:     utils.CreateDisplayCreatedAt(featProp.CreatedAt),
+			DisplayPrice:    rootUtils.CreateDisplayPrice(featProp.Price),
+			PropertyPathUrl: rootUtils.CreatePropertyPath(featProp.Title, featProp.Humanreadableid),
+			CreatedTime:     rootUtils.CreateDisplayCreatedAt(featProp.CreatedAt),
 			Thumbnail:       featProp.Thumbnail,
 		})
 	}

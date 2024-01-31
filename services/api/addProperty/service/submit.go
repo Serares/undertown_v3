@@ -57,7 +57,7 @@ func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multi
 	var outErr bytes.Buffer
 	err := os.Mkdir(localDirPath, 0755)
 	if err != nil {
-		ss.Log.Error("Error creating the temp dir")
+		ss.Log.Error("Error creating the temp dir", "err", err)
 	}
 
 	// read uploaded images
@@ -171,6 +171,7 @@ func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (s
 func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
 	var requestProperty types.RequestProperty
+	var requestPropertyFeatures map[string]interface{}
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
 		ss.Log.Error("json property not provided")
@@ -181,42 +182,47 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		ss.Log.Error("error decoding the json property", "err", err)
 		return "", "", fmt.Errorf("error on json unmarshal")
 	}
+
 	// SEE lite.Property
 	// features is stored as a json string in the db
-	propertyFeatures := types.RequestFeatures{
-		Floor:                            requestProperty.Floor,
-		EnergyClass:                      requestProperty.EnergyClass,
-		EnergyConsumptionPrimary:         requestProperty.EnergyConsumptionPrimary,
-		EnergyEmissionsIndex:             requestProperty.EnergyEmissionsIndex,
-		EnergyConsumptionGreen:           requestProperty.EnergyConsumptionGreen,
-		DestinationResidential:           requestProperty.DestinationResidential,
-		DestinationCommercial:            requestProperty.DestinationCommercial,
-		DestinationOffice:                requestProperty.DestinationOffice,
-		DestinationHoliday:               requestProperty.DestinationHoliday,
-		OtherUtilitiesTerrance:           requestProperty.OtherUtilitiesTerrance,
-		OtherUtilitiesServiceToilet:      requestProperty.OtherUtilitiesServiceToilet,
-		OtherUtilitiesUndergroundStorage: requestProperty.OtherUtilitiesUndergroundStorage,
-		OtherUtilitiesStorage:            requestProperty.OtherUtilitiesStorage,
-		FurnishedNot:                     requestProperty.FurnishedNot,
-		FurnishedPartially:               requestProperty.FurnishedPartially,
-		FurnishedComplete:                requestProperty.FurnishedComplete,
-		FurnishedLuxury:                  requestProperty.FurnishedLuxury,
-		InteriorNeedsRenovation:          requestProperty.InteriorNeedsRenovation,
-		InteriorHasRenovation:            requestProperty.InteriorHasRenovation,
-		InteriorGoodState:                requestProperty.InteriorGoodState,
-		HeatingTermoficare:               requestProperty.HeatingTermoficare,
-		HeatingCentralHeating:            requestProperty.HeatingCentralHeating,
-		HeatingBuilding:                  requestProperty.HeatingBuilding,
-		HeatingStove:                     requestProperty.HeatingStove,
-		HeatingRadiator:                  requestProperty.HeatingRadiator,
-		HeatingOtherElectrical:           requestProperty.HeatingOtherElectrical,
-		HeatingGasConvector:              requestProperty.HeatingGasConvector,
-		HeatingInfraredPanels:            requestProperty.HeatingInfraredPanels,
-		HeatingFloorHeating:              requestProperty.HeatingFloorHeating,
+	// propertyFeatures := types.RequestFeatures{
+	// 	Floor:                            requestProperty.Floor,
+	// 	EnergyClass:                      requestProperty.EnergyClass,
+	// 	EnergyConsumptionPrimary:         requestProperty.EnergyConsumptionPrimary,
+	// 	EnergyEmissionsIndex:             requestProperty.EnergyEmissionsIndex,
+	// 	EnergyConsumptionGreen:           requestProperty.EnergyConsumptionGreen,
+	// 	DestinationResidential:           requestProperty.DestinationResidential,
+	// 	DestinationCommercial:            requestProperty.DestinationCommercial,
+	// 	DestinationOffice:                requestProperty.DestinationOffice,
+	// 	DestinationHoliday:               requestProperty.DestinationHoliday,
+	// 	OtherUtilitiesTerrance:           requestProperty.OtherUtilitiesTerrance,
+	// 	OtherUtilitiesServiceToilet:      requestProperty.OtherUtilitiesServiceToilet,
+	// 	OtherUtilitiesUndergroundStorage: requestProperty.OtherUtilitiesUndergroundStorage,
+	// 	OtherUtilitiesStorage:            requestProperty.OtherUtilitiesStorage,
+	// 	FurnishedNot:                     requestProperty.FurnishedNot,
+	// 	FurnishedPartially:               requestProperty.FurnishedPartially,
+	// 	FurnishedComplete:                requestProperty.FurnishedComplete,
+	// 	FurnishedLuxury:                  requestProperty.FurnishedLuxury,
+	// 	InteriorNeedsRenovation:          requestProperty.InteriorNeedsRenovation,
+	// 	InteriorHasRenovation:            requestProperty.InteriorHasRenovation,
+	// 	InteriorGoodState:                requestProperty.InteriorGoodState,
+	// 	HeatingTermoficare:               requestProperty.HeatingTermoficare,
+	// 	HeatingCentralHeating:            requestProperty.HeatingCentralHeating,
+	// 	HeatingBuilding:                  requestProperty.HeatingBuilding,
+	// 	HeatingStove:                     requestProperty.HeatingStove,
+	// 	HeatingRadiator:                  requestProperty.HeatingRadiator,
+	// 	HeatingOtherElectrical:           requestProperty.HeatingOtherElectrical,
+	// 	HeatingGasConvector:              requestProperty.HeatingGasConvector,
+	// 	HeatingInfraredPanels:            requestProperty.HeatingInfraredPanels,
+	// 	HeatingFloorHeating:              requestProperty.HeatingFloorHeating,
+	// }
+
+	// features, err := ss.parsePropertyFeaturesToJson(propertyFeatures)
+	err := json.Unmarshal([]byte(jsonProperty[0]), &requestPropertyFeatures)
+	if err != nil {
+		return "", "", fmt.Errorf("error trying to get the request properties features %v", err)
 	}
-
-	features, err := ss.parsePropertyFeaturesToJson(propertyFeatures)
-
+	features, err := json.Marshal(requestPropertyFeatures)
 	if err != nil {
 		return "", "", err
 	}
@@ -236,7 +242,7 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		PropertyAddress:     requestProperty.PropertyAddress,
 		PropertySurface:     int64(requestProperty.PropertySurface),
 		Price:               int64(requestProperty.Price),
-		Features:            features,
+		Features:            string(features),
 		CreatedAt:           time.Now().UTC(),
 		UpdatedAt:           time.Now().UTC(),
 	}); err != nil {

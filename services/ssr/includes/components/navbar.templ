@@ -1,6 +1,6 @@
 package components
 
-import "github.com/Serares/ssr/includes/types"
+import "github.com/Serares/undertown_v3/ssr/includes/types"
 
 templ Navbar(props types.NavbarProps) {
 	<span>
@@ -33,40 +33,66 @@ templ Navbar(props types.NavbarProps) {
  									class="navbar-toggler-icon"
 								></span>
 							</button>
-							<div class="collapse navbar-collapse" id="navbarSupportedContent">
-								<ul class="navbar-nav ml-5">
-									<li class="nav-item">
-										<a
- 											class={ "nav-link", templ.KV("active", props.Path == "/") }
- 											href="/"
-										>Acasa</a>
-									</li>
-									<li class="nav-item">
-										<a
- 											class={ "nav-link" ,templ.KV("active", props.Path == "/chirii/") }
- 											href="/chirii/"
-										>Chirii</a>
-									</li>
-									<li class="nav-item">
-										<a
- 											class={ "nav-link" ,templ.KV("active", props.Path == "/vanzari/") }
- 											href="/vanzari/"
-										>Vanzari</a>
-									</li>
-									<li class="nav-item">
-										<a
- 											class={ "nav-link" ,templ.KV("active", props.Path == "/about/") }
- 											href="/about/"
-										>Despre noi</a>
-									</li>
-									<li class="nav-item">
-										<a
- 											class={ "nav-link" ,templ.KV("active", props.Path == "/contact/") }
- 											href="/contact/"
-										>Contact</a>
-									</li>
-								</ul>
-							</div>
+							if props.IsAdmin {
+								<div class="collapse navbar-collapse" id="navbarSupportedContent">
+									<ul class="navbar-nav ml-5">
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link", templ.KV("active", props.Path == "/list") }
+ 												href="/list"
+											>Proprietati</a>
+										</li>
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link" ,templ.KV("active", props.Path == "/submit/") }
+ 												href="/submit/"
+											>Adauga proprietate</a>
+										</li>
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link" }
+ 												href="http://www.undertown.ro"
+											>Pagina principala</a>
+										</li>
+									</ul>
+								</div>
+							}
+							if !props.IsAdmin {
+								<div class="collapse navbar-collapse" id="navbarSupportedContent">
+									<ul class="navbar-nav ml-5">
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link", templ.KV("active", props.Path == "/") }
+ 												href="/"
+											>Acasa</a>
+										</li>
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link" ,templ.KV("active", props.Path == "/chirii/") }
+ 												href="/chirii/"
+											>Chirii</a>
+										</li>
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link" ,templ.KV("active", props.Path == "/vanzari/") }
+ 												href="/vanzari/"
+											>Vanzari</a>
+										</li>
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link" ,templ.KV("active", props.Path == "/about/") }
+ 												href="/about/"
+											>Despre noi</a>
+										</li>
+										<li class="nav-item">
+											<a
+ 												class={ "nav-link" ,templ.KV("active", props.Path == "/contact/") }
+ 												href="/contact/"
+											>Contact</a>
+										</li>
+									</ul>
+								</div>
+							}
 						</nav>
 					</div>
 				</div>

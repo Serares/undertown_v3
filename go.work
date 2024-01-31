@@ -5,11 +5,13 @@ use (
 	./repositories/repository
 	./services/api/addProperty
 	./services/api/authorizer
+	./services/api/deleteProperty
 	./services/api/getProperties
 	./services/api/getProperty
 	./services/api/login
 	./services/api/register
 	./services/api/registerAuthorizer
+	./services/api/updateProperty
 	./services/ssr/admin
 	./services/ssr/homepage
 	./services/ssr/includes

@@ -10,14 +10,14 @@ type LoginService struct {
 	Client ISSRAdminClient
 }
 
-func NewLoginService(log *slog.Logger, client ISSRAdminClient) LoginService {
-	return LoginService{
+func NewLoginService(log *slog.Logger, client ISSRAdminClient) *LoginService {
+	return &LoginService{
 		Log:    log,
 		Client: client,
 	}
 }
 
-func (s LoginService) Login(email, password string) (string, error) {
+func (s *LoginService) Login(email, password string) (string, error) {
 	// TODO
 	// run some validations here if needed
 	// get the token from cookie

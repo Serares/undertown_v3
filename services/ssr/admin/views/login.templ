@@ -1,7 +1,93 @@
 package views
 
-templ Login() {
-    <div>
-    Login page!
-    </div>
+import "github.com/Serares/ssr/admin/types"
+
+templ Login(contents types.BasicIncludes, props types.LoginProps) {
+	<html>
+		@contents.Header
+		<link rel="stylesheet" href="/assets/css/auth.css"/>
+		<body class="page-load">
+			<!-- Wrapper Start -->
+			<div id="page_wrapper" class="container-fluid">
+				<div class="row">
+					<header id="header" class="w-100 bg_white nav-on-top">
+						<!-- Nav Header Start -->
+						@contents.Navbar
+						<!-- Nav Header End -->
+					</header>
+					<!-- Banner Section Start -->
+					<!-- TODO ADD THIS TO INCLUDES -->
+					@contents.BannerSection
+					<!-- Banner Section End -->
+					<!-- Sign In Account Start -->
+					<section class="full_row py_100 bg_gray">
+						if props.ErrorMessage != "" {
+							<div>{ props.ErrorMessage }</div>
+						}
+						if props.Message != "" {
+							<div>{ props.Message }</div>
+						}
+						<div class="container">
+							<div class="row">
+								<div class="col-md-12">
+									<div class=" bg_white sign_in_up" role="document">
+										<div class="header bg_primary">
+											<h4 class="inner-title text_white">Logheaza-te</h4>
+										</div>
+										<div class="body">
+											<p>Log in</p>
+											<form action="/login" method="POST" novalidate>
+												<div class="form-group">
+													<input
+ 														name="email"
+ 														type="email"
+ 														class="form-control "
+ 														placeholder="Email Address"
+													/>
+												</div>
+												<div class="form-group">
+													<input
+ 														name="password"
+ 														type="password"
+ 														class="form-control"
+ 														placeholder="Parolă"
+													/>
+												</div>
+												<div class="form-group">
+													<button type="submit" name="signin" class="btn btn_primary_bg">
+														Intră in
+														cont
+													</button>
+												</div>
+											</form>
+											<div class="password_recovery">
+												Recuperare Parolă <a href="#">Click Here</a>
+											</div>
+										</div>
+										<div class="footer">
+											Click and read our terms and condition
+											<a href="#">
+												Terms and
+												Condition
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- Modal -->
+					</section>
+					<!-- Sign In Account End -->
+					<!-- Footer Section Start -->
+					@contents.Footer
+					<!-- Footer Section End -->
+					<!-- Find Part Satrt -->
+					<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
+					<!-- Find Part Satrt -->
+				</div>
+			</div>
+			<!-- Wrapper End -->
+			@contents.Scripts
+		</body>
+	</html>
 }

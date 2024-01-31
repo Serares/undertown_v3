@@ -51,16 +51,25 @@ func main() {
 		Env: theEnv,
 	})
 
+	adminStack := stacks.AdminSSR(app, "UndertownAdmin-Stack", &stacks.AdminSSRStackProps{
+		StackProps: awscdk.StackProps{
+			Env: env(),
+		},
+		Env: theEnv,
+	})
+
 	ssrStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway getProperty and getProperties paths"))
+	adminStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway crud and login paths"))
 
 	cfStack := stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
-		HomeLambdaUrl: ssrStack.LambdaUrl,
-		Env:           theEnv,
-		AssetsBucket:  assetsBucket.Bucket,
-		OAI:           assetsBucket.OAI,
+		HomeLambdaUrl:  ssrStack.LambdaUrl,
+		AdminLambdaUrl: adminStack.LambdaUrl,
+		Env:            theEnv,
+		AssetsBucket:   assetsBucket.Bucket,
+		OAI:            assetsBucket.OAI,
 	})
 	crudLambdas.Stack.AddDependency(assetsBucket.Stack, jsii.String("CRUD lambdas need the Assets bucket stack deployed first"))
 	cfStack.AddDependency(assetsBucket.Stack, jsii.String("needs the bucket to be deployed first"))

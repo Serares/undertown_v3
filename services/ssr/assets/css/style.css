@@ -2342,7 +2342,7 @@ blockquote {
 	padding-bottom: 0
 }
 
-.fileupload_label {
+.fileupload_label, .fileupload_label.specific.extra {
 	background: transparent none repeat scroll 0 0;
 	border: 2px dashed transparent;
 	cursor: pointer;
@@ -2356,6 +2356,12 @@ blockquote {
 	-ms-transition: all 0.3s ease-in-out;
 	-o-transition: all 0.3s ease-in-out;
 	transition: all 0.3s ease-in-out
+}
+
+.fileupload_label.specific.extra:hover {
+	background: rgba(144, 201, 35, 0.05);
+	border-color: rgba(144, 201, 35, 0.7);
+	font-size: 16px;
 }
 
 .fileupload_label:hover {

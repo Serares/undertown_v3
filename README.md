@@ -19,6 +19,16 @@ Repository
 - go mod edit -require=github.com/Serares/undertown_v3/repositories/repository@v0.0.0
 - go mod edit -replace=github.com/Serares/undertown_v3/repositories/repository=../../../repositories/repository
 
+SSR Includes
+
+- go mod edit -require=github.com/Serares/undertown_v3/ssr/includes@v0.0.0
+- go mod edit -replace=github.com/Serares/undertown_v3/ssr/includes=../includes
+
+Other imports
+
+- go mod edit -require=github.com/Serares/undertown_v3/services/api/login@v0.0.0
+- go mod edit -replace=github.com/Serares/undertown_v3/services/api/login=../../api/login
+
 **Decided to use the cdk instead of cloudformation or aws sam**
 
 - It was harder to locally run go lambdas using the sam cli (the only option that worked was to run the go lambdas in docker images and this increased the development complexity)

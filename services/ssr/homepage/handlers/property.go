@@ -7,7 +7,8 @@ import (
 
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	"github.com/Serares/ssr/includes/components"
+	"github.com/Serares/undertown_v3/ssr/includes/components"
+	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
 )
 
 type PropertyHandler struct {
@@ -26,7 +27,7 @@ func (hh *PropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		switch r.Method {
 		case http.MethodGet:
-			viewProperty(w, r, types.BannerSectionProps{Title: ""})
+			viewProperty(w, r, includesTypes.BannerSectionProps{Title: ""})
 		default:
 			message := "Method not supported"
 			hh.Log.Error(message)
@@ -38,10 +39,10 @@ func (hh *PropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO should this function be defined like this?
-func viewProperty(w http.ResponseWriter, r *http.Request, bannerProps types.BannerSectionProps) {
+func viewProperty(w http.ResponseWriter, r *http.Request, bannerProps includesTypes.BannerSectionProps) {
 	header := components.Header("Page title")
 	preload := components.Preload()
-	navbar := components.Navbar(types.NavbarProps{})
+	navbar := components.Navbar(includesTypes.NavbarProps{IsAdmin: false})
 	footer := components.Footer()
 	scripts := components.Scripts()
 	views.Home(types.BasicIncludes{

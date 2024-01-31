@@ -9,7 +9,8 @@ import (
 	"github.com/Serares/ssr/homepage/service"
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	"github.com/Serares/ssr/includes/components"
+	"github.com/Serares/undertown_v3/ssr/includes/components"
+	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
 )
 
 type PropertiesHandler struct {
@@ -36,11 +37,11 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		properties, err := ph.PropertiesService.ListProperties(sortProps, transactionType)
 		if err != nil {
 			ph.Log.Error("error getting properties", "error", err, "urlpath", r.URL.Path)
-			viewProperties(w, r, types.PropertiesProps{Path: pagePath, Properties: properties, ErrorMessage: "Error fetching the properties"}, types.NavbarProps{Path: pagePath}, types.BannerSectionProps{Title: bannerTitle})
+			viewProperties(w, r, types.PropertiesProps{Path: pagePath, Properties: properties, ErrorMessage: "Error fetching the properties"}, includesTypes.NavbarProps{Path: pagePath}, includesTypes.BannerSectionProps{Title: bannerTitle})
 			return
 		}
 
-		viewProperties(w, r, types.PropertiesProps{Path: r.URL.Path, Properties: properties, ErrorMessage: ""}, types.NavbarProps{Path: pagePath}, types.BannerSectionProps{Title: bannerTitle})
+		viewProperties(w, r, types.PropertiesProps{Path: r.URL.Path, Properties: properties, ErrorMessage: ""}, includesTypes.NavbarProps{Path: pagePath}, includesTypes.BannerSectionProps{Title: bannerTitle})
 	default:
 		message := "Method not supported"
 		ph.Log.Error(message)
@@ -80,7 +81,7 @@ func resolveClientSortDirection(sortDirection string) string {
 }
 
 // TODO should this function be defined like this?
-func viewProperties(w http.ResponseWriter, r *http.Request, props types.PropertiesProps, navbarProps types.NavbarProps, bannerProps types.BannerSectionProps) {
+func viewProperties(w http.ResponseWriter, r *http.Request, props types.PropertiesProps, navbarProps includesTypes.NavbarProps, bannerProps includesTypes.BannerSectionProps) {
 
 	header := components.Header(bannerProps.Title)
 	preload := components.Preload()

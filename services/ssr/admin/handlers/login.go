@@ -6,16 +6,19 @@ import (
 	"time"
 
 	"github.com/Serares/ssr/admin/service"
+	"github.com/Serares/ssr/admin/types"
 	"github.com/Serares/ssr/admin/views"
+	"github.com/Serares/undertown_v3/ssr/includes/components"
+	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
 	"github.com/Serares/undertown_v3/utils"
 )
 
 type AdminLogin struct {
 	Log          *slog.Logger
-	LoginService service.LoginService
+	LoginService *service.LoginService
 }
 
-func NewLoginHandler(log *slog.Logger, service service.LoginService) *AdminLogin {
+func NewLoginHandler(log *slog.Logger, service *service.LoginService) *AdminLogin {
 	return &AdminLogin{
 		Log:          log,
 		LoginService: service,
@@ -27,14 +30,22 @@ func (h *AdminLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// get the email and password
 		email := r.FormValue("email")
 		password := r.FormValue("password")
+		var errorMessage string
 		// check if the email and password are valid
 		if email == "" || password == "" {
-			utils.ReplyError(w, r, http.StatusBadRequest, "invalid email or password")
+			errorMessage = "email or passwords cannot be null"
 			return
 		}
 		token, err := h.LoginService.Login(email, password)
 		if err != nil {
-			utils.ReplyError(w, r, http.StatusUnauthorized, "invalid email or password")
+			h.Log.Error("error invalid response", err, err)
+			errorMessage = "invalid email or password"
+			return
+		}
+		if errorMessage != "" {
+			viewLogin(w, r, types.LoginProps{
+				ErrorMessage: errorMessage,
+			})
 			return
 		}
 		cookieExpiration := time.Now().Add(24 * time.Hour)
@@ -44,16 +55,26 @@ func (h *AdminLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Expires: cookieExpiration,
 		}
 		http.SetCookie(w, &cookie)
-		utils.ReplySuccess(w, r, http.StatusOK, "login successful")
+		http.Redirect(w, r, "/submit", http.StatusSeeOther)
 		return
 	}
 	if r.Method == http.MethodGet {
-		viewLogin(w, r)
+		viewLogin(w, r, types.LoginProps{})
 		return
 	}
 	utils.ReplyError(w, r, http.StatusMethodNotAllowed, "Method not supported")
 }
 
-func viewLogin(w http.ResponseWriter, r *http.Request) {
-	views.Login().Render(r.Context(), w)
+func viewLogin(w http.ResponseWriter, r *http.Request, props types.LoginProps) {
+	views.Login(
+		types.BasicIncludes{
+			Header:        components.Header("Login"),
+			BannerSection: components.BannerSection(includesTypes.BannerSectionProps{Title: "Login"}),
+			Preload:       components.Preload(),
+			Navbar:        components.Navbar(includesTypes.NavbarProps{Path: "/login", IsAdmin: true}),
+			Footer:        components.Footer(),
+			Scripts:       components.Scripts(),
+		},
+		props,
+	).Render(r.Context(), w)
 }

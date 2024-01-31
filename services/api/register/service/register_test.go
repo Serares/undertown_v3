@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
-	"github.com/Serares/undertown_v3/repositories/repository/utils"
 	"github.com/Serares/undertown_v3/services/api/register/types"
 	"github.com/joho/godotenv"
 )
@@ -24,11 +23,7 @@ func setupService(t *testing.T) (*UserService, func()) {
 	// setup logger
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	// initialize the db
-	dbUrl, err := utils.CreatePsqlUrl(context.Background(), log)
-	if err != nil {
-		t.Fatal("error on creating the db url")
-	}
-	userRepo, err := repository.NewUsersRepository(dbUrl)
+	userRepo, err := repository.NewUsersRepository()
 	if err != nil {
 		t.Fatal("error connectiong to the db")
 	}
@@ -87,7 +82,7 @@ func TestRegisterService(t *testing.T) {
 		ctx := context.Background()
 		user, err := userService.UserRepo.GetByEmail(ctx, tc.userData.Email)
 		if err != nil {
-			if !errors.Is(err, repository.ErrorNotFound) {
+			if !errors.Is(err, types.ErrorNotFound) {
 				t.Fatalf("error searching up mock users %v", err)
 			}
 			continue

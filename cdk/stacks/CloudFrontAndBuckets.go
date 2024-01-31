@@ -13,10 +13,11 @@ import (
 
 type BucketProps struct {
 	awscdk.StackProps
-	HomeLambdaUrl awslambda.FunctionUrl
-	AssetsBucket  awss3.Bucket
-	OAI           awscloudfront.OriginAccessIdentity
-	Env           string
+	HomeLambdaUrl  awslambda.FunctionUrl
+	AdminLambdaUrl awslambda.FunctionUrl
+	AssetsBucket   awss3.Bucket
+	OAI            awscloudfront.OriginAccessIdentity
+	Env            string
 }
 
 func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketProps) awscdk.Stack {
@@ -30,8 +31,9 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 
 	// // Add a CloudFront distribution to route between the public directory and the Lambda function URL.
-	lambdaURLDomain := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), props.HomeLambdaUrl.Url(), nil))
-	lambdaOrigin := awscloudfrontorigins.NewHttpOrigin(lambdaURLDomain, &awscloudfrontorigins.HttpOriginProps{
+	homeLambdaUrl := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), props.HomeLambdaUrl.Url(), nil))
+	adminLambdaUrl := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), props.AdminLambdaUrl.Url(), nil))
+	lambdaOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
 	cf := awscloudfront.NewDistribution(stack, jsii.String("customerFacing"), &awscloudfront.DistributionProps{
@@ -55,11 +57,11 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	cf.AddBehavior(jsii.String("/assets*"), assetsOrigin, nil)
 
 	// Add /properties origins chirii|vanzari
-	chiriiOrigin := awscloudfrontorigins.NewHttpOrigin(lambdaURLDomain, &awscloudfrontorigins.HttpOriginProps{
+	chiriiOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
 	cf.AddBehavior(jsii.String("/chirii"), chiriiOrigin, nil)
-	vanzariOrigin := awscloudfrontorigins.NewHttpOrigin(lambdaURLDomain, &awscloudfrontorigins.HttpOriginProps{
+	vanzariOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
 	cf.AddBehavior(jsii.String("/vanzari"), vanzariOrigin, nil)
@@ -67,6 +69,23 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	awscdk.NewCfnOutput(stack, jsii.String("cloudFrontDomain"), &awscdk.CfnOutputProps{
 		ExportName: jsii.String("cloudfrontDomain"),
 		Value:      cf.DomainName(),
+	})
+
+	// Add ADMIN routes
+	loginOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
+		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
+	})
+	cf.AddBehavior(jsii.String("/login"), loginOrigin, &awscloudfront.AddBehaviorOptions{
+		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+	})
+
+	submitPropertyOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
+		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
+	})
+	cf.AddBehavior(jsii.String("/submit"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
+		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 	})
 
 	// // Deploy the contents of the ./assets directory to the S3 bucket.

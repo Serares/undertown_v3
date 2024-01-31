@@ -3,289 +3,312 @@ package views
 import "github.com/Serares/ssr/admin/types"
 
 templ Submit(contents types.BasicIncludes, props types.SubmitProps) {
-    <html>
-    @contents.Header
-<body class="page-load">
-    @contents.Preload
-<!-- Wrapper Start -->
-<div id="page_wrapper" class="container-fluid">
-    <div class="row">
-        <header id="header" class="w-100 bg_white nav-on-top">
-             <!-- Nav Header Start -->
-             @contents.Navbar
-             <!-- Nav Header End -->
-        </header>
-        
-        <!-- Banner Section Start -->
-        @contents.BannerSection
-        <!-- Banner Section End --> 
-        
-        <!-- Submit Property Start -->
-        <section id="submit_property" class="full_row py_80 bg_gray">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-9 col-md-10">
-                        <form method="POST" class="submit_form">
-                            <div class="basic_information">
-                            if props.ErrorMessage != "" {
-                                <div>{props.ErrorMessage}</div>
-                            } else if props.Message != "" {
-                                <div>{props.Message}</div>
-                            }
-                                <h4 class="inner-title mb-4">Basic Information</h4>
-                                <div class="row">
-                                    <div class="col-md-12 col-sm-12">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Property Title" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Property Status" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Property Types" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Ares (Sqft)" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Price (USD)" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="No. Of Rooms" class="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="important_facts">
-                                            <label>Do you have any installment system for payment?</label>
-                                            <div class="radio_check">
-                                                <input type="checkbox" id="radio_1" class="hide" name="question" value="Yes" />
-                                                <label for="radio_1"><span>No</span><span>Yes</span></label>
-                                            </div>
-                                        </div>
-                                        <div class="important_facts">
-                                            <label>Have any insurance of this property?</label>
-                                            <div class="radio_check">
-                                                <input type="checkbox" id="radio_2" class="hide" name="question" value="Yes" />
-                                                <label for="radio_2"><span>No</span><span>Yes</span></label>
-                                            </div>
-                                        </div>
-                                        <div class="important_facts">
-                                            <label>Is there any labilities of third party with this property?</label>
-                                            <div class="radio_check">
-                                                <input type="checkbox" id="radio_3" class="hide" name="question" value="Yes" />
-                                                <label for="radio_3"><span>No</span><span>Yes</span></label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="alert alert-warning">Please input the correct information of your property. Because it will effect on property search.</div>
-                            </div>
-                            <div class="description mt-5">
-                                <h4 class="inner-title mb-4">Description</h4>
-                                <div class="form-group">
-                                    <textarea name="description" placeholder="Type Description..." class="form-control" rows="5"></textarea>
-                                </div>
-                                <div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
-                            </div>
-                            <div class="property_location mt-5">
-                                <h4 class="inner-title mb-4">Property Location</h4>
-                                <div class="row">
-                                    <div class="col-md-12 col-sm-12">
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-6">
-                                                <div class="form-group">
-                                                    <input type="text" placeholder="Property Adddress" class="form-control" />
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-6">
-                                                <div class="form-group">
-                                                    <input type="text" placeholder="Judet" class="form-control" />
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 col-sm-6">
-                                                <div class="form-group">
-                                                    <input type="text" placeholder="Oras" class="form-control"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 col-sm-6">
-                                                <div class="form-group">
-                                                    <input type="text" placeholder="Zip Code" class="form-control"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 col-sm-12">
-                                                <div class="form-group">
-                                                    <select class="selectpicker form-control" data-live-search="true">
-                                                        <option>Sector</option>
-                                                        <option>1</option>
-                                                        <option>2</option>
-                                                        <option>3</option>
-                                                        <option>4</option>
-                                                        <option>5</option>
-                                                        <option>6</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="check_feature mt-5">
-                                <h4 class="inner-title mb-4">check feature</h4>
-                                <div class="row">
-                                    <ul class="check_submit">
-                                        <li>
-                                            <input id="feature_1" class="hide" type="checkbox"/>
-                                            <label for="feature_1">garden include</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_2" class="hide" type="checkbox"/>
-                                            <label for="feature_2">Garage Facility</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_3" class="hide" type="checkbox"/>
-                                            <label for="feature_3">Fire Security</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_4" class="hide" type="checkbox"/>
-                                            <label for="feature_4">Swiming Pool</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_5" class="hide" type="checkbox"/>
-                                            <label for="feature_5">Fire Place Facility</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_6" class="hide" type="checkbox"/>
-                                            <label for="feature_6">Play Ground</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_7" class="hide" type="checkbox"/>
-                                            <label for="feature_7">Ferniture Include</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_8" class="hide" type="checkbox"/>
-                                            <label for="feature_8">Marbel Floor</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_9" class="hide" type="checkbox"/>
-                                            <label for="feature_9">Store Room</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_10" class="hide" type="checkbox"/>
-                                            <label for="feature_10">Hight Class Door</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_11" class="hide" type="checkbox"/>
-                                            <label for="feature_11">Floor Heating System</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_12" class="hide" type="checkbox"/>
-                                            <label for="feature_12">Air Condition Facility</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_13" class="hide" type="checkbox"/>
-                                            <label for="feature_13">Fire Security</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_14" class="hide" type="checkbox"/>
-                                            <label for="feature_14">Fitness Room</label>
-                                        </li>
-                                        <li>
-                                            <input id="feature_15" class="hide" type="checkbox"/>
-                                            <label for="feature_15">Bathtub and Shaware</label>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="alert alert-warning">Check the extra features and facility of the property, it will show with the property.</div>
-                            </div>
-                            <div class="upload_media mt-5">
-                                <h4 class="inner-title mb-4">Upload Photo and Document</h4>
-                                <p>Felis etiam erat curabitur bibendum iaculis quisque placerat egestas. Nullam, lacus dis et consectetuer rhoncus etiam. Non vitae turpis curae; lacus sociosqu. Quisque. Lobortis aliquam penatibus mi. </p>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="browse_submit"> <span>Add Photos</span>
-                                            <input type="file" id="fileupload-example-1" class="hide"/>
-                                            <label class="fileupload_label" for="fileupload-example-1">Drop your photos here or Click</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <div class="property_thumbnails mt-5">
-                                            <div class="row">
-                                                <div class="thumbnails_box mb_30 col-lg-2 col-md-4 col-6"> <img src="img/property_grid/property_grid-1.png" alt=""/> <i class="fas fa-window-close"></i> </div>
-                                                <div class="thumbnails_box mb_30 col-lg-2 col-md-4 col-6"> <img src="img/property_grid/property_grid-2.png" alt=""/> <i class="fas fa-window-close"></i> </div>
-                                                <div class="thumbnails_box mb_30 col-lg-2 col-md-4 col-6"> <img src="img/property_grid/property_grid-3.png" alt=""/> <i class="fas fa-window-close"></i> </div>
-                                                <div class="thumbnails_box mb_30 col-lg-2 col-md-4 col-6"> <img src="img/property_grid/property_grid-4.png" alt=""/> <i class="fas fa-window-close"></i> </div>
-                                                <div class="thumbnails_box mb_30 col-lg-2 col-md-4 col-6"> <img src="img/property_grid/property_grid-5.png" alt=""/> <i class="fas fa-window-close"></i> </div>
-                                                <div class="thumbnails_box mb_30 col-lg-2 col-md-4 col-6"> <img src="img/property_grid/property_grid-6.png" alt=""/> <i class="fas fa-window-close"></i> </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="browse_submit"> <span>Add Documents</span>
-                                            <input type="file" id="fileupload-example-2" class="hide"/>
-                                            <label class="fileupload_label" for="fileupload-example-1">Drop your document file here or Click</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="video_upload">
-                                            <input type="url" placeholder="Add property video links or URL" class="form-control"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="alert alert-warning">Please uplaod the photo of the property, please keep the photo size 760X410 ratio and please upload the PDF or Doc file at the document attachment.</div>
-                            </div>
-                            <div class="property_owner mt-5">
-                                <h4 class="inner-title mb-4">Input Contact Details</h4>
-                                <p>Felis etiam erat curabitur bibendum iaculis quisque placerat egestas. Nullam, lacus dis et consectetuer rhoncus etiam. Non vitae turpis curae; lacus sociosqu. Quisque. Lobortis aliquam penatibus mi. </p>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Full Name" class="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <input type="email" placeholder="Email Address" class="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Phone Number" class="form-control"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="browse_submit">
-                                    <button name="submit" class="btn btn_primary">submit property</button>
-                                    <p><span>note</span> : Your property will be under review for 24 Hours after submission *</p>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Submit Property End -->
-
-        <!-- Footer Section Start -->
-        @contents.Footer
-        <!-- Footer Section End -->
-
-        <!-- Find Part Satrt --> 
-        <a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a> 
-        <!-- Find Part Satrt --> 
-    </div>
-</div>
-<!-- Wrapper End --> 
-@contents.Scripts
-</body>
-</html>
+	<html>
+		<span>
+			<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+		</span>
+		@contents.Header
+		<body class="page-load">
+			@contents.Preload
+			<!-- Wrapper Start -->
+			<div id="page_wrapper" class="container-fluid">
+				<div class="row">
+					<header id="header" class="w-100 bg_white nav-on-top">
+						<!-- Nav Header Start -->
+						@contents.Navbar
+						<!-- Nav Header End -->
+					</header>
+					<!-- Banner Section Start -->
+					@contents.BannerSection
+					<!-- Banner Section End -->
+					<!-- Submit Property Start -->
+					<section id="submit_property" class="full_row py_80 bg_gray">
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-9 col-md-10">
+									<form id="upload-form" action="/submit" method="POST" class="dropzone" enctype="multipart/form-data">
+										<div class="basic_information">
+											if props.ErrorMessage != "" {
+												<div>{ props.ErrorMessage }</div>
+											} else if props.Message != "" {
+												<div>{ props.Message }</div>
+											}
+											<h4 class="inner-title mb-4">Basic Information</h4>
+											<div class="row">
+												<div class="col-md-12 col-sm-12">
+													<div class="form-group">
+														<input name="title" type="text" placeholder="Property Title" class="form-control"/>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6">
+													<div class="form-group">
+														<select name="property_type" class="selectpicker form-control" data-live-search="true">
+															<option selected>Tipul proprietatii</option>
+															<option value="APARTMENT">Apartament</option>
+															<option value="HOUSE">Casa</option>
+															<option value="STUDIO">Garsoniera</option>
+															<option value="LAND">Teren</option>
+														</select>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6">
+													<div class="form-group">
+														<select name="property_transaction" class="selectpicker form-control" data-live-search="true">
+															<option selected>Tipul tranzactieti</option>
+															<option value="1">Chirie</option>
+															<option value="0">Vanzare</option>
+														</select>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6">
+													<div class="form-group">
+														<input name="price" type="number" placeholder="Pretul" class="form-control"/>
+													</div>
+												</div>
+												<div class="col-md-4 col-sm-4">
+													<div class="form-group">
+														<ul class="check_submit">
+															<li>
+																<input name="is_featured" id="is_featured" class="hide" type="checkbox"/>
+																<label for="is_featured">Apare pe pagina principala:</label>
+															</li>
+														</ul>
+													</div>
+												</div>
+												<div class="col-md-4 col-sm-4">
+													<div class="form-group">
+														<input name="property_surface" type="number" placeholder="Suprafata m²" class="form-control"/>
+													</div>
+												</div>
+												// <div class="col-md-12">
+												// 	<div class="important_facts">
+												// 		<label>Do you have any installment system for payment?</label>
+												// 		<div class="radio_check">
+												// 			<input type="checkbox" id="radio_1" class="hide" name="question" value="Yes"/>
+												// 			<label for="radio_1"><span>No</span><span>Yes</span></label>
+												// 		</div>
+												// 	</div>
+												// 	<div class="important_facts">
+												// 		<label>Have any insurance of this property?</label>
+												// 		<div class="radio_check">
+												// 			<input type="checkbox" id="radio_2" class="hide" name="question" value="Yes"/>
+												// 			<label for="radio_2"><span>No</span><span>Yes</span></label>
+												// 		</div>
+												// 	</div>
+												// 	<div class="important_facts">
+												// 		<label>Is there any labilities of third party with this property?</label>
+												// 		<div class="radio_check">
+												// 			<input type="checkbox" id="radio_3" class="hide" name="question" value="Yes"/>
+												// 			<label for="radio_3"><span>No</span><span>Yes</span></label>
+												// 		</div>
+												// 	</div>
+												// </div>
+											</div>
+											<div class="alert alert-warning">Please input the correct information of your property. Because it will effect on property search.</div>
+										</div>
+										<div class="description mt-5">
+											<h4 class="inner-title mb-4">Descriere</h4>
+											<div class="form-group">
+												<textarea name="property_description" placeholder="Type Description..." class="form-control" rows="5"></textarea>
+											</div>
+											<div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
+										</div>
+										<div class="property_location mt-5">
+											<h4 class="inner-title mb-4">Adresa</h4>
+											<div class="form-group">
+												<textarea name="property_address" placeholder="Adresa" class="form-control" rows="5"></textarea>
+											</div>
+										</div>
+										<div class="energy_certificate mt-5">
+											<h4 class="inner-title mb-4">Certificat energetic</h4>
+											<div class="form-group">
+												<select name="energy_class" class="selectpicker form-control" data-live-search="true">
+													<option selected></option>
+													<option value="A">A</option>
+													<option value="B">B</option>
+												</select>
+												<br/>
+												<div class="mt-3">
+													<input name="energy_consumption_primary" type="text" placeholder="Consum de energie primara" class="form-control"/>
+													<input name="energy_emissions_index" type="text" placeholder="Indice emisii CO2:" class="form-control"/>
+													<input name="energy_consumption_green" type="text" placeholder="Consum total specific de energie din surse regenerabile" class="form-control"/>
+												</div>
+											</div>
+											<div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
+										</div>
+										<div class="destination mt-5">
+											<h4 class="inner-title mb-4">Destinatie</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input id="destination_residential" class="hide" type="checkbox"/>
+														<label for="destination_residential">rezidential</label>
+													</li>
+													<li>
+														<input id="destination_commercial" class="hide" type="checkbox"/>
+														<label for="destination_commercial">comercial</label>
+													</li>
+													<li>
+														<input id="destination_office" class="hide" type="checkbox"/>
+														<label for="destination_office">birou</label>
+													</li>
+													<li>
+														<input id="destination_holiday" class="hide" type="checkbox"/>
+														<label for="destination_holiday">Vacanta</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="other mt-5">
+											<h4 class="inner-title mb-4">Alte spatii utile</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input id="other_utilities_terrance" class="hide" type="checkbox"/>
+														<label for="other_utilities_terrance">Terasa</label>
+													</li>
+													<li>
+														<input id="other_utilities_service_toilet" class="hide" type="checkbox"/>
+														<label for="other_utilities_service_toilet">WC SERVICIU</label>
+													</li>
+													<li>
+														<input id="other_utilities_underground_storage" class="hide" type="checkbox"/>
+														<label for="other_utilities_underground_storage">Boxa la subsol</label>
+													</li>
+													<li>
+														<input id="other_utilities_storage" class="hide" type="checkbox"/>
+														<label for="other_utilities_storage">Debara</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="furnished mt-5">
+											<h4 class="inner-title mb-4">Mobilat</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input id="furnished_not" class="hide" type="checkbox"/>
+														<label for="furnished_not">Nemobilat</label>
+													</li>
+													<li>
+														<input id="furnished_partially" class="hide" type="checkbox"/>
+														<label for="furnished_partially">Partial</label>
+													</li>
+													<li>
+														<input id="furnished_complete" class="hide" type="checkbox"/>
+														<label for="furnished_complete">Complet</label>
+													</li>
+													<li>
+														<input id="furnished_luxury" class="hide" type="checkbox"/>
+														<label for="furnished_luxury">Lux</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="interior mt-5">
+											<h4 class="inner-title mb-4">Stare interior</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input id="interior_needs_renovation" class="hide" type="checkbox"/>
+														<label for="interior_needs_renovation">Necesita renovare</label>
+													</li>
+													<li>
+														<input id="interior_has_renovation" class="hide" type="checkbox"/>
+														<label for="interior_has_renovation">Renovat</label>
+													</li>
+													<li>
+														<input id="interior_good_state" class="hide" type="checkbox"/>
+														<label for="interior_good_state">Buna</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="heating mt-5">
+											<h4 class="inner-title mb-4">Sistem incalzire</h4>
+											<div class="row">
+												<ul class="check_submit">
+													<li>
+														<input id="heating_termoficare" class="hide" type="checkbox"/>
+														<label for="heating_termoficare">Termoficare</label>
+													</li>
+													<li>
+														<input id="heating_central_heating" class="hide" type="checkbox"/>
+														<label for="heating_central_heating">Centrala proprie</label>
+													</li>
+													<li>
+														<input id="heating_building" class="hide" type="checkbox"/>
+														<label for="heating_building">Centrala imobil</label>
+													</li>
+													<li>
+														<input id="heating_stove" class="hide" type="checkbox"/>
+														<label for="heating_stove">Soba/Teracota</label>
+													</li>
+													<li>
+														<input id="heating_radiator" class="hide" type="checkbox"/>
+														<label for="heating_radiator">Calorifer</label>
+													</li>
+													<li>
+														<input id="heating_other_electrical" class="hide" type="checkbox"/>
+														<label for="heating_other_electrical">Alte metode electrice:</label>
+													</li>
+													<li>
+														<input id="heating_gas_convector" class="hide" type="checkbox"/>
+														<label for="heating_gas_convector">Convector gaz</label>
+													</li>
+													<li>
+														<input id="heating_infrared_panels" class="hide" type="checkbox"/>
+														<label for="heating_infrared_panels">Panouri infrarosu</label>
+													</li>
+													<li>
+														<input id="heating_floor_heating" class="hide" type="checkbox"/>
+														<label for="heating_floor_heating">Incalzire prin pardoseala</label>
+													</li>
+												</ul>
+											</div>
+											<div class="alert alert-warning">Check the extra features and facility of the property, it will show with the property.</div>
+										</div>
+										<div class="upload_media mt-5">
+											<h4 class="inner-title mb-4">Upload Photo and Document</h4>
+											<p>Felis etiam erat curabitur bibendum iaculis quisque placerat egestas. Nullam, lacus dis et consectetuer rhoncus etiam. Non vitae turpis curae; lacus sociosqu. Quisque. Lobortis aliquam penatibus mi. </p>
+											<div class="row">
+												<div class="col-md-12">
+													<div id="images-input" class="browse_submit">
+														<span>Add Photos</span>
+														<div class="dz-default dz-message">
+															// <button class="dz-button fileupload_label" type="button" value="Adauga imagini aici">Adauga imagini aici</button>
+															<label class="dz-button fileupload_label specific extra">Adauga imagini aici</label>
+														</div>
+													</div>
+												</div>
+												<div class="col-lg-12">
+													<div class="property_thumbnails mt-5">
+														<div class="row dropzone-previews"></div>
+													</div>
+												</div>
+											</div>
+											<div class="alert alert-warning">Please uplaod the photo of the property, please keep the photo size 760X410 ratio and please upload the PDF or Doc file at the document attachment.</div>
+										</div>
+										<div class="browse_submit">
+											<button type="submit" name="submit" class="btn btn_primary">Adauga</button>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</section>
+					<!-- Submit Property End -->
+					<!-- Footer Section Start -->
+					@contents.Footer
+					<!-- Footer Section End -->
+					<!-- Find Part Satrt -->
+					<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
+					<!-- Find Part Satrt -->
+				</div>
+			</div>
+			<!-- Wrapper End -->
+			<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+			@contents.Scripts
+		</body>
+	</html>
 }
