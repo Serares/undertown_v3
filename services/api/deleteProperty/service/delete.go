@@ -23,7 +23,8 @@ func NewDeleteService(log *slog.Logger, propertiesRepo *repository.Properties) D
 func (s DeleteService) DeleteProperty(ctx context.Context, id, humanReadableId string) error {
 	err := s.PropertiesRepo.DeleteByHumanReadableId(ctx, humanReadableId)
 	if err != nil {
-		return fmt.Errorf("error trying to get featured properties %w", err)
+		s.Log.Error("error when trying to delete the property", "error", err)
+		return fmt.Errorf("error trying to delete the property with human readable id %w", err)
 	}
 
 	return nil

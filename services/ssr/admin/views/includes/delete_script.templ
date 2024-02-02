@@ -22,7 +22,11 @@ script HandleDeleteButton(props types.DeleteScriptProps) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();
+            if (response.redirect) {
+                window.location.href = response.url;
+            }
+            // return response.json();
+            return response.text()
         })
         .then(data => {
             console.log(data); // Handle success response

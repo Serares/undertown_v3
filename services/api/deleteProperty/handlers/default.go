@@ -37,7 +37,7 @@ func (gh DeletePropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		q := r.URL.Query()
 		// ❗TODO at this point it will make sense to create a midleware util module to get the query params/cookies
 		if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
-			theId := q["propertyId"][0]
+			theId := q[utils.HumanReadableIdQueryKey][0]
 			err := gh.Service.DeleteProperty(r.Context(), "", theId)
 			if err != nil {
 				gh.Log.Error("error trying to delete the property", "error", err)

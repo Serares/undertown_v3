@@ -123,7 +123,7 @@ func (d *Properties) DeleteByHumanReadableId(ctx context.Context, humanReadableI
 		return nil
 	}
 
-	return fmt.Errorf("error you did not provide a human readable id")
+	return err
 }
 
 func (d *Properties) UpdateProperty(ctx context.Context, params lite.UpdatePropertyFieldsParams) error {
