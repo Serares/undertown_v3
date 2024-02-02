@@ -42,10 +42,6 @@ func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
 	}
 }
 
-func arrayToString(images []string) string {
-	return strings.Join(images, ",")
-}
-
 func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
 	var localDirPath = "../../ssr/assets/uploads"
 	var imagePaths []string
