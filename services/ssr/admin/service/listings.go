@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/Serares/ssr/admin/types"
 	"github.com/Serares/undertown_v3/utils"
@@ -30,18 +31,25 @@ func (ls *ListingsService) List(authToken string) ([]types.ListingProperty, erro
 	}
 	listingProperties := make([]types.ListingProperty, 0)
 	for _, property := range properties {
+		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodePropertyTitle(property.Title))
+		// add property human readable id as query string
+		editUrl, err = utils.AddParamToUrl(editUrl, utils.HumanReadableIdQueryKey, property.Humanreadableid)
+		if err != nil {
+			ls.Log.Error("error creating the edit url for proeprty:", "hrID", property.Humanreadableid)
+			editUrl = fmt.Sprintf("%s/brokenurl", types.EditPath)
+		}
+		imagesLen := len(strings.Split(property.Images, ";"))
 		tempLp := types.ListingProperty{
-			Title:              property.Title,
-			Price:              property.Price,
-			Address:            property.PropertyAddress,
-			TransactionType:    property.PropertyTransaction,
-			DisplayPrice:       utils.CreateDisplayPrice(property.Price),
-			Thumbnail:          property.Thumbnail,
-			EditPropertyPath:   fmt.Sprintf("/edit/%s", utils.CreatePropertyPath(property.Title, property.Humanreadableid)),
-			DeletePropertyPath: fmt.Sprintf("/delete/%s", utils.CreatePropertyPath(property.Title, property.Humanreadableid)),
-			Surface:            property.PropertySurface,
-			ImagesNumber:       2, // TODO the images are a string separated by ;
-			CreatedTime:        utils.CreateDisplayCreatedAt(property.CreatedAt),
+			Title:            property.Title,
+			Price:            property.Price,
+			Address:          property.PropertyAddress,
+			TransactionType:  property.PropertyTransaction,
+			DisplayPrice:     utils.CreateDisplayPrice(property.Price),
+			Thumbnail:        property.Thumbnail,
+			EditPropertyPath: editUrl,
+			Surface:          property.PropertySurface,
+			ImagesNumber:     int64(imagesLen),
+			CreatedTime:      utils.CreateDisplayCreatedAt(property.CreatedAt),
 		}
 		listingProperties = append(listingProperties, tempLp)
 	}

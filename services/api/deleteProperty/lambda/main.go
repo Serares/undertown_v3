@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
-	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/services/api/deleteProperty/handlers"
 	"github.com/Serares/undertown_v3/services/api/deleteProperty/service"
+	"github.com/akrylysov/algnhsa"
 	"github.com/joho/godotenv"
 )
 
@@ -34,13 +32,5 @@ func main() {
 
 	gh := handlers.New(log, service)
 
-	server := &http.Server{
-		Addr:         fmt.Sprintf("localhost:%s", port),
-		Handler:      gh,
-		ReadTimeout:  time.Second * 10,
-		WriteTimeout: time.Second * 10,
-	}
-
-	fmt.Printf("Listening on %v\n", server.Addr)
-	server.ListenAndServe()
+	algnhsa.ListenAndServe(gh, nil)
 }

@@ -49,6 +49,9 @@ func (gp GetPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			utils.ReplySuccess(w, r, http.StatusAccepted, response)
 			return
+		} else {
+			utils.ReplyError(w, r, http.StatusMethodNotAllowed, "you have to provide a property id")
+			return
 		}
 	}
 	utils.ReplyError(w, r, http.StatusMethodNotAllowed, "method not allowed")

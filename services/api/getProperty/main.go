@@ -15,7 +15,7 @@ import (
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
 		log.Error("error loading the env file")
 	}

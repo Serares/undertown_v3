@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/Serares/ssr/admin/handlers"
+	"github.com/Serares/ssr/admin/middleware"
 	"github.com/Serares/ssr/admin/service"
 	"github.com/joho/godotenv"
 )
@@ -35,15 +36,32 @@ func setupAPI(t *testing.T) (string, func()) {
 	// multipartWriter := multipart.NewWriter(&requestBody)
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	client := service.NewAdminClient(log)
-	submitService := service.NewSubmitService(log, client)
-	hh := handlers.NewSubmitHandler(log, submitService)
-	loginService := service.NewLoginService(log, client)
-	loginHandler := handlers.NewLoginHandler(log, loginService)
-	mux := http.NewServeMux()
-	mux.Handle("/submit", hh)
-	mux.Handle("/login", loginHandler)
 
-	ts := httptest.NewServer(mux)
+	loginService := service.NewLoginService(log, client)
+	submitService := service.NewSubmitService(log, client)
+	listingService := service.NewListingService(log, client)
+	editService := service.NewEditService(log, client)
+
+	m := http.NewServeMux()
+
+	loginHanlder := handlers.NewLoginHandler(log, loginService)
+	submitHandler := handlers.NewSubmitHandler(log, submitService)
+	listingsHandler := handlers.NewListingsHandler(log, listingService)
+	editHandler := handlers.NewEditHandler(log, editService, submitService)
+	// This is not advised to use in prod
+	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
+	m.Handle("/login/", loginHanlder)
+	m.Handle("/login", loginHanlder)
+	m.Handle("/submit/", middleware.NewMiddleware(submitHandler, middleware.WithSecure(false)))
+	m.Handle("/submit", middleware.NewMiddleware(submitHandler, middleware.WithSecure(false)))
+	m.Handle("/edit", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
+	m.Handle("/edit/", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
+	m.Handle("/list", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+	m.Handle("/list/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+	m.Handle("/delete", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+	m.Handle("/delete/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+
+	ts := httptest.NewServer(m)
 
 	// propertyField, err := multipartWriter.CreateFormField("property")
 	// if err != nil {

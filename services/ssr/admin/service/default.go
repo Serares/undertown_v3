@@ -10,5 +10,6 @@ type ISSRAdminClient interface {
 	AddProperty(body io.Reader, url, authToken, contentType, method string) error
 	Login(email, password, url string) (string, error)
 	List(url, authToken string) ([]lite.Property, error)
-	GetProperty(url, humanReadableId, authToken string) (lite.Property, error)
+	GetProperty(url, authToken string) (lite.Property, error)
+	DeleteProperty(url, authToken string) error
 }

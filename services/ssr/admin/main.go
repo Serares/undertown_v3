@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Serares/ssr/admin/handlers"
+	"github.com/Serares/ssr/admin/middleware"
 	"github.com/Serares/ssr/admin/service"
 	"github.com/Serares/ssr/admin/types"
 	"github.com/Serares/ssr/admin/views"
@@ -33,6 +34,7 @@ func main() {
 	submitService := service.NewSubmitService(log, client)
 	listingService := service.NewListingService(log, client)
 	editService := service.NewEditService(log, client)
+	deleteService := service.NewDeleteService(log, client)
 
 	m := http.NewServeMux()
 
@@ -40,18 +42,20 @@ func main() {
 	submitHandler := handlers.NewSubmitHandler(log, submitService)
 	listingsHandler := handlers.NewListingsHandler(log, listingService)
 	editHandler := handlers.NewEditHandler(log, editService, submitService)
+	deleteHandler := handlers.NewDeleteHandler(log, deleteService)
+
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
 	m.Handle("/login/", loginHanlder)
 	m.Handle("/login", loginHanlder)
-	m.Handle("/submit/", submitHandler)
-	m.Handle("/submit", submitHandler)
-	m.Handle("/edit", http.StripPrefix("/edit", editHandler))
-	m.Handle("/edit/", http.StripPrefix("/edit/", editHandler))
-	m.Handle("/list", http.StripPrefix("/list", listingsHandler))
-	m.Handle("/list/", http.StripPrefix("/list/", listingsHandler))
-	m.Handle("/delete", http.StripPrefix("/delete", listingsHandler))
-	m.Handle("/delete/", http.StripPrefix("/delete/", listingsHandler))
+	m.Handle("/submit/", middleware.NewMiddleware(submitHandler, middleware.WithSecure(false)))
+	m.Handle("/submit", middleware.NewMiddleware(submitHandler, middleware.WithSecure(false)))
+	m.Handle("/edit", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
+	m.Handle("/edit/", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
+	m.Handle("/list", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+	m.Handle("/list/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+	m.Handle("/delete", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
+	m.Handle("/delete/", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
 	m.Handle("/test", templ.Handler(views.Dztest(types.BasicIncludes{Scripts: components.Scripts()}, types.SubmitProps{})))
 
 	server := &http.Server{

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Serares/ssr/homepage/utils"
+	"github.com/Serares/undertown_v3/utils"
 )
 
 type ProcessedFeaturedProperty struct {

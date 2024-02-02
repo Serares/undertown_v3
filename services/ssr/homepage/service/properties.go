@@ -130,7 +130,7 @@ func (ps *PropertiesService) constructGetUrl(transactionType, getUrl string) str
 
 // TODO sorting on the SSR is a bad pattern,
 // normally the sorting should be done with database queries
-// but it's about trying out how efficient golang is
+// but it's about trying out how fast golang is
 func sortProperties[T any](slice []T, less func(a, b T) bool) {
 	sort.Slice(slice, func(i, j int) bool {
 		return less(slice[i], slice[j])

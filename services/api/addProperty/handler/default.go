@@ -42,6 +42,7 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// ❗for local testing purposes
 		if userId == "" && isLocal == "true" {
 			userId = "c8fd42e9-7c8f-4bf0-b818-f6bb96304e92"
 		}
@@ -76,7 +77,11 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// TODO ❗
 		// this pattern of using conditionals seems a bit odd
 		// check if it's an edit request
-		// TODO move this to a PUT http method
+		// TODO you will also have a PUT request handled here
+		// TODO what if the data process/store failes, the images will be persisted without a property
+		// you will have to process and store the property data first? and then upload the images?
+		// but you won't have the images paths (get the images names from the multipartForm.File? and store the paths before uploading the images?)
+		// think how to solve this
 		q := r.URL.Query()
 		if _, ok := q["propertyId"]; ok {
 			humanReadableId := q["propertyId"][0]

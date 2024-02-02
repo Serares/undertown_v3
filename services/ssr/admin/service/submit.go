@@ -10,6 +10,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/Serares/ssr/admin/types"
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	"github.com/Serares/undertown_v3/utils"
 )
 
 type SubmitService struct {
@@ -28,12 +32,13 @@ type PropertyFormField struct {
 	Title string
 }
 
-func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId string, isEdit bool) error {
+func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId string, isEdit bool) (lite.Property, types.PropertyFeatures, error) {
+	var err error
 	// TODO
 	// run some validations here if needed
 	// get the token from cookie
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		return fmt.Errorf("error trying to read the request body %v", err)
+		return lite.Property{}, types.PropertyFeatures{}, fmt.Errorf("error trying to read the request body %v", err)
 	}
 	var newReaderBuffer bytes.Buffer
 	writer := multipart.NewWriter(&newReaderBuffer)
@@ -66,12 +71,12 @@ func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId strin
 	jsonString, err := json.Marshal(jsonStructure)
 	if err != nil {
 		s.Log.Error("error writing the json string")
-		return fmt.Errorf("error marshaling the json structure %v", err)
+		return lite.Property{}, types.PropertyFeatures{}, fmt.Errorf("error marshaling the json structure %v", err)
 	}
 	_, err = textWriter.Write(jsonString)
 	if err != nil {
 		s.Log.Error("error writing the json string")
-		return fmt.Errorf("error writing json string to the body %v", err)
+		return lite.Property{}, types.PropertyFeatures{}, fmt.Errorf("error writing json string to the body %v", err)
 	}
 	// get the files from the multipar form
 	for _, fileHeaders := range r.MultipartForm.File {
@@ -92,26 +97,55 @@ func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId strin
 		}
 	}
 	url := os.Getenv("SUBMIT_PROPERTY_URL")
-	// client := &http.Client{}
-	// request, err := http.NewRequest(http.MethodPost, submitUrl, &newReaderBuffer)
-	// if err != nil {
-	// 	s.Log.Error("error on creating the request", "err", err)
-	// }
-	// request.Header.Set("Content-Type", writer.FormDataContentType())
-	// // request.Header.Set("Authentication", authToken)
-	// writer.Close()
-	// response, err := client.Do(request)
-	// if err != nil {
-	// 	s.Log.Error("error on sending the request", "err", err)
-	// }
-	// defer response.Body.Close()
-	// byteResponse, err := io.ReadAll(response.Body)
-	// s.Log.Info("response body", "response", string(byteResponse))
+	// 🤔
+	// If the requests fail
+	// This method should return the form fields back to the view
+	// to fill the values of the inputs
 	writer.Close()
 	if isEdit {
 		url = fmt.Sprintf("%s?propertyId=%s", url, humanReadableId)
-		return s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType(), http.MethodPut)
+		err = s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType(), http.MethodPut)
 	} else {
-		return s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType(), http.MethodPost)
+		err = s.Client.AddProperty(&newReaderBuffer, url, authToken, writer.FormDataContentType(), http.MethodPost)
 	}
+
+	if err != nil {
+		// do the json unmarshal
+		var property utils.RequestProperty // using the type from the addProperty service
+		err := json.Unmarshal(jsonString, &property)
+		if err != nil {
+			return lite.Property{}, types.PropertyFeatures{}, err
+		}
+		// Have to unmarshal the property features into the types.PropertyFeatures struct
+		// ❗but the features are unmarshaled first as a map[string]interface{}
+		var features types.PropertyFeatures
+		featuresAsJsonString, err := json.Marshal(property.Features)
+		if err != nil {
+			return lite.Property{}, types.PropertyFeatures{}, err
+		}
+		err = json.Unmarshal(featuresAsJsonString, &features)
+		if err != nil {
+			return lite.Property{}, types.PropertyFeatures{}, err
+		}
+		// ❗
+		// populating a lite.Property struct with the types.RequestProperty fields
+		// because the views.Edit() component used for rerendering the last values
+		// is accepting a lite.Property prop as parameter
+		// TODO think if there are other ways around this hacky sittuation
+		// ❗this is the ending where the fields need to be rerendered
+		return lite.Property{
+			Title:               property.Title,
+			Price:               property.Price,
+			IsFeatured:          utils.BoolToInt(property.IsFeatured),
+			PropertyType:        property.PropertyType,
+			PropertyDescription: property.PropertyDescription,
+			PropertyAddress:     property.PropertyAddress,
+			PropertyTransaction: fmt.Sprintf("%d", property.PropertyTransaction),
+			PropertySurface:     int64(property.PropertySurface),
+			Features:            "", // features can be empty because it's already been unmarshaled
+		}, features, nil
+	}
+
+	// this is the success ending
+	return lite.Property{}, types.PropertyFeatures{}, err
 }

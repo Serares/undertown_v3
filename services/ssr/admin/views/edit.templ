@@ -1,312 +1,569 @@
 package views
 
-templ Edit() {
-	// <html>
-	// 	<span>
-	// 		<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
-	// 	</span>
-	// 	@contents.Header
-	// 	<body class="page-load">
-	// 		@contents.Preload
-	// 		<!-- Wrapper Start -->
-	// 		<div id="page_wrapper" class="container-fluid">
-	// 			<div class="row">
-	// 				<header id="header" class="w-100 bg_white nav-on-top">
-	// 					<!-- Nav Header Start -->
-	// 					@contents.Navbar
-	// 					<!-- Nav Header End -->
-	// 				</header>
-	// 				<!-- Banner Section Start -->
-	// 				@contents.BannerSection
-	// 				<!-- Banner Section End -->
-	// 				<!-- Submit Property Start -->
-	// 				<section id="submit_property" class="full_row py_80 bg_gray">
-	// 					<div class="container">
-	// 						<div class="row">
-	// 							<div class="col-lg-9 col-md-10">
-	// 								<form id="upload-form" action="/edit" method="POST" class="dropzone" enctype="multipart/form-data">
-	// 									<div class="basic_information">
-	// 										if props.ErrorMessage != "" {
-	// 											<div>{ props.ErrorMessage }</div>
-	// 										} else if props.Message != "" {
-	// 											<div>{ props.Message }</div>
-	// 										}
-	// 										<h4 class="inner-title mb-4">Basic Information</h4>
-	// 										<div class="row">
-	// 											<div class="col-md-12 col-sm-12">
-	// 												<div class="form-group">
-	// 													<input name="title" type="text" placeholder="Property Title" class="form-control"/>
-	// 												</div>
-	// 											</div>
-	// 											<div class="col-md-6 col-sm-6">
-	// 												<div class="form-group">
-	// 													<select name="property_type" class="selectpicker form-control" data-live-search="true">
-	// 														<option selected>Tipul proprietatii</option>
-	// 														<option value="APARTMENT">Apartament</option>
-	// 														<option value="HOUSE">Casa</option>
-	// 														<option value="STUDIO">Garsoniera</option>
-	// 														<option value="LAND">Teren</option>
-	// 													</select>
-	// 												</div>
-	// 											</div>
-	// 											<div class="col-md-6 col-sm-6">
-	// 												<div class="form-group">
-	// 													<select name="property_transaction" class="selectpicker form-control" data-live-search="true">
-	// 														<option selected>Tipul tranzactieti</option>
-	// 														<option value="1">Chirie</option>
-	// 														<option value="0">Vanzare</option>
-	// 													</select>
-	// 												</div>
-	// 											</div>
-	// 											<div class="col-md-6 col-sm-6">
-	// 												<div class="form-group">
-	// 													<input name="price" type="number" placeholder="Pretul" class="form-control"/>
-	// 												</div>
-	// 											</div>
-	// 											<div class="col-md-4 col-sm-4">
-	// 												<div class="form-group">
-	// 													<ul class="check_submit">
-	// 														<li>
-	// 															<input name="is_featured" id="is_featured" class="hide" type="checkbox"/>
-	// 															<label for="is_featured">Apare pe pagina principala:</label>
-	// 														</li>
-	// 													</ul>
-	// 												</div>
-	// 											</div>
-	// 											<div class="col-md-4 col-sm-4">
-	// 												<div class="form-group">
-	// 													<input name="property_surface" type="number" placeholder="Suprafata m²" class="form-control"/>
-	// 												</div>
-	// 											</div>
-	// 											// <div class="col-md-12">
-	// 											// 	<div class="important_facts">
-	// 											// 		<label>Do you have any installment system for payment?</label>
-	// 											// 		<div class="radio_check">
-	// 											// 			<input type="checkbox" id="radio_1" class="hide" name="question" value="Yes"/>
-	// 											// 			<label for="radio_1"><span>No</span><span>Yes</span></label>
-	// 											// 		</div>
-	// 											// 	</div>
-	// 											// 	<div class="important_facts">
-	// 											// 		<label>Have any insurance of this property?</label>
-	// 											// 		<div class="radio_check">
-	// 											// 			<input type="checkbox" id="radio_2" class="hide" name="question" value="Yes"/>
-	// 											// 			<label for="radio_2"><span>No</span><span>Yes</span></label>
-	// 											// 		</div>
-	// 											// 	</div>
-	// 											// 	<div class="important_facts">
-	// 											// 		<label>Is there any labilities of third party with this property?</label>
-	// 											// 		<div class="radio_check">
-	// 											// 			<input type="checkbox" id="radio_3" class="hide" name="question" value="Yes"/>
-	// 											// 			<label for="radio_3"><span>No</span><span>Yes</span></label>
-	// 											// 		</div>
-	// 											// 	</div>
-	// 											// </div>
-	// 										</div>
-	// 										<div class="alert alert-warning">Please input the correct information of your property. Because it will effect on property search.</div>
-	// 									</div>
-	// 									<div class="description mt-5">
-	// 										<h4 class="inner-title mb-4">Descriere</h4>
-	// 										<div class="form-group">
-	// 											<textarea name="property_description" placeholder="Type Description..." class="form-control" rows="5"></textarea>
-	// 										</div>
-	// 										<div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
-	// 									</div>
-	// 									<div class="property_location mt-5">
-	// 										<h4 class="inner-title mb-4">Adresa</h4>
-	// 										<div class="form-group">
-	// 											<textarea name="property_address" placeholder="Adresa" class="form-control" rows="5"></textarea>
-	// 										</div>
-	// 									</div>
-	// 									<div class="energy_certificate mt-5">
-	// 										<h4 class="inner-title mb-4">Certificat energetic</h4>
-	// 										<div class="form-group">
-	// 											<select name="energy_class" class="selectpicker form-control" data-live-search="true">
-	// 												<option selected></option>
-	// 												<option value="A">A</option>
-	// 												<option value="B">B</option>
-	// 											</select>
-	// 											<br/>
-	// 											<div class="mt-3">
-	// 												<input name="energy_consumption_primary" type="text" placeholder="Consum de energie primara" class="form-control"/>
-	// 												<input name="energy_emissions_index" type="text" placeholder="Indice emisii CO2:" class="form-control"/>
-	// 												<input name="energy_consumption_green" type="text" placeholder="Consum total specific de energie din surse regenerabile" class="form-control"/>
-	// 											</div>
-	// 										</div>
-	// 										<div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
-	// 									</div>
-	// 									<div class="destination mt-5">
-	// 										<h4 class="inner-title mb-4">Destinatie</h4>
-	// 										<div class="form-group">
-	// 											<ul class="check_submit">
-	// 												<li>
-	// 													<input id="destination_residential" class="hide" type="checkbox"/>
-	// 													<label for="destination_residential">rezidential</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="destination_commercial" class="hide" type="checkbox"/>
-	// 													<label for="destination_commercial">comercial</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="destination_office" class="hide" type="checkbox"/>
-	// 													<label for="destination_office">birou</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="destination_holiday" class="hide" type="checkbox"/>
-	// 													<label for="destination_holiday">Vacanta</label>
-	// 												</li>
-	// 											</ul>
-	// 										</div>
-	// 									</div>
-	// 									<div class="other mt-5">
-	// 										<h4 class="inner-title mb-4">Alte spatii utile</h4>
-	// 										<div class="form-group">
-	// 											<ul class="check_submit">
-	// 												<li>
-	// 													<input id="other_utilities_terrance" class="hide" type="checkbox"/>
-	// 													<label for="other_utilities_terrance">Terasa</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="other_utilities_service_toilet" class="hide" type="checkbox"/>
-	// 													<label for="other_utilities_service_toilet">WC SERVICIU</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="other_utilities_underground_storage" class="hide" type="checkbox"/>
-	// 													<label for="other_utilities_underground_storage">Boxa la subsol</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="other_utilities_storage" class="hide" type="checkbox"/>
-	// 													<label for="other_utilities_storage">Debara</label>
-	// 												</li>
-	// 											</ul>
-	// 										</div>
-	// 									</div>
-	// 									<div class="furnished mt-5">
-	// 										<h4 class="inner-title mb-4">Mobilat</h4>
-	// 										<div class="form-group">
-	// 											<ul class="check_submit">
-	// 												<li>
-	// 													<input id="furnished_not" class="hide" type="checkbox"/>
-	// 													<label for="furnished_not">Nemobilat</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="furnished_partially" class="hide" type="checkbox"/>
-	// 													<label for="furnished_partially">Partial</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="furnished_complete" class="hide" type="checkbox"/>
-	// 													<label for="furnished_complete">Complet</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="furnished_luxury" class="hide" type="checkbox"/>
-	// 													<label for="furnished_luxury">Lux</label>
-	// 												</li>
-	// 											</ul>
-	// 										</div>
-	// 									</div>
-	// 									<div class="interior mt-5">
-	// 										<h4 class="inner-title mb-4">Stare interior</h4>
-	// 										<div class="form-group">
-	// 											<ul class="check_submit">
-	// 												<li>
-	// 													<input id="interior_needs_renovation" class="hide" type="checkbox"/>
-	// 													<label for="interior_needs_renovation">Necesita renovare</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="interior_has_renovation" class="hide" type="checkbox"/>
-	// 													<label for="interior_has_renovation">Renovat</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="interior_good_state" class="hide" type="checkbox"/>
-	// 													<label for="interior_good_state">Buna</label>
-	// 												</li>
-	// 											</ul>
-	// 										</div>
-	// 									</div>
-	// 									<div class="heating mt-5">
-	// 										<h4 class="inner-title mb-4">Sistem incalzire</h4>
-	// 										<div class="row">
-	// 											<ul class="check_submit">
-	// 												<li>
-	// 													<input id="heating_termoficare" class="hide" type="checkbox"/>
-	// 													<label for="heating_termoficare">Termoficare</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_central_heating" class="hide" type="checkbox"/>
-	// 													<label for="heating_central_heating">Centrala proprie</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_building" class="hide" type="checkbox"/>
-	// 													<label for="heating_building">Centrala imobil</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_stove" class="hide" type="checkbox"/>
-	// 													<label for="heating_stove">Soba/Teracota</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_radiator" class="hide" type="checkbox"/>
-	// 													<label for="heating_radiator">Calorifer</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_other_electrical" class="hide" type="checkbox"/>
-	// 													<label for="heating_other_electrical">Alte metode electrice:</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_gas_convector" class="hide" type="checkbox"/>
-	// 													<label for="heating_gas_convector">Convector gaz</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_infrared_panels" class="hide" type="checkbox"/>
-	// 													<label for="heating_infrared_panels">Panouri infrarosu</label>
-	// 												</li>
-	// 												<li>
-	// 													<input id="heating_floor_heating" class="hide" type="checkbox"/>
-	// 													<label for="heating_floor_heating">Incalzire prin pardoseala</label>
-	// 												</li>
-	// 											</ul>
-	// 										</div>
-	// 										<div class="alert alert-warning">Check the extra features and facility of the property, it will show with the property.</div>
-	// 									</div>
-	// 									<div class="upload_media mt-5">
-	// 										<h4 class="inner-title mb-4">Upload Photo and Document</h4>
-	// 										<p>Felis etiam erat curabitur bibendum iaculis quisque placerat egestas. Nullam, lacus dis et consectetuer rhoncus etiam. Non vitae turpis curae; lacus sociosqu. Quisque. Lobortis aliquam penatibus mi. </p>
-	// 										<div class="row">
-	// 											<div class="col-md-12">
-	// 												<div id="images-input" class="browse_submit">
-	// 													<span>Add Photos</span>
-	// 													<div class="dz-default dz-message">
-	// 														// <button class="dz-button fileupload_label" type="button" value="Adauga imagini aici">Adauga imagini aici</button>
-	// 														<label class="dz-button fileupload_label specific extra">Adauga imagini aici</label>
-	// 													</div>
-	// 												</div>
-	// 											</div>
-	// 											<div class="col-lg-12">
-	// 												<div class="property_thumbnails mt-5">
-	// 													<div class="row dropzone-previews"></div>
-	// 												</div>
-	// 											</div>
-	// 										</div>
-	// 										<div class="alert alert-warning">Please uplaod the photo of the property, please keep the photo size 760X410 ratio and please upload the PDF or Doc file at the document attachment.</div>
-	// 									</div>
-	// 									<div class="browse_submit">
-	// 										<button type="submit" name="submit" class="btn btn_primary">Adauga</button>
-	// 									</div>
-	// 								</form>
-	// 							</div>
-	// 						</div>
-	// 					</div>
-	// 				</section>
-	// 				<!-- Submit Property End -->
-	// 				<!-- Footer Section Start -->
-	// 				@contents.Footer
-	// 				<!-- Footer Section End -->
-	// 				<!-- Find Part Satrt -->
-	// 				<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
-	// 				<!-- Find Part Satrt -->
-	// 			</div>
-	// 		</div>
-	// 		<!-- Wrapper End -->
-	// 		<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-	// 		@contents.Scripts
-	// 	</body>
-	// </html>
+// ❗TODO is it needed to have those types both in homepage and admin
+// for example the BasicIncludes struct is similar for the moment
+import "github.com/Serares/ssr/admin/types"
+import "fmt"
+import "strings"
+
+script createGlobalImagesVariable(images []string) {
+	const imagesPaths = images
+	console.log(images)
+}
+
+templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props types.EditProps) {
+	<html>
+		<span>
+			<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+		</span>
+		@contents.Header
+		<body class="page-load">
+			@contents.Preload
+			<!-- Wrapper Start -->
+			<div id="page_wrapper" class="container-fluid">
+				<div class="row">
+					<header id="header" class="w-100 bg_white nav-on-top">
+						<!-- Nav Header Start -->
+						@contents.Navbar
+						<!-- Nav Header End -->
+					</header>
+					<!-- Banner Section Start -->
+					@contents.BannerSection
+					<!-- Banner Section End -->
+					<!-- Submit Property Start -->
+					<section id="submit_property" class="full_row py_80 bg_gray">
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-9 col-md-10">
+									<form id="upload-form" action={ templ.SafeURL(props.FormAction) } method={ props.FormMethod } class="dropzone" enctype="multipart/form-data">
+										<div class="basic_information">
+											if props.ErrorMessage != "" {
+												<div class="text-danger bold">{ props.ErrorMessage }</div>
+											} else if props.SuccessMessage != "" {
+												<div class="text-success bold">{ props.SuccessMessage }</div>
+											}
+											<h4 class="inner-title mb-4">Basic Information</h4>
+											<div class="row">
+												<div class="col-md-12 col-sm-12">
+													<div class="form-group">
+														<input value={ props.Property.Title } name="title" type="text" placeholder="Property Title" class="form-control"/>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6">
+													<div class="form-group">
+														<select name="property_type" class="selectpicker form-control" data-live-search="true">
+															for _, option := range props.PropertyTypes {
+																<option
+ 																	value={ option.Value }
+ 																	if option.Value == props.Property.PropertyType {
+																		selected="true"
+																	}
+																>
+																	{ option.DisplayName }
+																</option>
+															}
+														</select>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6">
+													<div class="form-group">
+														<select name="property_transaction" class="selectpicker form-control" data-live-search="true">
+															for _, option := range props.PropertyTransaction {
+																<option
+ 																	value={ option.Value }
+ 																	if option.Value == props.Property.PropertyTransaction {
+																		selected="true"
+																	}
+																>
+																	{ option.DisplayName }
+																</option>
+															}
+														</select>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6">
+													<div class="form-group">
+														<input
+ 															value={ fmt.Sprintf("%d", props.Property.Price) }
+ 															name="price"
+ 															type="number"
+ 															placeholder="Pretul"
+ 															class="form-control"
+														/>
+													</div>
+												</div>
+												<div class="col-md-4 col-sm-4">
+													<div class="form-group">
+														<ul class="check_submit">
+															<li>
+																<input
+ 																	if props.Property.IsFeatured == 1 {
+																		checked="true"
+																	}
+ 																	name="is_featured"
+ 																	id="is_featured"
+ 																	class="hide"
+ 																	type="checkbox"
+																/>
+																<label for="is_featured">Apare pe pagina principala:</label>
+															</li>
+														</ul>
+													</div>
+												</div>
+												<div class="col-md-4 col-sm-4">
+													<div class="form-group">
+														<input
+ 															value={ fmt.Sprintf("%d", props.Property.PropertySurface) }
+ 															name="property_surface"
+ 															type="number"
+ 															placeholder="Suprafata m²"
+ 															class="form-control"
+														/>
+													</div>
+												</div>
+												// <div class="col-md-12">
+												// 	<div class="important_facts">
+												// 		<label>Do you have any installment system for payment?</label>
+												// 		<div class="radio_check">
+												// 			<input type="checkbox" id="radio_1" class="hide" name="question" value="Yes"/>
+												// 			<label for="radio_1"><span>No</span><span>Yes</span></label>
+												// 		</div>
+												// 	</div>
+												// 	<div class="important_facts">
+												// 		<label>Have any insurance of this property?</label>
+												// 		<div class="radio_check">
+												// 			<input type="checkbox" id="radio_2" class="hide" name="question" value="Yes"/>
+												// 			<label for="radio_2"><span>No</span><span>Yes</span></label>
+												// 		</div>
+												// 	</div>
+												// 	<div class="important_facts">
+												// 		<label>Is there any labilities of third party with this property?</label>
+												// 		<div class="radio_check">
+												// 			<input type="checkbox" id="radio_3" class="hide" name="question" value="Yes"/>
+												// 			<label for="radio_3"><span>No</span><span>Yes</span></label>
+												// 		</div>
+												// 	</div>
+												// </div>
+											</div>
+											<div class="alert alert-warning">Please input the correct information of your property. Because it will effect on property search.</div>
+										</div>
+										<div class="description mt-5">
+											<h4 class="inner-title mb-4">Descriere</h4>
+											<div class="form-group">
+												<textarea name="property_description" placeholder="Type Description..." class="form-control" rows="5">{ props.Property.PropertyDescription }</textarea>
+											</div>
+											<div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
+										</div>
+										<div class="property_location mt-5">
+											<h4 class="inner-title mb-4">Adresa</h4>
+											<div class="form-group">
+												<textarea name="property_address" placeholder="Adresa" class="form-control" rows="5">{ props.Property.PropertyAddress } </textarea>
+											</div>
+										</div>
+										<div class="energy_certificate mt-5">
+											<h4 class="inner-title mb-4">Certificat energetic</h4>
+											<div class="form-group">
+												<select name="energy_class" class="selectpicker form-control" data-live-search="true">
+													<option
+ 														if props.PropertyFeatures.EnergyClass == "A" {
+															selected="true"
+														}
+ 														value="A"
+													>A</option>
+													<option
+ 														if props.PropertyFeatures.EnergyClass == "B" {
+															selected="true"
+														}
+ 														value="B"
+													>B</option>
+												</select>
+												<br/>
+												<div class="mt-3">
+													<input value={ props.PropertyFeatures.EnergyConsumptionPrimary } name="energy_consumption_primary" type="text" placeholder="Consum de energie primara" class="form-control"/>
+													<input value={ props.PropertyFeatures.EnergyEmissionsIndex } name="energy_emissions_index" type="text" placeholder="Indice emisii CO2:" class="form-control"/>
+													<input value={ props.PropertyFeatures.EnergyConsumptionGreen } name="energy_consumption_green" type="text" placeholder="Consum total specific de energie din surse regenerabile" class="form-control"/>
+												</div>
+											</div>
+											<div class="alert alert-warning">Need a proper description about the property. So that client can easily understand about the property.</div>
+										</div>
+										<div class="destination mt-5">
+											<h4 class="inner-title mb-4">Destinatie</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input
+ 															if props.PropertyFeatures.DestinationResidential {
+																checked="true"
+															}
+ 															name="destination_residential"
+ 															id="destination_residential"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="destination_residential">rezidential</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.DestinationCommercial {
+																checked="true"
+															}
+ 															name="destination_commercial"
+ 															id="destination_commercial"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="destination_commercial">comercial</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.DestinationOffice {
+																checked="true"
+															}
+ 															name="destination_office"
+ 															id="destination_office"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="destination_office">birou</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.DestinationHoliday {
+																checked="true"
+															}
+ 															name="destination_holiday"
+ 															id="destination_holiday"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="destination_holiday">Vacanta</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="other mt-5">
+											<h4 class="inner-title mb-4">Alte spatii utile</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input
+ 															if props.PropertyFeatures.OtherUtilitiesTerrance {
+																checked="true"
+															}
+ 															name="other_utilities_terrance"
+ 															id="other_utilities_terrance"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="other_utilities_terrance">Terasa</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.OtherUtilitiesServiceToilet {
+																checked="true"
+															}
+ 															name="other_utilities_service_toilet"
+ 															id="other_utilities_service_toilet"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="other_utilities_service_toilet">WC SERVICIU</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.OtherUtilitiesUndergroundStorage {
+																checked="true"
+															}
+ 															name="other_utilities_underground_storage"
+ 															id="other_utilities_underground_storage"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="other_utilities_underground_storage">Boxa la subsol</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.OtherUtilitiesStorage {
+																checked="true"
+															}
+ 															name="other_utilities_storage"
+ 															id="other_utilities_storage"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="other_utilities_storage">Debara</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="furnished mt-5">
+											<h4 class="inner-title mb-4">Mobilat</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input
+ 															if props.PropertyFeatures.FurnishedNot {
+																checked="true"
+															}
+ 															name="furnished_not"
+ 															id="furnished_not"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="furnished_not">Nemobilat</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.FurnishedPartially {
+																checked="true"
+															}
+ 															name="furnished_partially"
+ 															id="furnished_partially"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="furnished_partially">Partial</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.FurnishedComplete {
+																checked="true"
+															}
+ 															name="furnished_complete"
+ 															id="furnished_complete"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="furnished_complete">Complet</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.FurnishedLuxury {
+																checked="true"
+															}
+ 															name="furnished_luxury"
+ 															id="furnished_luxury"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="furnished_luxury">Lux</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="interior mt-5">
+											<h4 class="inner-title mb-4">Stare interior</h4>
+											<div class="form-group">
+												<ul class="check_submit">
+													<li>
+														<input
+ 															if props.PropertyFeatures.InteriorNeedsRenovation {
+																checked="true"
+															}
+ 															name="interior_needs_renovation"
+ 															id="interior_needs_renovation"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="interior_needs_renovation">Necesita renovare</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.InteriorHasRenovation {
+																checked="true"
+															}
+ 															name="interior_has_renovation"
+ 															id="interior_has_renovation"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="interior_has_renovation">Renovat</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.InteriorGoodState {
+																checked="true"
+															}
+ 															name="interior_good_state"
+ 															id="interior_good_state"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="interior_good_state">Buna</label>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div class="heating mt-5">
+											<h4 class="inner-title mb-4">Sistem incalzire</h4>
+											<div class="row">
+												<ul class="check_submit">
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingTermoficare {
+																checked="true"
+															}
+ 															name="heating_termoficare"
+ 															id="heating_termoficare"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_termoficare">Termoficare</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingCentralHeating {
+																checked="true"
+															}
+ 															name="heating_central_heating"
+ 															id="heating_central_heating"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_central_heating">Centrala proprie</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingBuilding {
+																checked="true"
+															}
+ 															name="heating_building"
+ 															id="heating_building"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_building">Centrala imobil</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingStove {
+																checked="true"
+															}
+ 															name="heating_stove"
+ 															id="heating_stove"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_stove">Soba/Teracota</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingRadiator {
+																checked="true"
+															}
+ 															name="heating_radiator"
+ 															id="heating_radiator"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_radiator">Calorifer</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingOtherElectrical {
+																checked="true"
+															}
+ 															name="heating_other_electrical"
+ 															id="heating_other_electrical"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_other_electrical">Alte metode electrice:</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingGasConvector {
+																checked="true"
+															}
+ 															name="heating_gas_convector"
+ 															id="heating_gas_convector"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_gas_convector">Convector gaz</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingInfraredPanels {
+																checked="true"
+															}
+ 															name="heating_infrared_panels"
+ 															id="heating_infrared_panels"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_infrared_panels">Panouri infrarosu</label>
+													</li>
+													<li>
+														<input
+ 															if props.PropertyFeatures.HeatingFloorHeating {
+																checked="true"
+															}
+ 															name="heating_floor_heating"
+ 															id="heating_floor_heating"
+ 															class="hide"
+ 															type="checkbox"
+														/>
+														<label for="heating_floor_heating">Incalzire prin pardoseala</label>
+													</li>
+												</ul>
+											</div>
+											<div class="alert alert-warning">Check the extra features and facility of the property, it will show with the property.</div>
+										</div>
+										<div class="upload_media mt-5">
+											<h4 class="inner-title mb-4">Upload Photo and Document</h4>
+											<p>Felis etiam erat curabitur bibendum iaculis quisque placerat egestas. Nullam, lacus dis et consectetuer rhoncus etiam. Non vitae turpis curae; lacus sociosqu. Quisque. Lobortis aliquam penatibus mi. </p>
+											<div class="row">
+												<div class="col-md-12">
+													<div id="images-input" class="browse_submit">
+														<span>Add Photos</span>
+														<div class="dz-default dz-message">
+															// <button class="dz-button fileupload_label" type="button" value="Adauga imagini aici">Adauga imagini aici</button>
+															<label class="dz-button fileupload_label specific extra">Adauga imagini aici</label>
+														</div>
+													</div>
+												</div>
+												<div class="col-lg-12">
+													<div class="property_thumbnails mt-5">
+														<div class="row dropzone-previews"></div>
+													</div>
+												</div>
+											</div>
+											<div class="alert alert-warning">Please uplaod the photo of the property, please keep the photo size 760X410 ratio and please upload the PDF or Doc file at the document attachment.</div>
+										</div>
+										<div class="browse_submit">
+											<button type="submit" name="submit" class="btn btn_primary">
+												if strings.Contains(props.FormAction, "submit") {
+													Adauga
+												} else {
+													Modifica
+												}
+											</button>
+										</div>
+										if strings.Contains(props.FormAction, "edit") {
+											<div class="browse_submit">
+												<button id="delete_button" class="btn btn-danger">Delete</button>
+											</div>
+										}
+									</form>
+								</div>
+							</div>
+						</div>
+					</section>
+					<!-- Submit Property End -->
+					<!-- Footer Section Start -->
+					@contents.Footer
+					<!-- Footer Section End -->
+					<!-- Find Part Satrt -->
+					<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
+					<!-- Find Part Satrt -->
+				</div>
+			</div>
+			<!-- Wrapper End -->
+			<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+			@contents.Scripts
+			@contents.DropzoneScript
+			@editIncludes.HandleDeleteButton
+		</body>
+	</html>
 }

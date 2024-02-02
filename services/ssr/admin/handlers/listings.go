@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/Serares/ssr/admin/middleware"
 	"github.com/Serares/ssr/admin/service"
 	"github.com/Serares/ssr/admin/types"
 	"github.com/Serares/ssr/admin/views"
@@ -25,12 +26,9 @@ func NewListingsHandler(log *slog.Logger, service *service.ListingsService) *Adm
 
 func (h *AdminListings) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		cookie, err := r.Cookie("token")
-		if err != nil {
-			viewListings(w, r, types.ListingProps{Properties: []types.ListingProperty{}, ErrorMessage: "Invalid authentication", SuccessMessage: ""})
-			return
-		}
-		properties, err := h.Service.List(cookie.Value)
+		token := middleware.ID(r)
+
+		properties, err := h.Service.List(token)
 		if err != nil {
 			h.Log.Error("error invalid response", err, err)
 			viewListings(w, r, types.ListingProps{
@@ -53,8 +51,8 @@ func (h *AdminListings) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func viewListings(w http.ResponseWriter, r *http.Request, props types.ListingProps) {
 	views.Listings(
 		types.BasicIncludes{
-			Header:        components.Header("Login"),
-			BannerSection: components.BannerSection(includesTypes.BannerSectionProps{Title: "Login"}),
+			Header:        components.Header("List"),
+			BannerSection: components.BannerSection(includesTypes.BannerSectionProps{Title: "List"}),
 			Preload:       components.Preload(),
 			Navbar:        components.Navbar(includesTypes.NavbarProps{Path: "/listings", IsAdmin: true}),
 			Footer:        components.Footer(),

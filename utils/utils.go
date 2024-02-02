@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -63,8 +63,33 @@ func CreateDisplayCreatedAt(createdAt time.Time) string {
 	return fmt.Sprintf("Adaugat cu %d zile in urma", passedTime)
 }
 
-// ❗ The GET_PROPERTY backend should search for the propertyId query string
-func CreatePropertyPath(title, humanReadableId string) string {
-	replacedString := strings.ReplaceAll(title, " ", string('%'))
-	return strings.ToLower(replacedString) + strings.Join([]string{"?propertyId=", humanReadableId}, "")
+func UrlEncodePropertyTitle(title string) string {
+	return url.PathEscape(title)
+}
+
+func BoolToInt(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func AddParamToUrl(baseUrl, param, value string) (string, error) {
+	parsedURL, err := url.Parse(baseUrl)
+	if err != nil {
+		return "", fmt.Errorf("error parsing the url %v; %s; %s", err, param, value)
+	}
+
+	// Prepare query values
+	parameters := url.Values{}
+	parameters.Add(param, value)
+	// Add more parameters as needed
+
+	// Attach query parameters to the URL
+	parsedURL.RawQuery = parameters.Encode()
+
+	// The final URL with query parameters
+	finalURL := parsedURL.String()
+
+	return finalURL, nil
 }

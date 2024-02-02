@@ -17,6 +17,7 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/Serares/undertown_v3/services/api/addProperty/util"
+	"github.com/Serares/undertown_v3/utils"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -42,13 +43,6 @@ func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
 
 func arrayToString(images []string) string {
 	return strings.Join(images, ",")
-}
-
-func booleanToInt(value bool) int64 {
-	if value {
-		return 1
-	}
-	return 0
 }
 
 func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
@@ -169,13 +163,52 @@ func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (s
 }
 
 func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, humanReadableId string) error {
+	var requestProperty types.RequestProperty
+	jsonProperty, ok := multipartForm.Value["property"]
+	if !ok {
+		ss.Log.Error("json property not provided for PUT request")
+		return fmt.Errorf("json property not provided")
+	}
 
+	if err := json.Unmarshal([]byte(jsonProperty[0]), &requestProperty); err != nil {
+		ss.Log.Error("error decoding the json property for PUT request", "err", err)
+		return fmt.Errorf("error on json unmarshal")
+	}
+	if err := json.Unmarshal([]byte(jsonProperty[0]), &requestProperty.Features); err != nil {
+		ss.Log.Error("error decoding the json property features for PUT request", "err", err)
+		return fmt.Errorf("error on json unmarshal")
+	}
+
+	features, err := json.Marshal(requestProperty.Features)
+	if err != nil {
+		return err
+	}
+
+	// TODO handle the case where no new images are uploaded
+	// OR when new images are uploaded and the old ones are not deleted
+	if err := ss.PropertyRepository.UpdateProperty(ctx, lite.UpdatePropertyFieldsParams{
+		Humanreadableid:     humanReadableId,
+		Title:               requestProperty.Title,
+		Images:              strings.Join(imagesPaths, ";"),
+		Thumbnail:           imagesPaths[0],
+		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
+		PropertyTransaction: requestProperty.PropertyTransaction.String(),
+		PropertyDescription: requestProperty.PropertyDescription,
+		PropertyType:        requestProperty.PropertyType,
+		PropertyAddress:     requestProperty.PropertyAddress,
+		PropertySurface:     int64(requestProperty.PropertySurface),
+		Price:               int64(requestProperty.Price),
+		Features:            string(features),
+		UpdatedAt:           time.Now().UTC(),
+	}); err != nil {
+		return fmt.Errorf("error trying to persist the order with error: %v", err)
+	}
+	return nil
 }
 
 func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
 	var requestProperty types.RequestProperty
-	var requestPropertyFeatures map[string]interface{}
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
 		ss.Log.Error("json property not provided")
@@ -184,6 +217,10 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 
 	if err := json.Unmarshal([]byte(jsonProperty[0]), &requestProperty); err != nil {
 		ss.Log.Error("error decoding the json property", "err", err)
+		return "", "", fmt.Errorf("error on json unmarshal")
+	}
+	if err := json.Unmarshal([]byte(jsonProperty[0]), &requestProperty.Features); err != nil {
+		ss.Log.Error("error decoding the json property features for PUT request", "err", err)
 		return "", "", fmt.Errorf("error on json unmarshal")
 	}
 
@@ -222,11 +259,7 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 	// }
 
 	// features, err := ss.parsePropertyFeaturesToJson(propertyFeatures)
-	err := json.Unmarshal([]byte(jsonProperty[0]), &requestPropertyFeatures)
-	if err != nil {
-		return "", "", fmt.Errorf("error trying to get the request properties features %v", err)
-	}
-	features, err := json.Marshal(requestPropertyFeatures)
+	features, err := json.Marshal(requestProperty.Features)
 	if err != nil {
 		return "", "", err
 	}
@@ -239,7 +272,7 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		Title:               requestProperty.Title,
 		Images:              strings.Join(imagesPaths, ";"),
 		Thumbnail:           imagesPaths[0],
-		IsFeatured:          booleanToInt(requestProperty.IsFeatured),
+		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: requestProperty.PropertyTransaction.String(),
 		PropertyDescription: requestProperty.PropertyDescription,
 		PropertyType:        requestProperty.PropertyType,
@@ -252,5 +285,5 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 	}); err != nil {
 		return "", "", fmt.Errorf("error trying to persist the order with error: %v", err)
 	}
-	return propertyId, "humanReadableId", nil
+	return propertyId, humanReadableId, nil
 }

@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/Serares/ssr/homepage/service"
+	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/a-h/templ"
 )
 
@@ -31,5 +32,5 @@ type PropertiesProps struct {
 }
 
 type SinglePropertyProps struct {
-	Property any // TODO define a structure for this type
+	Property []lite.Property // TODO define a structure for this type
 }

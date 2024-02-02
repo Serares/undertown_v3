@@ -30,21 +30,18 @@ func (h *AdminLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// get the email and password
 		email := r.FormValue("email")
 		password := r.FormValue("password")
-		var errorMessage string
 		// check if the email and password are valid
 		if email == "" || password == "" {
-			errorMessage = "email or passwords cannot be null"
+			viewLogin(w, r, types.LoginProps{
+				ErrorMessage: "Email or password cannot be null",
+			})
 			return
 		}
 		token, err := h.LoginService.Login(email, password)
 		if err != nil {
-			h.Log.Error("error invalid response", err, err)
-			errorMessage = "invalid email or password"
-			return
-		}
-		if errorMessage != "" {
+			h.Log.Error("error invalid response", "err", err)
 			viewLogin(w, r, types.LoginProps{
-				ErrorMessage: errorMessage,
+				ErrorMessage: "Invalid email or password",
 			})
 			return
 		}
@@ -55,10 +52,13 @@ func (h *AdminLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Expires: cookieExpiration,
 		}
 		http.SetCookie(w, &cookie)
-		http.Redirect(w, r, "/submit", http.StatusSeeOther)
+		http.Redirect(w, r, types.ListPath, http.StatusSeeOther)
 		return
 	}
 	if r.Method == http.MethodGet {
+		// TODO if it's a redirect
+		// you'll have to use cookies to send a message to login
+
 		viewLogin(w, r, types.LoginProps{})
 		return
 	}

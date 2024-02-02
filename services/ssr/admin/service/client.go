@@ -68,6 +68,9 @@ func (ssrc *SSRAdminClient) sendRequest(url, method, contentType, token string,
 	return msg, nil
 }
 
+// ❗TODO
+// is it a better idea to also pass the status of the response as a parameter to the client methods?
+
 // ❗ This is used for both add and edit
 func (ssrc *SSRAdminClient) AddProperty(body io.Reader, url, authToken, contentType, method string) error {
 	// the body should already come as multipart from the client
@@ -123,8 +126,8 @@ func (ssrc *SSRAdminClient) List(url, authToken string) ([]lite.Property, error)
 	return response.Results, nil
 }
 
-func (ssrc *SSRAdminClient) GetProperty(url, humanReadableId, authToken string) (lite.Property, error) {
-	resp, err := ssrc.sendRequest(url, http.MethodGet, "", authToken, http.StatusOK, nil)
+func (ssrc *SSRAdminClient) GetProperty(url, authToken string) (lite.Property, error) {
+	resp, err := ssrc.sendRequest(url, http.MethodGet, "", authToken, http.StatusAccepted, nil)
 	if err != nil {
 		return lite.Property{}, err
 	}
@@ -135,4 +138,12 @@ func (ssrc *SSRAdminClient) GetProperty(url, humanReadableId, authToken string) 
 		return lite.Property{}, fmt.Errorf("error deconding the listing properties response %w", err)
 	}
 	return response.Results[0], nil
+}
+
+func (ssrc *SSRAdminClient) DeleteProperty(url, authToken string) error {
+	_, err := ssrc.sendRequest(url, http.MethodDelete, "", authToken, http.StatusOK, nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }

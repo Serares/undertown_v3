@@ -15,11 +15,11 @@ import (
 
 type IPropertiesRepository interface {
 	Add(ctx context.Context, propertyParameters lite.AddPropertyParams) error
-	GetById(ctx context.Context, id string, humanReadableId *string) (lite.Property, error)
+	GetById(ctx context.Context, id string, humanReadableId string) (lite.Property, error)
 	List(ctx context.Context) ([]lite.Property, error)
-	DeleteByHumanReadableId(ctx context.Context, humanReadableId *string) error
+	DeleteByHumanReadableId(ctx context.Context, humanReadableId string) error
 	CloseDbConnection(ctx context.Context) error
-	UpdateProperty(ctx context.Context, humanReadableId string, params lite.UpdatePropertyFieldsParams) error
+	UpdateProperty(ctx context.Context, params lite.UpdatePropertyFieldsParams) error
 }
 
 type Properties struct {
@@ -72,20 +72,20 @@ func (d *Properties) Add(ctx context.Context, propertyParams lite.AddPropertyPar
 // ❔
 // not sure if using pointers to create nullable parameters is a good practice
 // this method is used to retreive both by UUID and humanReadableId
-func (d *Properties) GetById(ctx context.Context, id *string, humanReadableId *string) (lite.Property, error) {
+func (d *Properties) GetById(ctx context.Context, id string, humanReadableId string) (lite.Property, error) {
 	var property lite.Property
 	var err error
-	if id != nil {
-		property, err = d.db.GetProperty(ctx, *id)
+	if id != "" {
+		property, err = d.db.GetProperty(ctx, id)
 		if err != nil {
-			return lite.Property{}, fmt.Errorf("error trying to retreive by uuid: %v, err: %v", *id, err)
+			return lite.Property{}, fmt.Errorf("error trying to retreive by uuid: %v, err: %v", id, err)
 		}
 	}
 
-	if humanReadableId != nil {
-		property, err = d.db.GetByHumanReadableId(ctx, *humanReadableId)
+	if humanReadableId != "" {
+		property, err = d.db.GetByHumanReadableId(ctx, humanReadableId)
 		if err != nil {
-			return lite.Property{}, fmt.Errorf("error trying to retreive by humanReadableId: %v, err: %v", *humanReadableId, err)
+			return lite.Property{}, fmt.Errorf("error trying to retreive by humanReadableId: %v, err: %v", humanReadableId, err)
 		}
 	}
 	return property, nil
@@ -117,21 +117,19 @@ func (d *Properties) ListFeatured(ctx context.Context) ([]lite.ListFeaturedPrope
 	return properties, nil
 }
 
-func (d *Properties) DeleteByHumanReadableId(ctx context.Context, humanReadableId *string) error {
-	if humanReadableId != nil {
-		err := d.db.DeletePropertyByHumanReadableId(ctx, *humanReadableId)
-		if err != nil {
-			return nil
-		}
+func (d *Properties) DeleteByHumanReadableId(ctx context.Context, humanReadableId string) error {
+	err := d.db.DeletePropertyByHumanReadableId(ctx, humanReadableId)
+	if err != nil {
+		return nil
 	}
 
 	return fmt.Errorf("error you did not provide a human readable id")
 }
 
-func (d *Properties) UpdateProperty(ctx context.Context, humanReadableId string, params lite.UpdatePropertyFieldsParams) error {
+func (d *Properties) UpdateProperty(ctx context.Context, params lite.UpdatePropertyFieldsParams) error {
 	err := d.db.UpdatePropertyFields(ctx, params)
 	if err != nil {
-		return fmt.Errorf("failed to update the property features id: %s ; error: %w", humanReadableId, err)
+		return fmt.Errorf("failed to update the property features id: %s ; error: %w", params.Humanreadableid, err)
 	}
 
 	return nil
