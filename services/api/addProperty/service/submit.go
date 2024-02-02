@@ -15,6 +15,7 @@ import (
 
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	repositoryTypes "github.com/Serares/undertown_v3/repositories/repository/types"
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/Serares/undertown_v3/services/api/addProperty/util"
 	"github.com/Serares/undertown_v3/utils"
@@ -163,7 +164,7 @@ func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (s
 }
 
 func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, humanReadableId string) error {
-	var requestProperty types.RequestProperty
+	var requestProperty utils.RequestProperty
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
 		ss.Log.Error("json property not provided for PUT request")
@@ -192,7 +193,7 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []s
 		Images:              strings.Join(imagesPaths, ";"),
 		Thumbnail:           imagesPaths[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
-		PropertyTransaction: requestProperty.PropertyTransaction.String(),
+		PropertyTransaction: repositoryTypes.TransactionType(requestProperty.PropertyTransaction).String(),
 		PropertyDescription: requestProperty.PropertyDescription,
 		PropertyType:        requestProperty.PropertyType,
 		PropertyAddress:     requestProperty.PropertyAddress,
@@ -208,7 +209,7 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []s
 
 func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
-	var requestProperty types.RequestProperty
+	var requestProperty utils.RequestProperty
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
 		ss.Log.Error("json property not provided")
@@ -264,7 +265,7 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		return "", "", err
 	}
 
-	humanReadableId := util.HumanReadableId(requestProperty.PropertyTransaction)
+	humanReadableId := util.HumanReadableId(repositoryTypes.TransactionType(requestProperty.PropertyTransaction))
 	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
 		ID:                  propertyId,
 		UserID:              userId,
@@ -273,7 +274,7 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		Images:              strings.Join(imagesPaths, ";"),
 		Thumbnail:           imagesPaths[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
-		PropertyTransaction: requestProperty.PropertyTransaction.String(),
+		PropertyTransaction: repositoryTypes.TransactionType(requestProperty.PropertyTransaction).String(),
 		PropertyDescription: requestProperty.PropertyDescription,
 		PropertyType:        requestProperty.PropertyType,
 		PropertyAddress:     requestProperty.PropertyAddress,
