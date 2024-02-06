@@ -1,6 +1,9 @@
 package types
 
-const ErrorMethodNotSupported string = "http method not supported"
+const (
+	ErrorMethodNotSupported = "http method not supported"
+	ASSETS_BUCKET_ENV       = "ASSETS_BUCKET_NAME"
+)
 
 type POSTSuccessResponse struct {
 	PropertyId      string

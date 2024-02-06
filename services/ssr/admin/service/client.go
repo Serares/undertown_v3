@@ -27,7 +27,7 @@ type SSRAdminClient struct {
 
 func NewAdminClient(log *slog.Logger) *SSRAdminClient {
 	return &SSRAdminClient{
-		Log: log,
+		Log: log.WithGroup("Admin Client"),
 		Client: &http.Client{
 			Timeout: 30 * time.Second,
 		},

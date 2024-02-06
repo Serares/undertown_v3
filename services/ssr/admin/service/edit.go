@@ -2,13 +2,15 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/Serares/ssr/admin/types"
+	adminUtils "github.com/Serares/ssr/admin/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	"github.com/Serares/undertown_v3/utils"
 )
 
 type EditService struct {
@@ -18,7 +20,7 @@ type EditService struct {
 
 func NewEditService(log *slog.Logger, client ISSRAdminClient) *EditService {
 	return &EditService{
-		Log:    log,
+		Log:    log.WithGroup("Edit Service"),
 		Client: client,
 	}
 }
@@ -26,19 +28,20 @@ func NewEditService(log *slog.Logger, client ISSRAdminClient) *EditService {
 // TODO right now the Submit() method from the SubmitService is used to edit the property
 // func (es *EditService) Post(body, humanReadableId, authToken string) error {
 // }
-
 func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []string, types.PropertyFeatures, error) {
 	getPropertyUrl := os.Getenv("GET_PROPERTY_URL")
 	// have to add the human readable id to the url
 	// ❗TODO
 	// this might need some validations
-	urlWithQueryString := fmt.Sprintf("%s?propertyId=%s", getPropertyUrl, humanReadableId)
-
+	getPropertyBackendUrl, err := utils.AddParamToUrl(getPropertyUrl, utils.HumanReadableIdQueryKey, humanReadableId)
+	if err != nil {
+		es.Log.Error("error trying to create the backend delete url", "error", err)
+	}
 	// process the images returned from the db
 	// the images are a string separated by ;
 	// return to the views the images paths as a slice of strings
 
-	property, err := es.Client.GetProperty(urlWithQueryString, authToken)
+	property, err := es.Client.GetProperty(getPropertyBackendUrl, authToken)
 	if err != nil {
 		return lite.Property{}, nil, types.PropertyFeatures{}, err
 	}
@@ -60,4 +63,39 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 	}
 
 	return property, imagesWithPrefix, propertyFeatures, nil
+}
+
+func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lite.Property, types.PropertyFeatures, error) {
+	url := os.Getenv("SUBMIT_PROPERTY_URL")
+	url, err := utils.AddParamToUrl(url, utils.HumanReadableIdQueryKey, humanReadableId)
+	if err != nil {
+		es.Log.Error("error trying to construct the url")
+		return lite.Property{}, types.PropertyFeatures{}, err
+	}
+
+	bufferedBody, contentType, jsonString, err := adminUtils.ParseMultipart(r)
+	if err != nil {
+		return lite.Property{}, types.PropertyFeatures{}, err
+	}
+	// TODO handle the case where iamges are removed
+	err = es.Client.AddProperty(bufferedBody, url, token, contentType, http.MethodPut)
+	if err != nil {
+		es.Log.Error("error trying to send the request", "error", err)
+		property, features, unmarshallingErrors := adminUtils.UnmarshalProperty(jsonString)
+		// ❗
+		// populating a lite.Property struct with the types.RequestProperty fields
+		// because the views.Edit() component used for rerendering the last values
+		// is accepting a lite.Property prop as parameter
+		// TODO think if there are other ways around this hacky sittuation
+		// ❗this is the ending where the fields need to be rerendered
+		if unmarshallingErrors != nil {
+			es.Log.Error("error trying to unmarshal the data for error response", "error", unmarshallingErrors)
+			// This case the property and features will be empty struct values
+			return property, features, err
+		}
+		return property, features, err
+	}
+
+	// this is the success ending
+	return lite.Property{}, types.PropertyFeatures{}, nil
 }

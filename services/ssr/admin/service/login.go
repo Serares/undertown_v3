@@ -12,7 +12,7 @@ type LoginService struct {
 
 func NewLoginService(log *slog.Logger, client ISSRAdminClient) *LoginService {
 	return &LoginService{
-		Log:    log,
+		Log:    log.WithGroup("Login Service"),
 		Client: client,
 	}
 }

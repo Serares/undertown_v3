@@ -31,3 +31,4 @@ yarn-error.log*
 
 .aws-sam
 /**/__debug_bin*
+services/ssr/assets/uploads/**

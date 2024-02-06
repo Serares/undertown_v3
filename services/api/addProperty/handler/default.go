@@ -60,22 +60,39 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			utils.ReplyError(w, r, http.StatusExpectationFailed, "files are too large")
 			return
 		}
-		files := r.MultipartForm.File["images"]
-		if err != nil {
-			utils.ReplyError(w, r, http.StatusInternalServerError, "error uploading file to s3")
+		files := r.MultipartForm.File[utils.ImagesFormKey]
+		imagesToBeRemoved := r.MultipartForm.Value[utils.DeleteImagesFormKey]
+
+		if len(files) > 0 {
+			var processImagesErr error
+			if isLocal == "true" {
+				imagesPaths, processImagesErr = h.SubmitService.ProcessImagesLocal(r.Context(), files)
+			} else {
+				imagesPaths, processImagesErr = h.SubmitService.ProcessImagesS3(r.Context(), files)
+			}
+			if processImagesErr != nil {
+				h.Log.Error("error on processing the images", "error", processImagesErr)
+				utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the images")
+				return
+			}
 		}
-		if isLocal == "true" {
-			imagesPaths, err = h.SubmitService.ProcessPropertyImagesLocal(r.Context(), files)
-		} else {
-			imagesPaths, err = h.SubmitService.ProcessPropertyImages(r.Context(), files)
-		}
-		if err != nil {
-			h.Log.Error("error on processing the images", "error", err)
-			utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the images")
+
+		if len(imagesToBeRemoved) > 0 {
+			var deleteImagesError error
+			if isLocal == "true" {
+				deleteImagesError = h.SubmitService.DeleteImagesLocal(imagesToBeRemoved)
+			} else {
+				deleteImagesError = h.SubmitService.DeleteImagesS3(r.Context(), imagesToBeRemoved)
+			}
+			if deleteImagesError != nil {
+				h.Log.Error("error trying to delete the images", "error", err, "images names:", imagesToBeRemoved)
+				utils.ReplyError(w, r, http.StatusInternalServerError, "error deleting the image")
+				return
+			}
 		}
 
 		// TODO ❗
-		// this pattern of using conditionals seems a bit odd
+		// this pattern of using conditions seems a bit odd
 		// check if it's an edit request
 		// TODO you will also have a PUT request handled here
 		// TODO what if the data process/store failes, the images will be persisted without a property
@@ -83,8 +100,8 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// but you won't have the images paths (get the images names from the multipartForm.File? and store the paths before uploading the images?)
 		// think how to solve this
 		q := r.URL.Query()
-		if _, ok := q["propertyId"]; ok {
-			humanReadableId := q["propertyId"][0]
+		if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
+			humanReadableId := q[utils.HumanReadableIdQueryKey][0]
 			err = h.SubmitService.ProcessPropertyUpdateData(r.Context(), imagesPaths, r.MultipartForm, humanReadableId)
 		} else {
 			_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm, userId)

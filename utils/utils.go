@@ -75,6 +75,9 @@ func BoolToInt(b bool) int64 {
 }
 
 func AddParamToUrl(baseUrl, param, value string) (string, error) {
+	if baseUrl == "" {
+		return "", fmt.Errorf("the base url is empty")
+	}
 	parsedURL, err := url.Parse(baseUrl)
 	if err != nil {
 		return "", fmt.Errorf("error parsing the url %v; %s; %s", err, param, value)

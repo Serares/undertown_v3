@@ -22,8 +22,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 )
+
+var LocalAssetsRelativePath = "../../ssr/assets/uploads"
 
 // TODO handle the property creation
 // handle the checking if the user id exists before persisting the property
@@ -37,16 +40,15 @@ type Submit struct {
 
 func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
 	return Submit{
-		Log:                log,
+		Log:                log.WithGroup("Submit Service"),
 		PropertyRepository: pr,
 	}
 }
 
-func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
-	var localDirPath = "../../ssr/assets/uploads"
+func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
 	var imagePaths []string
 	var outErr bytes.Buffer
-	err := os.Mkdir(localDirPath, 0755)
+	err := os.Mkdir(LocalAssetsRelativePath, 0755)
 	if err != nil {
 		ss.Log.Error("Error creating the temp dir", "err", err)
 	}
@@ -58,7 +60,7 @@ func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multi
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
-		filePath := fmt.Sprintf("%s/%s", localDirPath, fileHeader.Filename)
+		filePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, fileHeader.Filename)
 		dst, err := os.Create(filePath)
 		if err != nil {
 			ss.Log.Error("error trying to create the file path")
@@ -68,7 +70,7 @@ func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multi
 			ss.Log.Error("error copying the file")
 		}
 		webpFileName := fileHeader.Filename + ".webp"
-		webpFilePath := fmt.Sprintf("%s/%s", localDirPath, webpFileName)
+		webpFilePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, webpFileName)
 		// convert to webp
 		cmd := exec.Command("cwebp", "-q", "75", filePath, "-o", webpFilePath)
 		cmd.Stderr = &outErr
@@ -83,15 +85,15 @@ func (ss *Submit) ProcessPropertyImagesLocal(ctx context.Context, files []*multi
 }
 
 // Uploads the files to S3
-func (ss *Submit) ProcessPropertyImages(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
+func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
 	var imagePaths []string
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
-		ss.Log.Error("error loading the default config for lambda")
+		ss.Log.Error("error loading the default config for lambda", "error", err)
 	}
 	s3Client := s3.NewFromConfig(cfg)
 	var outErr bytes.Buffer
-	bucketName := os.Getenv("ASSETS_BUCKET_NAME")
+	bucketName := os.Getenv(types.ASSETS_BUCKET_ENV)
 	webpDir, err := os.MkdirTemp("", "webp")
 	if err != nil {
 		ss.Log.Error("error creating webp dir")
@@ -206,6 +208,7 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []s
 func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, userId string) (string, string, error) {
 	var propertyId = uuid.New().String()
 	var requestProperty utils.RequestProperty
+	thumbnail := ""
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
 		ss.Log.Error("json property not provided")
@@ -261,6 +264,10 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		return "", "", err
 	}
 
+	if len(imagesPaths) > 0 {
+		thumbnail = imagesPaths[0]
+	}
+
 	humanReadableId := util.HumanReadableId(repositoryTypes.TransactionType(requestProperty.PropertyTransaction))
 	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
 		ID:                  propertyId,
@@ -268,7 +275,7 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		Humanreadableid:     humanReadableId,
 		Title:               requestProperty.Title,
 		Images:              strings.Join(imagesPaths, ";"),
-		Thumbnail:           imagesPaths[0],
+		Thumbnail:           thumbnail,
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: repositoryTypes.TransactionType(requestProperty.PropertyTransaction).String(),
 		PropertyDescription: requestProperty.PropertyDescription,
@@ -283,4 +290,46 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 		return "", "", fmt.Errorf("error trying to persist the order with error: %v", err)
 	}
 	return propertyId, humanReadableId, nil
+}
+
+func (ss *Submit) DeleteImagesLocal(imagesList []string) error {
+	for _, imagePath := range imagesList {
+		parts := strings.Split(imagePath, "/")
+		imageName := parts[len(parts)-1]
+		imageRelativePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, imageName)
+		if err := os.Remove(imageRelativePath); err != nil {
+			ss.Log.Error("error trying to remove the file", "filePath", imageRelativePath, "error", err)
+			return fmt.Errorf("error trying to remove image %v", err)
+		}
+	}
+	return nil
+}
+
+func (ss *Submit) DeleteImagesS3(ctx context.Context, imagesList []string) error {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	bucketName := os.Getenv(types.ASSETS_BUCKET_ENV)
+	if err != nil {
+		ss.Log.Error("error trying to initialize the default lambda config", "error", err)
+	}
+
+	client := s3.NewFromConfig(cfg)
+	var objects []s3Types.ObjectIdentifier
+	for _, key := range imagesList {
+		objects = append(objects, s3Types.ObjectIdentifier{
+			Key: &key,
+		})
+	}
+
+	_, err = client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
+		Bucket: &bucketName,
+		Delete: &s3Types.Delete{
+			Objects: objects,
+		},
+	})
+	if err != nil {
+		ss.Log.Error("error trying to delete objects in s3", "error", err)
+		return err
+	}
+
+	return nil
 }

@@ -41,7 +41,7 @@ func main() {
 	loginHanlder := handlers.NewLoginHandler(log, loginService)
 	submitHandler := handlers.NewSubmitHandler(log, submitService)
 	listingsHandler := handlers.NewListingsHandler(log, listingService)
-	editHandler := handlers.NewEditHandler(log, editService, submitService)
+	editHandler := handlers.NewEditHandler(log, editService)
 	deleteHandler := handlers.NewDeleteHandler(log, deleteService)
 
 	// This is not advised to use in prod

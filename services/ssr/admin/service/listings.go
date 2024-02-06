@@ -17,7 +17,7 @@ type ListingsService struct {
 
 func NewListingService(log *slog.Logger, client ISSRAdminClient) *ListingsService {
 	return &ListingsService{
-		Log:    log,
+		Log:    log.WithGroup("Listings Service"),
 		Client: client,
 	}
 }

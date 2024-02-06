@@ -18,13 +18,15 @@ import (
 )
 
 type EditHandler struct {
-	Log           *slog.Logger
-	Service       *service.EditService
-	SubmitService *service.SubmitService
+	Log     *slog.Logger
+	Service *service.EditService
 }
 
-func NewEditHandler(log *slog.Logger, service *service.EditService, submitService *service.SubmitService) *EditHandler {
-	return &EditHandler{Log: log, Service: service, SubmitService: submitService}
+func NewEditHandler(log *slog.Logger, service *service.EditService) *EditHandler {
+	return &EditHandler{
+		Log:     log.WithGroup("Edit handler"),
+		Service: service,
+	}
 }
 
 func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +45,13 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// add property human readable id as query string
 		deleteUrl, err = utils.AddParamToUrl(deleteUrl, utils.HumanReadableIdQueryKey, theId)
+		if err != nil {
+			h.Log.Error("error creating the delete url", "error", err)
+		}
 		editUrl, err = utils.AddParamToUrl(editUrl, utils.HumanReadableIdQueryKey, theId)
+		if err != nil {
+			h.Log.Error("error creating the edit url", "error", err)
+		}
 		if err != nil {
 			h.Log.Error("malformed request", "id", theId, "error", err)
 			viewEdit(w, r, types.EditProps{
@@ -54,10 +62,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				PropertyTransaction: types.PropertyTransactions,
 				PropertyFeatures:    types.PropertyFeatures{},
 				Images:              []string{},
-				FormMethod:          http.MethodPost,
 				FormAction:          editUrl,
 			},
 				deleteUrl,
+				utils.DeleteImagesFormKey,
+				http.StatusInternalServerError,
 			)
 			return
 		}
@@ -78,10 +87,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					PropertyTransaction: types.PropertyTransactions,
 					PropertyFeatures:    types.PropertyFeatures{},
 					Images:              []string{},
-					FormMethod:          http.MethodPost,
 					FormAction:          editUrl,
 				},
 					deleteUrl,
+					utils.DeleteImagesFormKey,
+					http.StatusInternalServerError,
 				)
 				return
 			}
@@ -93,10 +103,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				Images:              images,
 				SuccessMessage:      "",
 				ErrorMessage:        "",
-				FormMethod:          http.MethodPost,
 				FormAction:          editUrl,
 			},
 				deleteUrl,
+				utils.DeleteImagesFormKey,
+				http.StatusOK,
 			)
 			return
 		}
@@ -105,7 +116,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// This is just a patchy solution to reuse the existing code of sending data
 		if r.Method == http.MethodPost {
 			fullUrl := r.URL.Path + "?" + r.URL.RawQuery
-			liteProperty, features, err := h.SubmitService.Submit(r, token, theId, true)
+			liteProperty, features, err := h.Service.Post(r, token, theId)
 			if err != nil {
 				h.Log.Error("error trying to update the property", "id", theId, "error", err)
 				viewEdit(w, r, types.EditProps{
@@ -116,10 +127,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					Images:              []string{}, // images are rip
 					PropertyTypes:       types.PropertyTypes,
 					PropertyTransaction: types.PropertyTransactions,
-					FormMethod:          http.MethodPost,
 					FormAction:          editUrl,
 				},
 					deleteUrl,
+					utils.DeleteImagesFormKey,
+					http.StatusInternalServerError,
 				)
 				return
 			}
@@ -135,7 +147,8 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // TODO maybe I can reuse the submit.templ template
 // but for now just create a new template
 // The reason for the deleteUrl parm is because the types.EditProps is reused with the submit path and submit doesn't really need the delete url
-func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl string) {
+func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl, deletedImagesFormKey string, statusCode int64) {
+	w.WriteHeader(int(statusCode))
 	views.Edit(
 		types.BasicIncludes{
 			Header: components.Header("Edit"),
@@ -143,8 +156,7 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 				Title: "Edit",
 			},
 			),
-			DropzoneScript: includes.DropZone(props.Images), // TODO is this bad pattern?
-			Preload:        components.Preload(),
+			Preload: components.Preload(),
 			Navbar: components.Navbar(includesTypes.NavbarProps{
 				Path:    fmt.Sprintf("admin%s", types.EditPath),
 				IsAdmin: true,
@@ -156,6 +168,9 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 			HandleDeleteButton: includes.HandleDeleteButton(types.DeleteScriptProps{
 				DeleteUrl: deleteUrl,
 			}),
+			EditDropzoneScript: includes.DropzoneEdit(props.Images, props.FormAction, deletedImagesFormKey),
+			Modal:              components.Modal(""),
+			LeafletMap:         includes.LeafletMap(props.PropertyFeatures.Lat, props.PropertyFeatures.Lng),
 		},
 		props,
 	).Render(r.Context(), w)

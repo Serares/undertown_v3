@@ -14,18 +14,34 @@ const (
 	LoginPath    = "/login"
 )
 
+var DefaultMapLocation = struct {
+	Lat string
+	Lng string
+}{
+	Lat: "44.431907651074624",
+	Lng: "26.097464561462406",
+}
+
 type BasicIncludes struct {
-	Header         templ.Component
-	BannerSection  templ.Component
-	Preload        templ.Component
-	Navbar         templ.Component
-	Footer         templ.Component
-	Scripts        templ.Component
-	DropzoneScript templ.ComponentScript
+	Header        templ.Component
+	BannerSection templ.Component
+	Preload       templ.Component
+	Navbar        templ.Component
+	Footer        templ.Component
+	Scripts       templ.Component
 }
 
 type EditIncludes struct {
 	HandleDeleteButton templ.ComponentScript
+	EditDropzoneScript templ.ComponentScript
+	Modal              templ.Component
+	LeafletMap         templ.ComponentScript
+}
+
+type SubmitIncludes struct {
+	SubmitDropzoneScript templ.ComponentScript
+	Modal                templ.Component
+	LeafletMap           templ.ComponentScript
 }
 
 type SelectInputs struct {
@@ -36,19 +52,18 @@ type SelectInputs struct {
 type SubmitProps struct {
 	PropertyTypes       []SelectInputs
 	PropertyTransaction []SelectInputs
-	FormMethod          string
-	FormAction          string
-	Message             string
+	PropertyFeatures    PropertyFeatures
+	Property            lite.Property
+	SuccessMessage      string
 	ErrorMessage        string
 }
 
 type EditProps struct {
+	FormAction          string // needed to pass in the property human readable id
 	PropertyTypes       []SelectInputs
 	PropertyTransaction []SelectInputs
 	PropertyFeatures    PropertyFeatures
 	Property            lite.Property
-	FormMethod          string
-	FormAction          string
 	Images              []string // The images comming from db are a string of image paths separated by ;
 	ErrorMessage        string
 	SuccessMessage      string
@@ -141,6 +156,8 @@ type PropertyFeatures struct {
 	HeatingGasConvector              bool   `json:"heating_gas_convector"`
 	HeatingInfraredPanels            bool   `json:"heating_infrared_panels"`
 	HeatingFloorHeating              bool   `json:"heating_floor_heating"`
+	Lat                              string `json:"lat"`
+	Lng                              string `json:"lng"`
 }
 
 type DeleteScriptProps struct {

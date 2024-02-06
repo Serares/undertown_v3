@@ -7,10 +7,10 @@ package includes
 
 import "github.com/a-h/templ"
 
-func DropZone(images []string) templ.ComponentScript {
+func DropzoneSubmit() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DropZone_7939`,
-		Function: `function __templ_DropZone_7939(images){Dropzone.options.uploadForm = {
+		Name: `__templ_DropzoneSubmit_1014`,
+		Function: `function __templ_DropzoneSubmit_1014(){Dropzone.options.uploadForm = {
     autoProcessQueue: false,
     addRemoveLinks: true,
     uploadMultiple: true,
@@ -21,23 +21,13 @@ func DropZone(images []string) templ.ComponentScript {
     paramName: "#images-input",
     init: function () {
       var myDropzone = this;
-      if (images && images.length) {
-      images.forEach((path)=>{
-        // those are just some mock data
-        const fileData = {
-            name: path,
-            size: 12345,
-            type: "webp"
-        }
-        myDropzone.displayExistingFile( fileData, path)
-      })
-      }
       this.element
         .querySelector("button[type=submit]")
         .addEventListener("click", function (e) {
           e.preventDefault();
           e.stopPropagation();
           document.querySelector(".dz-hidden-input").setAttribute("name", "images")
+          // Have to handle the case where the user is not adding any new images when modifying the property
           myDropzone.processQueue();
         });
       this.on("sendingmultiple", function () {
@@ -46,25 +36,31 @@ func DropZone(images []string) templ.ComponentScript {
       this.on("addedfile", function(file){ 
         console.log(file)
       });
-      this.on("successmultiple", function (files, response) {
-        if (!response.ok) {
-                // console.log("network response", response)
-            }
-            if (response.redirect) {
-                window.location.href = response.url;
-            }
-            // return response.json();
-            document.documentElement.innerHTML = response
+      this.on("successmultiple", function (files, response, xhr) {
+          if (response.redirect) {
+              window.location.href = response.url;
+          }
+          // return response.json();
+          document.documentElement.innerHTML = response;
+          if (response.ok !== undefined && !response.ok) {
+              $("#myModal .modal-body").html("Failed to add the property")
+              $("#myModal").modal("show")
+          }
             // dispatch a event that the page has loaded success
             var submitEvent = new CustomEvent('submitresponse', {
                     detail: { key: 'loadsuccess' }
                   });
             window.dispatchEvent(submitEvent)
       });
-      this.on("errormultiple", function (files, response) {});
+      this.on("errormultiple", function (files, response) {
+        if (response.ok != undefined && !response.ok) {
+                $("#myModal .modal-body").html("Failed editing the property")
+                $("#myModal").modal("show")
+          }
+      });
     },
   };}`,
-		Call:       templ.SafeScript(`__templ_DropZone_7939`, images),
-		CallInline: templ.SafeScriptInline(`__templ_DropZone_7939`, images),
+		Call:       templ.SafeScript(`__templ_DropzoneSubmit_1014`),
+		CallInline: templ.SafeScriptInline(`__templ_DropzoneSubmit_1014`),
 	}
 }

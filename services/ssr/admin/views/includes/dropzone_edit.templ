@@ -1,0 +1,102 @@
+package includes
+
+script DropzoneEdit(images []string, url string, deleteImagesFormKey string) {
+    Dropzone.options.uploadForm = {
+    autoProcessQueue: false,
+    addRemoveLinks: true,
+    uploadMultiple: true,
+    parallelUploads: 100,
+    maxFiles: 100,
+    previewsContainer: ".dropzone-previews",
+    hiddenInputContainer: ".browse_submit",
+    paramName: "#images-input",
+    init: function () {
+      var myDropzone = this;
+      if (images && images.length) {
+      images.forEach((path)=>{
+        // those are just some mock data
+        const fileData = {
+            name: path,
+            size: 12345,
+            type: "webp",
+            status: "s3"
+        }
+        myDropzone.displayExistingFile( fileData, path)
+      })
+      }
+      this.element
+        .querySelector("button[type=submit]")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          document.querySelector(".dz-hidden-input").setAttribute("name", "images")
+          // Have to handle the case where the user is not adding any new images when modifying the property
+          if (myDropzone.getQueuedFiles().length > 0) {
+            myDropzone.processQueue();
+          } else {
+            // manually send the AJAX request
+            let formData = new FormData(myDropzone.element)
+            fetch(url, {
+            method: "POST",
+            body: formData,
+            }
+            )
+            .then(response => {
+              if (response.ok !== undefined && !response.ok) {
+                myDropzone.emit("errormultiple", [], response)
+                return
+              }
+              myDropzone.emit("successmultiple", [], response)
+            })
+            .catch(err=> {
+              console.log("error sending thew AJAX request")
+            })
+          }
+        });
+      this.on("sendingmultiple", function () {
+        console.log("Sending multiple");
+      });
+      this.on("addedfile", function(file){ 
+        console.log(file)
+      });
+      this.on("successmultiple", function (files, response, xhr) {
+        
+        if (response.redirect) {
+            window.location.href = response.url;
+          }
+          // return response.json();
+          document.documentElement.innerHTML = response
+          if (response.ok != undefined && response.ok) {
+                $("#myModal .modal-body").html("Success editing the property")
+                $("#myModal").modal("show")
+          }
+          // dispatch a event that the page has loaded success
+          var submitEvent = new CustomEvent('submitresponse', {
+                  detail: { key: 'loadsuccess' }
+                });
+          window.dispatchEvent(submitEvent)
+      });
+      this.on("errormultiple", function (files, response, xhr) {
+        if (response.ok != undefined && !response.ok) {
+                $("#myModal .modal-body").html("Failed editing the property")
+                $("#myModal").modal("show")
+          }
+      });
+      this.on("removedfile", function(file) {
+        // check if status of the image is S3 and add it to the remove list
+        if (file.status && file.status.toLowerCase() === "s3") {
+          // create inputs with the same name for each delete file
+          // because inputs with the same names will be added as an array of values with the same key
+          let newInput = document.createElement("input");
+          newInput.type = "text"
+          newInput.id = "input-" + Math.random().toString(36).substr(2,9)
+          newInput.setAttribute("name", deleteImagesFormKey);
+          newInput.setAttribute("style", "visibility: hidden;");
+          newInput.classList.add("hidden");
+          newInput.value = file.name;
+          this.element.appendChild(newInput);
+        }
+      })
+    },
+  };
+}

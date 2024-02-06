@@ -4,7 +4,6 @@ package views
 // for example the BasicIncludes struct is similar for the moment
 import "github.com/Serares/ssr/admin/types"
 import "fmt"
-import "strings"
 
 script createGlobalImagesVariable(images []string) {
 	const imagesPaths = images
@@ -15,6 +14,18 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 	<html>
 		<span>
 			<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+			<link
+ 				rel="stylesheet"
+ 				href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+ 				integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+ 				crossorigin=""
+			/>
+			<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+			<style>
+				#mapid {
+					min-height: 400px;
+				}
+			</style>
 		</span>
 		@contents.Header
 		<body class="page-load">
@@ -35,7 +46,7 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 						<div class="container">
 							<div class="row">
 								<div class="col-lg-9 col-md-10">
-									<form id="upload-form" action={ templ.SafeURL(props.FormAction) } method={ props.FormMethod } class="dropzone" enctype="multipart/form-data">
+									<form id="upload-form" action={ templ.SafeURL(props.FormAction) } method="POST" class="dropzone" enctype="multipart/form-data">
 										<div class="basic_information">
 											if props.ErrorMessage != "" {
 												<div class="text-danger bold">{ props.ErrorMessage }</div>
@@ -511,40 +522,43 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 											<div class="alert alert-warning">Check the extra features and facility of the property, it will show with the property.</div>
 										</div>
 										<div class="upload_media mt-5">
-											<h4 class="inner-title mb-4">Upload Photo and Document</h4>
+											<h4 class="inner-title mb-4">Upload images</h4>
 											<p>Felis etiam erat curabitur bibendum iaculis quisque placerat egestas. Nullam, lacus dis et consectetuer rhoncus etiam. Non vitae turpis curae; lacus sociosqu. Quisque. Lobortis aliquam penatibus mi. </p>
 											<div class="row">
 												<div class="col-md-12">
 													<div id="images-input" class="browse_submit">
-														<span>Add Photos</span>
+														<span>Images</span>
 														<div class="dz-default dz-message">
 															// <button class="dz-button fileupload_label" type="button" value="Adauga imagini aici">Adauga imagini aici</button>
-															<label class="dz-button fileupload_label specific extra">Adauga imagini aici</label>
+															<label class="dz-button fileupload_label specific extra">Click here to add images</label>
 														</div>
 													</div>
 												</div>
+												// <input type="file" class="hidden" id="fileInput" multiple name="images" style="visiblity: hidden;"/>
 												<div class="col-lg-12">
 													<div class="property_thumbnails mt-5">
 														<div class="row dropzone-previews"></div>
 													</div>
 												</div>
 											</div>
-											<div class="alert alert-warning">Please uplaod the photo of the property, please keep the photo size 760X410 ratio and please upload the PDF or Doc file at the document attachment.</div>
+											<div class="alert alert-warning">
+												The first images uploaded will be selected as the thumbnail
+											</div>
 										</div>
+										<div class="single_map mb-5">
+											<h4 class="inner-title mb-4">Locație</h4>
+											<div id="mapid" class="map-canvas"></div>
+										</div>
+										<input type="text" id="latitude" name="latitude" class="hidden" style="visibility: hidden;"/>
+										<input type="text" id="longitude" name="longitude" class="hidden" style="visibility: hidden;"/>
 										<div class="browse_submit">
 											<button type="submit" name="submit" class="btn btn_primary">
-												if strings.Contains(props.FormAction, "submit") {
-													Adauga
-												} else {
-													Modifica
-												}
+												Modifica
 											</button>
 										</div>
-										if strings.Contains(props.FormAction, "edit") {
-											<div class="browse_submit">
-												<button id="delete_button" class="btn btn-danger">Delete</button>
-											</div>
-										}
+										<div class="browse_submit">
+											<button id="delete_button" class="btn btn-danger">Delete</button>
+										</div>
 									</form>
 								</div>
 							</div>
@@ -562,8 +576,10 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 			<!-- Wrapper End -->
 			<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 			@contents.Scripts
-			@contents.DropzoneScript
+			@editIncludes.EditDropzoneScript
 			@editIncludes.HandleDeleteButton
+			@editIncludes.Modal
+			@editIncludes.LeafletMap
 		</body>
 	</html>
 }

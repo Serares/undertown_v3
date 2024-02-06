@@ -14,7 +14,7 @@ type DeleteService struct {
 
 func NewDeleteService(log *slog.Logger, client ISSRAdminClient) *DeleteService {
 	return &DeleteService{
-		Log:    log,
+		Log:    log.WithGroup("Delete Service"),
 		Client: client,
 	}
 }
