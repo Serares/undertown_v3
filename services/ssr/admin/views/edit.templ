@@ -62,7 +62,7 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 												</div>
 												<div class="col-md-6 col-sm-6">
 													<div class="form-group">
-														<select name="property_type" class="selectpicker form-control" data-live-search="true">
+														<select name="property_type" class="form-control" data-live-search="true">
 															for _, option := range props.PropertyTypes {
 																<option
  																	value={ option.Value }
@@ -78,7 +78,7 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 												</div>
 												<div class="col-md-6 col-sm-6">
 													<div class="form-group">
-														<select name="property_transaction" class="selectpicker form-control" data-live-search="true">
+														<select name="property_transaction" class="form-control" data-live-search="true">
 															for _, option := range props.PropertyTransaction {
 																<option
  																	value={ option.Value }
@@ -174,7 +174,7 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 										<div class="energy_certificate mt-5">
 											<h4 class="inner-title mb-4">Certificat energetic</h4>
 											<div class="form-group">
-												<select name="energy_class" class="selectpicker form-control" data-live-search="true">
+												<select name="energy_class" class="form-control" data-live-search="true">
 													<option
  														if props.PropertyFeatures.EnergyClass == "A" {
 															selected="true"

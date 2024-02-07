@@ -205,7 +205,7 @@ func Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"title\" type=\"text\" placeholder=\"Property Title\" class=\"form-control\"></div></div><div class=\"col-md-6 col-sm-6\"><div class=\"form-group\"><select name=\"property_type\" class=\"selectpicker form-control\" data-live-search=\"true\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"title\" type=\"text\" placeholder=\"Property Title\" class=\"form-control\"></div></div><div class=\"col-md-6 col-sm-6\"><div class=\"form-group\"><select name=\"property_type\" class=\"form-control\" data-live-search=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -242,7 +242,7 @@ func Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props t
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div></div><div class=\"col-md-6 col-sm-6\"><div class=\"form-group\"><select name=\"property_transaction\" class=\"selectpicker form-control\" data-live-search=\"true\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div></div><div class=\"col-md-6 col-sm-6\"><div class=\"form-group\"><select name=\"property_transaction\" class=\"form-control\" data-live-search=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -377,7 +377,7 @@ func Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4><div class=\"form-group\"><select name=\"energy_class\" class=\"selectpicker form-control\" data-live-search=\"true\"><option")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4><div class=\"form-group\"><select name=\"energy_class\" class=\"form-control\" data-live-search=\"true\"><option")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

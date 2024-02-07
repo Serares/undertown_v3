@@ -18,7 +18,7 @@ func HumanReadableId(propertyType types.TransactionType) string {
 	var randomBlock []string
 
 	for i := 0; i < 2; i++ {
-		randomBlock = append(randomBlock, generateRandomBlock(3))
+		randomBlock = append(randomBlock, generateRandomBlock(5, int32(i+1)))
 	}
 
 	transactionTypeTrimmedCapitalized := strings.ToUpper(propertyType.String()[:2])
@@ -34,9 +34,10 @@ func generateRandomInt() int {
 	return random.Int()
 }
 
-func generateRandomBlock(numOfDigits int32) string {
+func generateRandomBlock(numOfDigits, n int32) string {
 	for {
 		randomInt := generateRandomInt()
+		randomInt = randomInt * int(n)
 		intToString := fmt.Sprintf("%d", randomInt)
 		if len(intToString) > int(numOfDigits) {
 			return intToString[1 : numOfDigits+1]

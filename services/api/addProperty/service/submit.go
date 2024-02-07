@@ -198,16 +198,14 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths, de
 		finalImages = append(finalImages, imagesPaths...)
 	}
 	var filteredImages = make([]string, 0)
-	if len(deleteImages) > 0 {
-		removeMap := make(map[string]bool, 0)
-		for _, img := range deleteImages {
-			removeMap[img] = true
-		}
+	removeMap := make(map[string]bool, 0)
+	for _, img := range deleteImages {
+		removeMap[img] = true
+	}
 
-		for _, img := range finalImages {
-			if !removeMap[img] {
-				filteredImages = append(filteredImages, img)
-			}
+	for _, img := range finalImages {
+		if !removeMap[img] {
+			filteredImages = append(filteredImages, img)
 		}
 	}
 

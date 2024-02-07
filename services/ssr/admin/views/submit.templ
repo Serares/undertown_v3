@@ -53,25 +53,25 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 														<input value={ props.Property.Title } name="title" type="text" placeholder="Property Title" class="form-control"/>
 													</div>
 												</div>
-												<div class="col-md-6 col-sm-6">
-													<div class="form-group">
-														<select name="property_type" class="selectpicker form-control" data-live-search="true">
-															for _, option := range props.PropertyTypes {
-																<option
- 																	value={ option.Value }
- 																	if option.Value == props.Property.PropertyType {
-																		selected="true"
-																	}
-																>
-																	{ option.DisplayName }
-																</option>
-															}
-														</select>
-													</div>
+												<div class="col-md-6 col-sm-12">
+													<label>Tipul proprietatii</label>
+													<select name="property_type" class="form-control" data-live-search="true">
+														for _, option := range props.PropertyTypes {
+															<option
+ 																value={ option.Value }
+ 																if option.Value == props.Property.PropertyType {
+																	selected="true"
+																}
+															>
+																{ option.DisplayName }
+															</option>
+														}
+													</select>
 												</div>
 												<div class="col-md-6 col-sm-6">
 													<div class="form-group">
-														<select name="property_transaction" class="selectpicker form-control" data-live-search="true">
+														<label>Tranzactie</label>
+														<select name="property_transaction" class="form-control" data-live-search="true">
 															for _, option := range props.PropertyTransaction {
 																<option
  																	value={ option.Value }
@@ -167,7 +167,7 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 										<div class="energy_certificate mt-5">
 											<h4 class="inner-title mb-4">Certificat energetic</h4>
 											<div class="form-group">
-												<select name="energy_class" class="selectpicker form-control" data-live-search="true">
+												<select name="energy_class" class="form-control" data-live-search="true">
 													<option
  														if props.PropertyFeatures.EnergyClass == "A" {
 															selected="true"
