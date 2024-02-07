@@ -22,7 +22,7 @@ script HandleDeleteButton(props types.DeleteScriptProps) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            if (response.redirect) {
+            if (response.redirected) {
                 window.location.href = response.url;
                 return
             }
@@ -30,7 +30,7 @@ script HandleDeleteButton(props types.DeleteScriptProps) {
         })
         .then(data => {
             // console.log(data); // Handle success response
-            document.documentElement.innerHTML = response;
+            document.documentElement.innerHTML = data;
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);

@@ -61,7 +61,7 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ErrorMessage:        "",
 			PropertyTypes:       types.PropertyTypes,
 			PropertyTransaction: types.PropertyTransactions,
-			PropertyFeatures:    types.PropertyFeatures{},
+			PropertyFeatures:    utils.PropertyFeatures{},
 			Property:            lite.Property{},
 		},
 			http.StatusOK,

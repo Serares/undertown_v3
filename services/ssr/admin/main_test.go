@@ -44,6 +44,7 @@ func setupAPI(t *testing.T) (string, func()) {
 	submitService := service.NewSubmitService(log, client)
 	listingService := service.NewListingService(log, client)
 	editService := service.NewEditService(log, client)
+	deleteService := service.NewDeleteService(log, client)
 
 	m := http.NewServeMux()
 
@@ -51,6 +52,7 @@ func setupAPI(t *testing.T) (string, func()) {
 	submitHandler := handlers.NewSubmitHandler(log, submitService)
 	listingsHandler := handlers.NewListingsHandler(log, listingService)
 	editHandler := handlers.NewEditHandler(log, editService)
+	deleteHandler := handlers.NewDeleteHandler(log, deleteService)
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
 	m.Handle("/login/", loginHanlder)
@@ -61,8 +63,8 @@ func setupAPI(t *testing.T) (string, func()) {
 	m.Handle("/edit/", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
 	m.Handle("/list", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
 	m.Handle("/list/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
-	m.Handle("/delete", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
-	m.Handle("/delete/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
+	m.Handle("/delete", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
+	m.Handle("/delete/", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
 
 	ts := httptest.NewServer(m)
 

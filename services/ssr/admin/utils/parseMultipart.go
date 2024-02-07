@@ -8,6 +8,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
+
+	"github.com/Serares/undertown_v3/utils"
 )
 
 // ❔
@@ -23,8 +25,9 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 
 	var newReaderBuffer bytes.Buffer
 	writer := multipart.NewWriter(&newReaderBuffer)
-	var jsonStructure map[string]interface{} = make(map[string]interface{})
+	defer writer.Close()
 
+	var jsonStructure map[string]interface{} = make(map[string]interface{})
 	for key, values := range r.PostForm {
 		if len(values) > 1 {
 			// this is for all the fields that have one key with multiple values
@@ -50,6 +53,21 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 		}
 	}
 
+	// ❗images that are removed will be sent as a form field
+	// because the images have to be removed before doing all the json unmarshalling and db updates on the backend
+	if len(r.MultipartForm.Value[utils.DeleteImagesFormKey]) > 0 {
+		removedImagesWriter, err := writer.CreateFormField(utils.DeleteImagesFormKey)
+		if err != nil {
+			return nil, "", nil, fmt.Errorf("error creating the remove images form key %v", err)
+		}
+		for _, ri := range r.MultipartForm.Value[utils.DeleteImagesFormKey] {
+			_, err = removedImagesWriter.Write([]byte(ri))
+			if err != nil {
+				return nil, "", nil, fmt.Errorf("error writing the remove images form value %v", err)
+			}
+		}
+	}
+
 	textWriter, _ := writer.CreateFormField("property")
 	// json marshal
 	jsonString, err := json.Marshal(jsonStructure)
@@ -69,7 +87,7 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 			}
 			defer file.Close()
 
-			fw, err := writer.CreateFormFile("images", fileHeader.Filename)
+			fw, err := writer.CreateFormFile(utils.ImagesFormKey, fileHeader.Filename)
 			if err != nil {
 				return nil, "", nil, fmt.Errorf("error creating file writer %v", err)
 			}
@@ -79,6 +97,5 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 		}
 	}
 	contentType := writer.FormDataContentType()
-	writer.Close()
 	return &newReaderBuffer, contentType, jsonString, err
 }

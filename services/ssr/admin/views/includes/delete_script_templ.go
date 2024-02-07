@@ -11,8 +11,8 @@ import "github.com/Serares/ssr/admin/types"
 
 func HandleDeleteButton(props types.DeleteScriptProps) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_HandleDeleteButton_4ee1`,
-		Function: `function __templ_HandleDeleteButton_4ee1(props){document.getElementById('delete_button').addEventListener('click', function(e) {
+		Name: `__templ_HandleDeleteButton_bb5d`,
+		Function: `function __templ_HandleDeleteButton_bb5d(props){document.getElementById('delete_button').addEventListener('click', function(e) {
         e.preventDefault(); // Stop the form from submitting normally
         if(window.confirm("Are you sure you want to delete?")) {
         fetch(props.DeleteUrl, {
@@ -31,7 +31,7 @@ func HandleDeleteButton(props types.DeleteScriptProps) templ.ComponentScript {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            if (response.redirect) {
+            if (response.redirected) {
                 window.location.href = response.url;
                 return
             }
@@ -39,7 +39,7 @@ func HandleDeleteButton(props types.DeleteScriptProps) templ.ComponentScript {
         })
         .then(data => {
             // console.log(data); // Handle success response
-            document.documentElement.innerHTML = response;
+            document.documentElement.innerHTML = data;
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
@@ -48,7 +48,7 @@ func HandleDeleteButton(props types.DeleteScriptProps) templ.ComponentScript {
         });
         }
     });}`,
-		Call:       templ.SafeScript(`__templ_HandleDeleteButton_4ee1`, props),
-		CallInline: templ.SafeScriptInline(`__templ_HandleDeleteButton_4ee1`, props),
+		Call:       templ.SafeScript(`__templ_HandleDeleteButton_bb5d`, props),
+		CallInline: templ.SafeScriptInline(`__templ_HandleDeleteButton_bb5d`, props),
 	}
 }

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Serares/ssr/admin/types"
 	adminUtils "github.com/Serares/ssr/admin/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	"github.com/Serares/undertown_v3/utils"
 )
 
 type SubmitService struct {
@@ -26,7 +26,7 @@ type PropertyFormField struct {
 	Title string
 }
 
-func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId string) (lite.Property, types.PropertyFeatures, error) {
+func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId string) (lite.Property, utils.PropertyFeatures, error) {
 	var err error
 	// TODO
 	// run some validations here if needed
@@ -38,7 +38,7 @@ func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId strin
 	// to fill the values of the inputs
 	bufferedBody, contentType, jsonString, err := adminUtils.ParseMultipart(r)
 	if err != nil {
-		return lite.Property{}, types.PropertyFeatures{}, err
+		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
 
 	err = s.Client.AddProperty(bufferedBody, url, authToken, contentType, http.MethodPost)
@@ -61,5 +61,5 @@ func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId strin
 	}
 
 	// this is the success ending
-	return lite.Property{}, types.PropertyFeatures{}, nil
+	return lite.Property{}, utils.PropertyFeatures{}, nil
 }

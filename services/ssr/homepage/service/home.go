@@ -46,9 +46,9 @@ func (hs *HomeService) ListProperties() ([]ProcessedFeaturedProperty, error) {
 			TransactionType: featProp.PropertyTransaction,
 			Price:           featProp.Price,
 			DisplayPrice:    utils.CreateDisplayPrice(featProp.Price),
-			PropertyPathUrl: utils.CreatePropertyPath(featProp.Title, featProp.Humanreadableid),
-			CreatedTime:     utils.CreateDisplayCreatedAt(featProp.CreatedAt),
-			Thumbnail:       featProp.Thumbnail,
+			// PropertyPathUrl: utils.UrlEncodePropertyTitle(featProp.Title, featProp.Humanreadableid), // TODO
+			CreatedTime: utils.CreateDisplayCreatedAt(featProp.CreatedAt),
+			Thumbnail:   featProp.Thumbnail,
 		})
 	}
 	return processedFeatProperties, nil

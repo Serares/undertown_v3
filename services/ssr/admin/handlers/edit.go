@@ -60,12 +60,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				Property:            lite.Property{},
 				PropertyTypes:       types.PropertyTypes,
 				PropertyTransaction: types.PropertyTransactions,
-				PropertyFeatures:    types.PropertyFeatures{},
+				PropertyFeatures:    utils.PropertyFeatures{},
 				Images:              []string{},
 				FormAction:          editUrl,
 			},
 				deleteUrl,
-				utils.DeleteImagesFormKey,
 				http.StatusInternalServerError,
 			)
 			return
@@ -85,12 +84,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					Property:            lite.Property{},
 					PropertyTypes:       types.PropertyTypes,
 					PropertyTransaction: types.PropertyTransactions,
-					PropertyFeatures:    types.PropertyFeatures{},
+					PropertyFeatures:    utils.PropertyFeatures{},
 					Images:              []string{},
 					FormAction:          editUrl,
 				},
 					deleteUrl,
-					utils.DeleteImagesFormKey,
 					http.StatusInternalServerError,
 				)
 				return
@@ -106,7 +104,6 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				FormAction:          editUrl,
 			},
 				deleteUrl,
-				utils.DeleteImagesFormKey,
 				http.StatusOK,
 			)
 			return
@@ -115,7 +112,6 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// TODO ❗
 		// This is just a patchy solution to reuse the existing code of sending data
 		if r.Method == http.MethodPost {
-			fullUrl := r.URL.Path + "?" + r.URL.RawQuery
 			liteProperty, features, err := h.Service.Post(r, token, theId)
 			if err != nil {
 				h.Log.Error("error trying to update the property", "id", theId, "error", err)
@@ -130,13 +126,20 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					FormAction:          editUrl,
 				},
 					deleteUrl,
-					utils.DeleteImagesFormKey,
 					http.StatusInternalServerError,
 				)
 				return
 			}
 
 			// redirect to the edit property page
+			// the url might be changed if the property title is changed
+			fullUrl := utils.UrlEncodePropertyTitle(liteProperty.Title)
+			fullUrl, err = utils.AddParamToUrl(fullUrl, utils.HumanReadableIdQueryKey, liteProperty.Humanreadableid)
+			if err != nil {
+				h.Log.Error("error trying to create the redirect url", "error", err)
+				http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+				return
+			}
 			http.Redirect(w, r, fullUrl, http.StatusSeeOther)
 			return
 		}
@@ -147,7 +150,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // TODO maybe I can reuse the submit.templ template
 // but for now just create a new template
 // The reason for the deleteUrl parm is because the types.EditProps is reused with the submit path and submit doesn't really need the delete url
-func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl, deletedImagesFormKey string, statusCode int64) {
+func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl string, statusCode int64) {
 	w.WriteHeader(int(statusCode))
 	views.Edit(
 		types.BasicIncludes{
@@ -168,7 +171,7 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 			HandleDeleteButton: includes.HandleDeleteButton(types.DeleteScriptProps{
 				DeleteUrl: deleteUrl,
 			}),
-			EditDropzoneScript: includes.DropzoneEdit(props.Images, props.FormAction, deletedImagesFormKey),
+			EditDropzoneScript: includes.DropzoneEdit(props.Images, props.FormAction, utils.DeleteImagesFormKey),
 			Modal:              components.Modal(""),
 			LeafletMap:         includes.LeafletMap(props.PropertyFeatures.Lat, props.PropertyFeatures.Lng),
 		},

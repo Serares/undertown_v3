@@ -48,7 +48,7 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		const maxFileUpload = 10 << 20
-		var imagesPaths []string
+		var imagesNames []string
 		h.Log.Info("Content-Type", "value", r.Header.Get("Content-Type"))
 		if err := r.ParseMultipartForm(maxFileUpload); err != nil {
 			h.Log.Error("Error parsing the form", "err", err)
@@ -60,15 +60,15 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			utils.ReplyError(w, r, http.StatusExpectationFailed, "files are too large")
 			return
 		}
-		files := r.MultipartForm.File[utils.ImagesFormKey]
+		images := r.MultipartForm.File[utils.ImagesFormKey]
 		imagesToBeRemoved := r.MultipartForm.Value[utils.DeleteImagesFormKey]
 
-		if len(files) > 0 {
+		if len(images) > 0 {
 			var processImagesErr error
 			if isLocal == "true" {
-				imagesPaths, processImagesErr = h.SubmitService.ProcessImagesLocal(r.Context(), files)
+				imagesNames, processImagesErr = h.SubmitService.ProcessImagesLocal(r.Context(), images)
 			} else {
-				imagesPaths, processImagesErr = h.SubmitService.ProcessImagesS3(r.Context(), files)
+				imagesNames, processImagesErr = h.SubmitService.ProcessImagesS3(r.Context(), images)
 			}
 			if processImagesErr != nil {
 				h.Log.Error("error on processing the images", "error", processImagesErr)
@@ -102,9 +102,9 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
 			humanReadableId := q[utils.HumanReadableIdQueryKey][0]
-			err = h.SubmitService.ProcessPropertyUpdateData(r.Context(), imagesPaths, r.MultipartForm, humanReadableId)
+			err = h.SubmitService.ProcessPropertyUpdateData(r.Context(), imagesNames, imagesToBeRemoved, r.MultipartForm, humanReadableId)
 		} else {
-			_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesPaths, r.MultipartForm, userId)
+			_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesNames, r.MultipartForm, userId)
 		}
 
 		fmt.Printf("Uploaded File:")

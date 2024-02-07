@@ -96,3 +96,18 @@ func AddParamToUrl(baseUrl, param, value string) (string, error) {
 
 	return finalURL, nil
 }
+
+func CreateImagePath(imageName string) string {
+	return "/assets/uploads/" + imageName
+}
+
+func CreateImagePathList(imageNames []string) []string {
+	listOfPaths := make([]string, 0)
+
+	for _, imgName := range imageNames {
+		imagePath := CreateImagePath(imgName)
+		listOfPaths = append(listOfPaths, imagePath)
+	}
+
+	return listOfPaths
+}

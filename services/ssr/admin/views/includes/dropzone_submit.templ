@@ -28,8 +28,9 @@ script DropzoneSubmit() {
         console.log(file)
       });
       this.on("successmultiple", function (files, response, xhr) {
-          if (response.redirect) {
+          if (response.redirected) {
               window.location.href = response.url;
+              return;
           }
           // return response.json();
           document.documentElement.innerHTML = response;
@@ -48,6 +49,9 @@ script DropzoneSubmit() {
                 $("#myModal .modal-body").html("Failed editing the property")
                 $("#myModal").modal("show")
           }
+        if (typeof response === "string") {
+          document.documentElement.innerHTML = response;
+        }
       });
     },
   };

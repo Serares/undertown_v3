@@ -45,7 +45,7 @@ func (ls *ListingsService) List(authToken string) ([]types.ListingProperty, erro
 			Address:          property.PropertyAddress,
 			TransactionType:  property.PropertyTransaction,
 			DisplayPrice:     utils.CreateDisplayPrice(property.Price),
-			Thumbnail:        property.Thumbnail,
+			Thumbnail:        utils.CreateImagePath(property.Thumbnail),
 			EditPropertyPath: editUrl,
 			Surface:          property.PropertySurface,
 			ImagesNumber:     int64(imagesLen),

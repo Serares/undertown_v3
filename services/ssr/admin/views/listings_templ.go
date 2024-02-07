@@ -280,7 +280,7 @@ func Listings(contents types.BasicIncludes, props types.ListingProps) templ.Comp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/assets/%s", property.Thumbnail)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(property.Thumbnail))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

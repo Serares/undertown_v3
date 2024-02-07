@@ -46,7 +46,7 @@ func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
 }
 
 func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
-	var imagePaths []string
+	var imageNames []string
 	var outErr bytes.Buffer
 	err := os.Mkdir(LocalAssetsRelativePath, 0755)
 	if err != nil {
@@ -77,16 +77,16 @@ func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.Fil
 		if err := cmd.Run(); err != nil {
 			ss.Log.Error("error converting the file", "cmd error:", outErr.String())
 		}
-		imagePaths = append(imagePaths, "/uploads/"+webpFileName)
+		imageNames = append(imageNames, webpFileName)
 		// remove files after beeing uploaded to s3 to not overflow to storage
 		defer os.Remove(filePath)
 	}
-	return imagePaths, nil
+	return imageNames, nil
 }
 
 // Uploads the files to S3
 func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
-	var imagePaths []string
+	var imageNames []string
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		ss.Log.Error("error loading the default config for lambda", "error", err)
@@ -144,12 +144,12 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 		if err != nil {
 			ss.Log.Error("error uploading the file to s3", "error", err)
 		}
-		imagePaths = append(imagePaths, "/uploads/"+webpFileName)
+		imageNames = append(imageNames, webpFileName)
 		// remove files after beeing uploaded to s3 to not overflow to storage
 		defer os.Remove(webpFilePath)
 		defer os.Remove(filePath)
 	}
-	return imagePaths, nil
+	return imageNames, nil
 }
 
 func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (string, error) {
@@ -161,7 +161,7 @@ func (ss *Submit) parsePropertyFeaturesToJson(features types.RequestFeatures) (s
 	return string(featuresJson), nil
 }
 
-func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []string, multipartForm *multipart.Form, humanReadableId string) error {
+func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths, deleteImages []string, multipartForm *multipart.Form, humanReadableId string) error {
 	var requestProperty utils.RequestProperty
 	jsonProperty, ok := multipartForm.Value["property"]
 	if !ok {
@@ -183,13 +183,38 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths []s
 		return err
 	}
 
+	// get the existing property to append the existing files if new files are added
+	liteProperty, err := ss.PropertyRepository.GetById(ctx, "", humanReadableId)
+	if err != nil {
+		ss.Log.Error("error trying to get the existing proprety", "hrID", humanReadableId, "error", err)
+		return fmt.Errorf("error trying to get the existing property to update")
+	}
+
+	var finalImages []string = make([]string, 0)
+	finalImages = append(finalImages, strings.Split(liteProperty.Images, ";")...)
+	if len(imagesPaths) > 0 {
+		finalImages = append(finalImages, imagesPaths...)
+	}
+
+	if len(deleteImages) > 0 {
+		removeMap := make(map[string]bool, 0)
+		for _, img := range deleteImages {
+			removeMap[img] = true
+		}
+		for index, img := range finalImages {
+			if removeMap[img] {
+				finalImages = append(finalImages[:index-1], finalImages[index:]...)
+			}
+		}
+	}
+
 	// TODO handle the case where no new images are uploaded
 	// OR when new images are uploaded and the old ones are not deleted
 	if err := ss.PropertyRepository.UpdateProperty(ctx, lite.UpdatePropertyFieldsParams{
 		Humanreadableid:     humanReadableId,
 		Title:               requestProperty.Title,
-		Images:              strings.Join(imagesPaths, ";"),
-		Thumbnail:           imagesPaths[0],
+		Images:              strings.Join(finalImages, ";"),
+		Thumbnail:           finalImages[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: repositoryTypes.TransactionType(requestProperty.PropertyTransaction).String(),
 		PropertyDescription: requestProperty.PropertyDescription,
@@ -292,14 +317,12 @@ func (ss *Submit) ProcessPropertyData(ctx context.Context, imagesPaths []string,
 	return propertyId, humanReadableId, nil
 }
 
-func (ss *Submit) DeleteImagesLocal(imagesList []string) error {
-	for _, imagePath := range imagesList {
-		parts := strings.Split(imagePath, "/")
-		imageName := parts[len(parts)-1]
+func (ss *Submit) DeleteImagesLocal(imagesNames []string) error {
+	for _, imageName := range imagesNames {
 		imageRelativePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, imageName)
 		if err := os.Remove(imageRelativePath); err != nil {
 			ss.Log.Error("error trying to remove the file", "filePath", imageRelativePath, "error", err)
-			return fmt.Errorf("error trying to remove image %v", err)
+			// return fmt.Errorf("error trying to remove image %v", err) ❗this is not really needed to return because the error will generally be when files are non existent
 		}
 	}
 	return nil
@@ -314,9 +337,10 @@ func (ss *Submit) DeleteImagesS3(ctx context.Context, imagesList []string) error
 
 	client := s3.NewFromConfig(cfg)
 	var objects []s3Types.ObjectIdentifier
-	for _, key := range imagesList {
+	for _, imageName := range imagesList {
+		s3Key := fmt.Sprintf("uploads/%s", imageName)
 		objects = append(objects, s3Types.ObjectIdentifier{
-			Key: &key,
+			Key: &s3Key,
 		})
 	}
 

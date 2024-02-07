@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 
 func DropzoneEdit(images []string, url string, deleteImagesFormKey string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DropzoneEdit_2aed`,
-		Function: `function __templ_DropzoneEdit_2aed(images, url, deleteImagesFormKey){Dropzone.options.uploadForm = {
+		Name: `__templ_DropzoneEdit_5f78`,
+		Function: `function __templ_DropzoneEdit_5f78(images, url, deleteImagesFormKey){Dropzone.options.uploadForm = {
     autoProcessQueue: false,
     addRemoveLinks: true,
     uploadMultiple: true,
@@ -70,8 +70,9 @@ func DropzoneEdit(images []string, url string, deleteImagesFormKey string) templ
       });
       this.on("successmultiple", function (files, response, xhr) {
         
-        if (response.redirect) {
+        if (response.redirected) {
             window.location.href = response.url;
+            return;
           }
           // return response.json();
           document.documentElement.innerHTML = response
@@ -108,7 +109,7 @@ func DropzoneEdit(images []string, url string, deleteImagesFormKey string) templ
       })
     },
   };}`,
-		Call:       templ.SafeScript(`__templ_DropzoneEdit_2aed`, images, url, deleteImagesFormKey),
-		CallInline: templ.SafeScriptInline(`__templ_DropzoneEdit_2aed`, images, url, deleteImagesFormKey),
+		Call:       templ.SafeScript(`__templ_DropzoneEdit_5f78`, images, url, deleteImagesFormKey),
+		CallInline: templ.SafeScriptInline(`__templ_DropzoneEdit_5f78`, images, url, deleteImagesFormKey),
 	}
 }

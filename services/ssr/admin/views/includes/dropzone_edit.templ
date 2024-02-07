@@ -61,8 +61,9 @@ script DropzoneEdit(images []string, url string, deleteImagesFormKey string) {
       });
       this.on("successmultiple", function (files, response, xhr) {
         
-        if (response.redirect) {
+        if (response.redirected) {
             window.location.href = response.url;
+            return;
           }
           // return response.json();
           document.documentElement.innerHTML = response
