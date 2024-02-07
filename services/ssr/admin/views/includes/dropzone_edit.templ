@@ -1,6 +1,6 @@
 package includes
 
-script DropzoneEdit(images []string, url string, deleteImagesFormKey string) {
+script DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string) {
     Dropzone.options.uploadForm = {
     autoProcessQueue: false,
     addRemoveLinks: true,
@@ -12,11 +12,12 @@ script DropzoneEdit(images []string, url string, deleteImagesFormKey string) {
     paramName: "#images-input",
     init: function () {
       var myDropzone = this;
-      if (images && images.length) {
-      images.forEach((path)=>{
+      if (imagesPaths && imagesPaths.length) {
+      imagesPaths.forEach((path)=>{
         // those are just some mock data
+        imagePathSplitted = path.split("/")
         const fileData = {
-            name: path,
+            name: imagePathSplitted[imagePathSplitted.length - 1],
             size: 12345,
             type: "webp",
             status: "s3"

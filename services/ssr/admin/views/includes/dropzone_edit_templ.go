@@ -7,10 +7,10 @@ package includes
 
 import "github.com/a-h/templ"
 
-func DropzoneEdit(images []string, url string, deleteImagesFormKey string) templ.ComponentScript {
+func DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DropzoneEdit_5f78`,
-		Function: `function __templ_DropzoneEdit_5f78(images, url, deleteImagesFormKey){Dropzone.options.uploadForm = {
+		Name: `__templ_DropzoneEdit_6185`,
+		Function: `function __templ_DropzoneEdit_6185(imagesPaths, url, deleteImagesFormKey){Dropzone.options.uploadForm = {
     autoProcessQueue: false,
     addRemoveLinks: true,
     uploadMultiple: true,
@@ -21,11 +21,12 @@ func DropzoneEdit(images []string, url string, deleteImagesFormKey string) templ
     paramName: "#images-input",
     init: function () {
       var myDropzone = this;
-      if (images && images.length) {
-      images.forEach((path)=>{
+      if (imagesPaths && imagesPaths.length) {
+      imagesPaths.forEach((path)=>{
         // those are just some mock data
+        imagePathSplitted = path.split("/")
         const fileData = {
-            name: path,
+            name: imagePathSplitted[imagePathSplitted.length - 1],
             size: 12345,
             type: "webp",
             status: "s3"
@@ -109,7 +110,7 @@ func DropzoneEdit(images []string, url string, deleteImagesFormKey string) templ
       })
     },
   };}`,
-		Call:       templ.SafeScript(`__templ_DropzoneEdit_5f78`, images, url, deleteImagesFormKey),
-		CallInline: templ.SafeScriptInline(`__templ_DropzoneEdit_5f78`, images, url, deleteImagesFormKey),
+		Call:       templ.SafeScript(`__templ_DropzoneEdit_6185`, imagesPaths, url, deleteImagesFormKey),
+		CallInline: templ.SafeScriptInline(`__templ_DropzoneEdit_6185`, imagesPaths, url, deleteImagesFormKey),
 	}
 }

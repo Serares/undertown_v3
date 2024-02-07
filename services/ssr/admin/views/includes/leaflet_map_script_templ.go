@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 
 func LeafletMap(lat string, lng string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_LeafletMap_a6d2`,
-		Function: `function __templ_LeafletMap_a6d2(lat, lng){function BuildLeafletMap(lat, lng, mapId) {
+		Name: `__templ_LeafletMap_44aa`,
+		Function: `function __templ_LeafletMap_44aa(lat, lng){function BuildLeafletMap(lat, lng, mapId) {
         this.mapId = mapId;
         this.lat = +lat;
         this.lng = +lng;
@@ -18,7 +18,13 @@ func LeafletMap(lat string, lng string) templ.ComponentScript {
         this.mapElement;
         this.initMap();
         this.marker;
+        this.updateInputValues(lat, lng)
     }   
+
+    BuildLeafletMap.prototype.updateInputValues = function(lat, lng) {
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    }
 
     BuildLeafletMap.prototype.initMap = function () {
         try {
@@ -32,8 +38,7 @@ func LeafletMap(lat string, lng string) templ.ComponentScript {
     }
 
     BuildLeafletMap.prototype.onClick = function(e) {
-        document.getElementById('latitude').value = e.latlng.lat;
-        document.getElementById('longitude').value = e.latlng.lng;
+        this.updateInputValues(e.latlng.lat, e.latlng.lng)
         this.lat = e.latlng.lat;
         this.lng = e.latlng.lng;
         if (this.marker) {
@@ -63,7 +68,7 @@ func LeafletMap(lat string, lng string) templ.ComponentScript {
 
     var mapId = "mapid";
     var leaflet_map = new BuildLeafletMap(lat, lng, mapId);}`,
-		Call:       templ.SafeScript(`__templ_LeafletMap_a6d2`, lat, lng),
-		CallInline: templ.SafeScriptInline(`__templ_LeafletMap_a6d2`, lat, lng),
+		Call:       templ.SafeScript(`__templ_LeafletMap_44aa`, lat, lng),
+		CallInline: templ.SafeScriptInline(`__templ_LeafletMap_44aa`, lat, lng),
 	}
 }

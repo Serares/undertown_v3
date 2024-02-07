@@ -9,7 +9,13 @@ script LeafletMap(lat string, lng string) {
         this.mapElement;
         this.initMap();
         this.marker;
+        this.updateInputValues(lat, lng)
     }   
+
+    BuildLeafletMap.prototype.updateInputValues = function(lat, lng) {
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    }
 
     BuildLeafletMap.prototype.initMap = function () {
         try {
@@ -23,8 +29,7 @@ script LeafletMap(lat string, lng string) {
     }
 
     BuildLeafletMap.prototype.onClick = function(e) {
-        document.getElementById('latitude').value = e.latlng.lat;
-        document.getElementById('longitude').value = e.latlng.lng;
+        this.updateInputValues(e.latlng.lat, e.latlng.lng)
         this.lat = e.latlng.lat;
         this.lng = e.latlng.lng;
         if (this.marker) {

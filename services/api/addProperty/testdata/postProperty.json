@@ -38,5 +38,7 @@
   "heating_other_electrical": false,
   "heating_gas_convector": false,
   "heating_infrared_panels": false,
-  "heating_floor_heating": true
+  "heating_floor_heating": true,
+  "latitude": "44.431907651074624",
+  "longitude": "26.097464561462406"
 }

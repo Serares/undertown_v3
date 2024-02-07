@@ -60,7 +60,8 @@ func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.Fil
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
-		filePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, fileHeader.Filename)
+		fileName := utils.UrlEncodeString(fileHeader.Filename)
+		filePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, fileName)
 		dst, err := os.Create(filePath)
 		if err != nil {
 			ss.Log.Error("error trying to create the file path")
@@ -69,7 +70,7 @@ func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.Fil
 		if _, err := io.Copy(dst, file); err != nil {
 			ss.Log.Error("error copying the file")
 		}
-		webpFileName := fileHeader.Filename + ".webp"
+		webpFileName := fileName + ".webp"
 		webpFilePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, webpFileName)
 		// convert to webp
 		cmd := exec.Command("cwebp", "-q", "75", filePath, "-o", webpFilePath)
@@ -112,7 +113,8 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
-		filePath := fmt.Sprintf("%s/%s", formImagesTempDir, fileHeader.Filename)
+		fileName := utils.UrlEncodeString(fileHeader.Filename)
+		filePath := fmt.Sprintf("%s/%s", formImagesTempDir, fileName)
 		dst, err := os.Create(filePath)
 		if err != nil {
 			ss.Log.Error("error trying to create the file path")
@@ -121,7 +123,7 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 		if _, err := io.Copy(dst, file); err != nil {
 			ss.Log.Error("error copying the file")
 		}
-		webpFileName := fileHeader.Filename + ".webp"
+		webpFileName := fileName + ".webp"
 		webpFilePath := fmt.Sprintf("%s/%s", webpDir, webpFileName)
 		// convert to webp
 		cmd := exec.Command("cwebp", "-q", "75", filePath, "-o", webpFilePath)
@@ -195,15 +197,16 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths, de
 	if len(imagesPaths) > 0 {
 		finalImages = append(finalImages, imagesPaths...)
 	}
-
+	var filteredImages = make([]string, 0)
 	if len(deleteImages) > 0 {
 		removeMap := make(map[string]bool, 0)
 		for _, img := range deleteImages {
 			removeMap[img] = true
 		}
-		for index, img := range finalImages {
-			if removeMap[img] {
-				finalImages = append(finalImages[:index-1], finalImages[index:]...)
+
+		for _, img := range finalImages {
+			if !removeMap[img] {
+				filteredImages = append(filteredImages, img)
 			}
 		}
 	}
@@ -213,8 +216,8 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, imagesPaths, de
 	if err := ss.PropertyRepository.UpdateProperty(ctx, lite.UpdatePropertyFieldsParams{
 		Humanreadableid:     humanReadableId,
 		Title:               requestProperty.Title,
-		Images:              strings.Join(finalImages, ";"),
-		Thumbnail:           finalImages[0],
+		Images:              strings.Join(filteredImages, ";"),
+		Thumbnail:           filteredImages[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: repositoryTypes.TransactionType(requestProperty.PropertyTransaction).String(),
 		PropertyDescription: requestProperty.PropertyDescription,

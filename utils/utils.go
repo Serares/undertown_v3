@@ -63,8 +63,8 @@ func CreateDisplayCreatedAt(createdAt time.Time) string {
 	return fmt.Sprintf("Adaugat cu %d zile in urma", passedTime)
 }
 
-func UrlEncodePropertyTitle(title string) string {
-	return url.PathEscape(title)
+func UrlEncodeString(s string) string {
+	return url.PathEscape(s)
 }
 
 func BoolToInt(b bool) int64 {

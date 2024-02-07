@@ -65,7 +65,7 @@ type EditProps struct {
 	PropertyTransaction []SelectInputs
 	PropertyFeatures    utils.PropertyFeatures
 	Property            lite.Property
-	Images              []string // The images comming from db are a string of image names separated by ;
+	ImagePaths          []string // These are the images paths, should be formatted to a path using the image names form th db
 	ErrorMessage        string
 	SuccessMessage      string
 }

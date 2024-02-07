@@ -40,8 +40,8 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// this is too much spaggeti conditions
 		propertyTitle := strings.Split(r.URL.Path, "/")[2]
 		theId := q[utils.HumanReadableIdQueryKey][0]
-		deleteUrl := fmt.Sprintf("%s/%s", types.DeletePath, utils.UrlEncodePropertyTitle(propertyTitle))
-		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodePropertyTitle(propertyTitle))
+		deleteUrl := fmt.Sprintf("%s/%s", types.DeletePath, utils.UrlEncodeString(propertyTitle))
+		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodeString(propertyTitle))
 
 		// add property human readable id as query string
 		deleteUrl, err = utils.AddParamToUrl(deleteUrl, utils.HumanReadableIdQueryKey, theId)
@@ -61,7 +61,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				PropertyTypes:       types.PropertyTypes,
 				PropertyTransaction: types.PropertyTransactions,
 				PropertyFeatures:    utils.PropertyFeatures{},
-				Images:              []string{},
+				ImagePaths:          []string{},
 				FormAction:          editUrl,
 			},
 				deleteUrl,
@@ -75,7 +75,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// ❗the Features are a json string
 			// should unmarshal the json string into a known struct
 			// and pass the struct to the templ file to fill out the checkboxes
-			property, images, propertyFeatures, err := h.Service.Get(theId, token)
+			property, imagesPaths, propertyFeatures, err := h.Service.Get(theId, token)
 			if err != nil {
 				h.Log.Error("error trying to get the property", "id", theId, "error", err)
 				viewEdit(w, r, types.EditProps{
@@ -85,7 +85,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					PropertyTypes:       types.PropertyTypes,
 					PropertyTransaction: types.PropertyTransactions,
 					PropertyFeatures:    utils.PropertyFeatures{},
-					Images:              []string{},
+					ImagePaths:          []string{},
 					FormAction:          editUrl,
 				},
 					deleteUrl,
@@ -98,7 +98,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				PropertyTypes:       types.PropertyTypes,
 				PropertyTransaction: types.PropertyTransactions,
 				PropertyFeatures:    propertyFeatures,
-				Images:              images,
+				ImagePaths:          imagesPaths,
 				SuccessMessage:      "",
 				ErrorMessage:        "",
 				FormAction:          editUrl,
@@ -120,7 +120,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					SuccessMessage:      "",
 					Property:            liteProperty,
 					PropertyFeatures:    features,
-					Images:              []string{}, // images are rip
+					ImagePaths:          []string{}, // images are rip
 					PropertyTypes:       types.PropertyTypes,
 					PropertyTransaction: types.PropertyTransactions,
 					FormAction:          editUrl,
@@ -131,10 +131,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// redirect to the edit property page
-			// the url might be changed if the property title is changed
-			fullUrl := utils.UrlEncodePropertyTitle(liteProperty.Title)
-			fullUrl, err = utils.AddParamToUrl(fullUrl, utils.HumanReadableIdQueryKey, liteProperty.Humanreadableid)
+			// ❗TODO
+			// If the user changes the property title, the ridirect will display the old property title in the url path
+			// because on a success backend query the liteProperty, features, err are all nullish values
+			fullUrl := r.URL.Path
+			fullUrl, err = utils.AddParamToUrl(fullUrl, utils.HumanReadableIdQueryKey, q[utils.HumanReadableIdQueryKey][0])
 			if err != nil {
 				h.Log.Error("error trying to create the redirect url", "error", err)
 				http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
@@ -171,7 +172,7 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 			HandleDeleteButton: includes.HandleDeleteButton(types.DeleteScriptProps{
 				DeleteUrl: deleteUrl,
 			}),
-			EditDropzoneScript: includes.DropzoneEdit(props.Images, props.FormAction, utils.DeleteImagesFormKey),
+			EditDropzoneScript: includes.DropzoneEdit(props.ImagePaths, props.FormAction, utils.DeleteImagesFormKey),
 			Modal:              components.Modal(""),
 			LeafletMap:         includes.LeafletMap(props.PropertyFeatures.Lat, props.PropertyFeatures.Lng),
 		},

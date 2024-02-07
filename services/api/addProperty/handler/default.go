@@ -63,6 +63,7 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		images := r.MultipartForm.File[utils.ImagesFormKey]
 		imagesToBeRemoved := r.MultipartForm.Value[utils.DeleteImagesFormKey]
 
+		// ❗TODO run the images update and delete concurrentlly
 		if len(images) > 0 {
 			var processImagesErr error
 			if isLocal == "true" {

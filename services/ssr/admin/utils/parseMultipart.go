@@ -56,12 +56,11 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 	// ❗images that are removed will be sent as a form field
 	// because the images have to be removed before doing all the json unmarshalling and db updates on the backend
 	if len(r.MultipartForm.Value[utils.DeleteImagesFormKey]) > 0 {
-		removedImagesWriter, err := writer.CreateFormField(utils.DeleteImagesFormKey)
 		if err != nil {
 			return nil, "", nil, fmt.Errorf("error creating the remove images form key %v", err)
 		}
 		for _, ri := range r.MultipartForm.Value[utils.DeleteImagesFormKey] {
-			_, err = removedImagesWriter.Write([]byte(ri))
+			err = writer.WriteField(utils.DeleteImagesFormKey, ri)
 			if err != nil {
 				return nil, "", nil, fmt.Errorf("error writing the remove images form value %v", err)
 			}

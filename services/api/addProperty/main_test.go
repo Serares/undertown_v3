@@ -93,6 +93,16 @@ func setupAPI(t *testing.T) (string, func()) {
 	}
 }
 
+func TestMain(t *testing.T) {
+	url, cleanup := setupAPI(t)
+	fmt.Println("the add property url:", url)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	<-c
+	defer cleanup()
+}
+
 // currently using psql with docker to test locally
 func TestPost(t *testing.T) {
 	// mockProperty, err := os.ReadFile("testdata/postProperty.json")
@@ -133,10 +143,6 @@ func TestPost(t *testing.T) {
 
 	url, cleanup := setupAPI(t)
 	fmt.Println("the add property url:", url)
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
-	<-c
 	defer cleanup()
 
 	// for _, tc := range cases {

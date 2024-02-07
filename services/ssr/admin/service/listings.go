@@ -31,7 +31,7 @@ func (ls *ListingsService) List(authToken string) ([]types.ListingProperty, erro
 	}
 	listingProperties := make([]types.ListingProperty, 0)
 	for _, property := range properties {
-		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodePropertyTitle(property.Title))
+		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodeString(property.Title))
 		// add property human readable id as query string
 		editUrl, err = utils.AddParamToUrl(editUrl, utils.HumanReadableIdQueryKey, property.Humanreadableid)
 		if err != nil {

@@ -108,7 +108,7 @@ func setupAPI(t *testing.T) (string, func()) {
 	_, err = io.Copy(image2Writer, mockImage2)
 
 	multipartWriter.Close()
-	request, err := http.NewRequest(http.MethodPost, ts.URL+"/submit", &requestBody)
+	request, err := http.NewRequest(http.MethodGet, ts.URL+"/submit", &requestBody)
 	if err != nil {
 		t.Fatal(err)
 	}
