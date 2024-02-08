@@ -169,7 +169,8 @@ SELECT id,
     title,
     thumbnail,
     price,
-    property_transaction
+    property_transaction,
+    property_type
 FROM properties
 WHERE is_featured = 1
 ORDER BY created_at DESC
@@ -183,6 +184,7 @@ type ListFeaturedPropertiesRow struct {
 	Thumbnail           string
 	Price               int64
 	PropertyTransaction string
+	PropertyType        string
 }
 
 func (q *Queries) ListFeaturedProperties(ctx context.Context) ([]ListFeaturedPropertiesRow, error) {
@@ -202,6 +204,7 @@ func (q *Queries) ListFeaturedProperties(ctx context.Context) ([]ListFeaturedPro
 			&i.Thumbnail,
 			&i.Price,
 			&i.PropertyTransaction,
+			&i.PropertyType,
 		); err != nil {
 			return nil, err
 		}

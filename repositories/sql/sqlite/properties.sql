@@ -59,7 +59,8 @@ SELECT id,
     title,
     thumbnail,
     price,
-    property_transaction
+    property_transaction,
+    property_type
 FROM properties
 WHERE is_featured = 1
 ORDER BY created_at DESC;
