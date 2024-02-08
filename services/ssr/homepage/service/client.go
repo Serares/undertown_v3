@@ -36,7 +36,7 @@ type SSRClient struct {
 	Client *http.Client
 }
 
-func NewHomeClient(log *slog.Logger) *SSRClient {
+func NewClient(log *slog.Logger) *SSRClient {
 	return &SSRClient{
 		Log: log,
 		Client: &http.Client{
@@ -59,12 +59,15 @@ func (ssrc *SSRClient) sendRequest(url, method, contentType string,
 	if contentType == "" {
 		contentType = "applicaiton/json"
 	}
-	token, err := ssrc.generateJwt()
-	if err != nil {
-		return []byte{}, err
+	isLocal := os.Getenv("IS_LOCAL")
+	if isLocal != "true" {
+		token, err := ssrc.generateJwt()
+		if err != nil {
+			return []byte{}, err
+		}
+		req.Header.Set("Authorization", token)
 	}
 	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("Authorization", token)
 	r, err := ssrc.Client.Do(req)
 	if err != nil {
 		return []byte{}, err
@@ -103,7 +106,7 @@ func (ssrc *SSRClient) generateJwt() (string, error) {
 }
 
 func (ssrc *SSRClient) ListFeaturedProperties(url string) ([]lite.ListFeaturedPropertiesRow, error) {
-	response, err := ssrc.sendRequest(url, http.MethodGet, "application/json", http.StatusAccepted, nil)
+	response, err := ssrc.sendRequest(url, http.MethodGet, "application/json", http.StatusOK, nil)
 	if err != nil {
 		ssrc.Log.Error("error requesting featured properties", "error", err, "url", url)
 		return []lite.ListFeaturedPropertiesRow{}, fmt.Errorf("error trying to query the url: %s error", err.Error())
