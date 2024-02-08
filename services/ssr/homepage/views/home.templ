@@ -3,7 +3,7 @@ package views
 import "github.com/Serares/ssr/homepage/types"
 import "fmt"
 
-templ Home(contents types.BasicIncludes, props types.HomeProps) {
+templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 	<style type="text/css">
 		.bootstrap-select .dropdown-item {
 		padding: 0 8px;
@@ -109,9 +109,10 @@ templ Home(contents types.BasicIncludes, props types.HomeProps) {
 											<div class="filters">
 												<ul class="filter-tabs filter-btns clearfix anim-3-all">
 													<li class="active filter" data-role="button" data-filter="all">Toate</li>
-													<li class="filter" data-role="button" data-filter=".1">Casă</li>
-													<li class="filter" data-role="button" data-filter=".2">Apartament</li>
-													<li class="filter" data-role="button" data-filter=".3">Garsoniera</li>
+													<li class="filter" data-role="button" data-filter=".HOUSE">Casă</li>
+													<li class="filter" data-role="button" data-filter=".APARTMENT">Apartament</li>
+													<li class="filter" data-role="button" data-filter=".STUDIO">Garsoniera</li>
+													<li class="filter" data-role="button" data-filter=".LAND">Teren</li>
 												</ul>
 											</div>
 											if props.ErrorMessage != "" {
@@ -122,7 +123,7 @@ templ Home(contents types.BasicIncludes, props types.HomeProps) {
 											<div class="row filter-list clearfix">
 												for _,featProp := range props.FeaturedProperties {
 													<div
- 														class="column mix mix_all <%- featProp.tipProprietate %> col-lg-4 col-md-6"
+ 														class={ fmt.Sprintf("column mix mix_all col-lg-4 col-md-6 %s", featProp.PropertyType) }
 													>
 														<div class="property_grid_1 property_item bg-white mb_30">
 															<div class="zoom_effect_1">
@@ -136,10 +137,10 @@ templ Home(contents types.BasicIncludes, props types.HomeProps) {
 																</div>
 																<div class="upper_2 bg_primary text-white">Recomandare</div>
 																<a
- 																	href={ templ.URL("/property/" + featProp.PropertyPathUrl) }
+ 																	href={ templ.URL(featProp.PropertyPathUrl) }
 																>
 																	<img
- 																		src={ fmt.Sprintf("/assets/%s", featProp.Thumbnail) }
+ 																		src={ featProp.ThumbnailPath }
  																		alt="Image Not Found!"
 																	/>
 																</a>
@@ -152,7 +153,7 @@ templ Home(contents types.BasicIncludes, props types.HomeProps) {
 															<div class="property_text p-3">
 																<h5 class="title">
 																	<a
- 																		href={ templ.URL(fmt.Sprintf("/property/%s", featProp.PropertyPathUrl)) }
+ 																		href={ templ.URL(featProp.PropertyPathUrl) }
 																	>{ featProp.Title }</a>
 																</h5>
 																<span class="my-3 d-block">

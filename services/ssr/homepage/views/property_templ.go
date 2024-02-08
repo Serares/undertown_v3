@@ -12,7 +12,7 @@ import "bytes"
 
 import "github.com/Serares/ssr/homepage/types"
 
-func Property(contents types.BasicIncludes, props types.SinglePropertyProps) templ.Component {
+func Property(contents types.BasicIncludes, singlePropertyIncludes types.SinglePropertyIncludes, props types.SinglePropertyViewProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -137,12 +137,12 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, image := range props.Property.Images {
+		for _, image := range props.Property.ImagePaths {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"ls-slide\" data-ls=\"duration: 4000;\"><img src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ.SafeURL(image)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(image))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -150,7 +150,7 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ.SafeURL(image)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(image))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -222,48 +222,30 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4><div id=\"mapid\" class=\"map-canvas\"></div></div></div></div></div></div><div class=\"col-lg-4\"><div class=\"property_sidebar mt_md_50\"><div class=\"property_listing sidebar-widget\"></div><div class=\"contact_agent sidebar-widget\"><div class=\"author_img\"><img src=\"img/testimonial/2.png\" alt=\"\"><div class=\"agent_info\"><h5 class=\"author_name\"></h5></div></div><form id=\"contact-form\"><input type=\"hidden\" value=\"&lt;%-property.persoanaContact.email %&gt;\" name=\"CONTACT_PERSON_EMAIL\"><div class=\"row\"><div class=\"col-md-12\"><div class=\"form-group\"><input type=\"text\" class=\"form-control\" name=\"firstname\" placeholder=\"Prenume\"></div></div><div class=\"col-md-12\"><div class=\"form-group\"><input type=\"text\" class=\"form-control\" name=\"lastname\" placeholder=\"Nume\"></div></div><div class=\"col-md-12\"><div class=\"form-group\"><input type=\"text\" class=\"form-control\" name=\"email\" placeholder=\"Email\"></div></div><div class=\"col-md-12\"><div class=\"form-group\"></div></div><div class=\"col-md-12\"><button type=\"submit\" class=\"btn btn_primary\" name=\"submit\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4><div id=\"mapid\" class=\"map-canvas\"></div></div></div></div></div></div><div class=\"col-lg-4\"><div class=\"property_sidebar mt_md_50\"><div class=\"property_listing sidebar-widget\"><h4 class=\"widget-title mb-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var17 := `Trimite`
+		templ_7745c5c3_Var17 := `Caracteristici:`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div><div class=\"col-md-12\"><div class=\"error-handel\"><div id=\"success\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h4><ul><li><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var18 := `Mesajul a fost trimis.`
+		templ_7745c5c3_Var18 := `Caracteristica 1`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div id=\"error\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></li></ul></div><div class=\"contact_agent sidebar-widget\"><div class=\"author_img\"><img src=\"img/testimonial/2.png\" alt=\"\"><div class=\"agent_info\"><h5 class=\"author_name\"></h5></div></div></div></div></div></div></div></section><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var19 := `Eroare la procesarea mesajului, te rog incearcă din`
+		templ_7745c5c3_Var19 := ` Footer Section Start `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var20 := `nou.`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></div></form></div></div></div></div></div></section><!--")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var21 := ` Footer Section Start `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -271,7 +253,7 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.Footer.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = contents.Footer.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -279,8 +261,8 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var22 := ` Footer Section End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
+		templ_7745c5c3_Var20 := ` Footer Section End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -288,8 +270,8 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var23 := ` Find Part Satrt `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
+		templ_7745c5c3_Var21 := ` Find Part Satrt `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -297,17 +279,17 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var24 := ` Find Part Satrt `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
+		templ_7745c5c3_Var22 := ` Find Part Satrt `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><input type=\"hidden\" name=\"latlng\" value=\"&lt;%- latlng %&gt;\"></div></div><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--></div></div><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var25 := ` Wrapper End `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
+		templ_7745c5c3_Var23 := ` Wrapper End `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -315,43 +297,28 @@ func Property(contents types.BasicIncludes, props types.SinglePropertyProps) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.Scripts.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = contents.Scripts.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"/js/custom/leaflet_map.js\">")
+		templ_7745c5c3_Err = singlePropertyIncludes.LeafletMap.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var26 := ``
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"text/javascript\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script><script src=\"/js/custom/contact.js\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var27 := ``
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script><script type=\"text/javascript\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var28 := `
-        $(document).ready(function () {
-            // Calling LayerSlider on the target element
-            $('#layerslider').layerSlider({
-                thumbnailNavigation: 'always',
-                autoStart: false
-            });
-        });
-
-    `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
+		templ_7745c5c3_Var24 := `
+				$(document).ready(function () {
+					// Calling LayerSlider on the target element
+					$('#layerslider').layerSlider({
+						thumbnailNavigation: 'always',
+						autoStart: false
+					});
+				});
+		    `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

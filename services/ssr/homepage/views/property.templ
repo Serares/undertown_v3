@@ -2,7 +2,7 @@ package views
 
 import "github.com/Serares/ssr/homepage/types"
 
-templ Property(contents types.BasicIncludes, props types.SinglePropertyProps) {
+templ Property(contents types.BasicIncludes, singlePropertyIncludes types.SinglePropertyIncludes,props types.SinglePropertyViewProps) {
 	<html lang="en">
 		@contents.Header
 		<link rel="stylesheet" href="/assets/css/single_property.css"/>
@@ -40,14 +40,14 @@ templ Property(contents types.BasicIncludes, props types.SinglePropertyProps) {
 									<div class="row">
 										<div class="col-md-12">
 											<div class="property_slider" id="layerslider" style="width: 800px; height: 400px;">
-												for _ ,image := range props.Property.Images {
+												for _ ,image := range props.Property.ImagePaths {
 													<div class="ls-slide" data-ls="duration: 4000;">
 														<img
- 															src={ templ.SafeURL(image) }
+ 															src={ image }
  															class="ls-bg"
  															alt="Slide background"
 														/>
-														<img src={ templ.SafeURL(image) } class="ls-tn" alt="no image found"/>
+														<img src={ image } class="ls-tn" alt="no image found"/>
 													</div>
 												}
 											</div>
@@ -115,15 +115,12 @@ templ Property(contents types.BasicIncludes, props types.SinglePropertyProps) {
 								<div class="col-lg-4">
 									<div class="property_sidebar mt_md_50">
 										<div class="property_listing sidebar-widget">
-											// <%if(property.caracteristici) { %>
-											// <h4 class="widget-title mb-4">Caracteristici:</h4>
-											// <ul>
-											//     <% for(let carac in property.caracteristici){ %>
-											//     <li><span><%- property.caracteristici[carac].key %></span>
-											//         <%-property.caracteristici[carac].value %></li>
-											//     <% } %>
-											// </ul>
-											// <% } %>
+											<h4 class="widget-title mb-4">Caracteristici:</h4>
+											<ul>
+												<li>
+													<span>Caracteristica 1</span>
+												</li>
+											</ul>
 										</div>
 										<div class="contact_agent sidebar-widget">
 											<div class="author_img">
@@ -135,67 +132,67 @@ templ Property(contents types.BasicIncludes, props types.SinglePropertyProps) {
 													// <span><%-property.persoanaContact.phoneNumber %></span>
 												</div>
 											</div>
-											<form id="contact-form">
-												<input
- 													type="hidden"
- 													value="<%-property.persoanaContact.email %>"
- 													name="CONTACT_PERSON_EMAIL"
-												/>
-												<div class="row">
-													<div class="col-md-12">
-														<div class="form-group">
-															<input
- 																type="text"
- 																class="form-control"
- 																name="firstname"
- 																placeholder="Prenume"
-															/>
-														</div>
-													</div>
-													<div class="col-md-12">
-														<div class="form-group">
-															<input
- 																type="text"
- 																class="form-control"
- 																name="lastname"
- 																placeholder="Nume"
-															/>
-														</div>
-													</div>
-													<div class="col-md-12">
-														<div class="form-group">
-															<input
- 																type="text"
- 																class="form-control"
- 																name="email"
- 																placeholder="Email"
-															/>
-														</div>
-													</div>
-													<div class="col-md-12">
-														<div class="form-group">
-															// <textarea class="form-control" name="message" placeholder="Mesaj"
-															//     rows="5">Aș dori să aflu mai multe detalii pentru proprietaeta cu id-ul: <%-property._id %></textarea>
-														</div>
-													</div>
-													<div class="col-md-12">
-														<button
- 															type="submit"
- 															class="btn btn_primary"
- 															name="submit"
-														>Trimite</button>
-													</div>
-													<div class="col-md-12">
-														<div class="error-handel">
-															<div id="success">Mesajul a fost trimis.</div>
-															<div id="error">
-																Eroare la procesarea mesajului, te rog incearcă din
-																nou.
-															</div>
-														</div>
-													</div>
-												</div>
-											</form>
+											// <form id="contact-form">
+											// 	<input
+											// 		type="hidden"
+											// 		value="<%-property.persoanaContact.email %>"
+											// 		name="CONTACT_PERSON_EMAIL"
+											// 	/>
+											// 	<div class="row">
+											// 		<div class="col-md-12">
+											// 			<div class="form-group">
+											// 				<input
+											// 					type="text"
+											// 					class="form-control"
+											// 					name="firstname"
+											// 					placeholder="Prenume"
+											// 				/>
+											// 			</div>
+											// 		</div>
+											// 		<div class="col-md-12">
+											// 			<div class="form-group">
+											// 				<input
+											// 					type="text"
+											// 					class="form-control"
+											// 					name="lastname"
+											// 					placeholder="Nume"
+											// 				/>
+											// 			</div>
+											// 		</div>
+											// 		<div class="col-md-12">
+											// 			<div class="form-group">
+											// 				<input
+											// 					type="text"
+											// 					class="form-control"
+											// 					name="email"
+											// 					placeholder="Email"
+											// 				/>
+											// 			</div>
+											// 		</div>
+											// 		<div class="col-md-12">
+											// 			<div class="form-group">
+											// 				// <textarea class="form-control" name="message" placeholder="Mesaj"
+											// 				//     rows="5">Aș dori să aflu mai multe detalii pentru proprietaeta cu id-ul: <%-property._id %></textarea>
+											// 			</div>
+											// 		</div>
+											// 		<div class="col-md-12">
+											// 			<button
+											// 				type="submit"
+											// 				class="btn btn_primary"
+											// 				name="submit"
+											// 			>Trimite</button>
+											// 		</div>
+											// 		<div class="col-md-12">
+											// 			<div class="error-handel">
+											// 				<div id="success">Mesajul a fost trimis.</div>
+											// 				<div id="error">
+											// 					Eroare la procesarea mesajului, te rog incearcă din
+											// 					nou.
+											// 				</div>
+											// 			</div>
+											// 		</div>
+											// 	</div>
+											// </form>
 										</div>
 									</div>
 								</div>
@@ -203,28 +200,27 @@ templ Property(contents types.BasicIncludes, props types.SinglePropertyProps) {
 						</div>
 					</section>
 					<!-- Footer Section Start -->
-					@components.Footer
+					@contents.Footer
 					<!-- Footer Section End -->
 					<!-- Find Part Satrt -->
 					<a href="#" id="scroll"><i class="fas fa-arrow-up"></i></a>
 					<!-- Find Part Satrt -->
-					<input type="hidden" name="latlng" value="<%- latlng %>"/>
 				</div>
 			</div>
 			<!-- Wrapper End -->
-			@components.Scripts
-			<script src="/js/custom/leaflet_map.js"></script>
-			<script src="/js/custom/contact.js"></script>
+			@contents.Scripts
+			// <script src="/js/custom/leaflet_map.js"></script>
+			@singlePropertyIncludes.LeafletMap
+			// <script src="/js/custom/contact.js"></script>
 			<script type="text/javascript">
-        $(document).ready(function () {
-            // Calling LayerSlider on the target element
-            $('#layerslider').layerSlider({
-                thumbnailNavigation: 'always',
-                autoStart: false
-            });
-        });
-
-    </script>
+				$(document).ready(function () {
+					// Calling LayerSlider on the target element
+					$('#layerslider').layerSlider({
+						thumbnailNavigation: 'always',
+						autoStart: false
+					});
+				});
+		    </script>
 		</body>
 	</html>
 }

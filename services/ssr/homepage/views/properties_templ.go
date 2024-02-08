@@ -13,7 +13,7 @@ import "bytes"
 import "github.com/Serares/ssr/homepage/types"
 import "fmt"
 
-func Properties(contents types.BasicIncludes, props types.PropertiesProps) templ.Component {
+func Properties(contents types.BasicIncludes, props types.PropertiesViewProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -338,7 +338,15 @@ func Properties(contents types.BasicIncludes, props types.PropertiesProps) templ
 			return templ_7745c5c3_Err
 		}
 		for _, property := range props.Properties {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-md-12\"><div class=\"property_list_1 property_item bg-white mb_30\"><div class=\"zoom_effect_1\"><a href=\"/${createPropertyPath(property.status)}/${\n        property._id\n      }\"><img src=\"/${property.thumbnail}\" alt=\"Image Found\"></a><div class=\"upper_2\"><i class=\"far fa-images\"></i> <span>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-md-12\"><div class=\"property_list_1 property_item bg-white mb_30\"><div class=\"zoom_effect_1\"><a href=\"/${createPropertyPath(property.status)}/${\n        property._id\n      }\"><img src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(property.ThumbnailPath))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"Image Found\"></a><div class=\"upper_2\"><i class=\"far fa-images\"></i> <span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

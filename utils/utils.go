@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -67,6 +68,10 @@ func UrlEncodeString(s string) string {
 	return url.PathEscape(s)
 }
 
+func UrlDecodeString(s string) (string, error) {
+	return url.PathUnescape(s)
+}
+
 func BoolToInt(b bool) int64 {
 	if b {
 		return 1
@@ -110,4 +115,13 @@ func CreateImagePathList(imageNames []string) []string {
 	}
 
 	return listOfPaths
+}
+
+// replaces the whitespace with an underscore
+func ReplaceWhiteSpaceWithUnderscore(s string) string {
+	newString := strings.Split(s, " ")
+
+	joinedString := strings.Join(newString, "_")
+
+	return joinedString
 }
