@@ -60,7 +60,7 @@ func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.Fil
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
-		fileName := utils.UrlEncodeString(fileHeader.Filename)
+		fileName := utils.ReplaceWhiteSpaceWithUnderscore(fileHeader.Filename)
 		filePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, fileName)
 		dst, err := os.Create(filePath)
 		if err != nil {
@@ -113,7 +113,7 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
-		fileName := utils.UrlEncodeString(fileHeader.Filename)
+		fileName := utils.ReplaceWhiteSpaceWithUnderscore(fileHeader.Filename)
 		filePath := fmt.Sprintf("%s/%s", formImagesTempDir, fileName)
 		dst, err := os.Create(filePath)
 		if err != nil {
