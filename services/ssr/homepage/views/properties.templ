@@ -3,7 +3,7 @@ package views
 import "github.com/Serares/ssr/homepage/types"
 import "fmt"
 
-templ Properties(contents types.BasicIncludes, props types.PropertiesProps) {
+templ Properties(contents types.BasicIncludes, props types.PropertiesViewProps) {
 	<html lang="en">
 		@contents.Header
 		<body class="page-load">
@@ -192,7 +192,7 @@ templ Properties(contents types.BasicIncludes, props types.PropertiesProps) {
         property._id
       }"
 															>
-																<img src="/${property.thumbnail}" alt="Image Found"/>
+																<img src={ property.ThumbnailPath } alt="Image Found"/>
 															</a>
 															<div class="upper_2">
 																<i class="far fa-images"></i>
