@@ -20,14 +20,13 @@ type PropertiesHandler struct {
 
 func NewPropertiesHandler(log *slog.Logger, service service.PropertiesService) *PropertiesHandler {
 	return &PropertiesHandler{
-		Log:               log,
+		Log:               log.WithGroup("Properties Handler"),
 		PropertiesService: service,
 	}
 }
 
 func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
+	if r.Method == http.MethodGet {
 		// get the transction type from the url
 		transactionType := strings.ReplaceAll(r.URL.Path, "/", "")
 		bannerTitle := strings.ToUpper(transactionType)
@@ -37,16 +36,42 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		properties, err := ph.PropertiesService.ListProperties(sortProps, transactionType)
 		if err != nil {
 			ph.Log.Error("error getting properties", "error", err, "urlpath", r.URL.Path)
-			viewProperties(w, r, types.PropertiesProps{Path: pagePath, Properties: properties, ErrorMessage: "Error fetching the properties"}, includesTypes.NavbarProps{Path: pagePath}, includesTypes.BannerSectionProps{Title: bannerTitle})
+			viewProperties(
+				w,
+				r,
+				types.PropertiesViewProps{
+					Path:         pagePath,
+					Properties:   properties,
+					ErrorMessage: "Error fetching the properties",
+				},
+				includesTypes.NavbarProps{
+					Path: pagePath,
+				},
+				includesTypes.BannerSectionProps{
+					Title: bannerTitle,
+				})
 			return
 		}
 
-		viewProperties(w, r, types.PropertiesProps{Path: r.URL.Path, Properties: properties, ErrorMessage: ""}, includesTypes.NavbarProps{Path: pagePath}, includesTypes.BannerSectionProps{Title: bannerTitle})
-	default:
-		message := "Method not supported"
-		ph.Log.Error(message)
-		http.Error(w, message, http.StatusInternalServerError)
+		viewProperties(
+			w,
+			r,
+			types.PropertiesViewProps{
+				Path:         r.URL.Path,
+				Properties:   properties,
+				ErrorMessage: "",
+			},
+			includesTypes.NavbarProps{
+				Path: pagePath,
+			},
+			includesTypes.BannerSectionProps{
+				Title: bannerTitle,
+			})
 	}
+
+	message := "Method not supported"
+	ph.Log.Error(message)
+	http.Error(w, message, http.StatusMethodNotAllowed)
 	return
 }
 
@@ -81,7 +106,13 @@ func resolveClientSortDirection(sortDirection string) string {
 }
 
 // TODO should this function be defined like this?
-func viewProperties(w http.ResponseWriter, r *http.Request, props types.PropertiesProps, navbarProps includesTypes.NavbarProps, bannerProps includesTypes.BannerSectionProps) {
+func viewProperties(
+	w http.ResponseWriter,
+	r *http.Request,
+	props types.PropertiesViewProps,
+	navbarProps includesTypes.NavbarProps,
+	bannerProps includesTypes.BannerSectionProps,
+) {
 
 	header := components.Header(bannerProps.Title)
 	preload := components.Preload()
