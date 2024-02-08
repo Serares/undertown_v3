@@ -1,22 +1,14 @@
 package service
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 
+	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/undertown_v3/utils"
 )
-
-type ProcessedFeaturedProperty struct {
-	Title           string
-	TransactionType string
-	Price           int64
-	DisplayPrice    string
-	Thumbnail       string
-	PropertyPathUrl string
-	CreatedTime     string
-}
 
 type HomeService struct {
 	Log    *slog.Logger
@@ -31,24 +23,34 @@ func NewHomeService(log *slog.Logger, client ISSRClient) *HomeService {
 	}
 }
 
-func (hs *HomeService) ListProperties() ([]ProcessedFeaturedProperty, error) {
+func (hs *HomeService) Get() ([]types.ProcessedFeaturedProperty, error) {
 	getPropertiesUrl := os.Getenv("GET_PROPERTIES_URL")
-	var processedFeatProperties []ProcessedFeaturedProperty
+	var processedFeatProperties []types.ProcessedFeaturedProperty
 
 	properties, err := hs.client.ListFeaturedProperties(strings.Join([]string{getPropertiesUrl, "featured=true"}, "?"))
 	if err != nil {
-		return []ProcessedFeaturedProperty{}, err
+		return []types.ProcessedFeaturedProperty{}, err
 	}
 
 	for _, featProp := range properties {
-		processedFeatProperties = append(processedFeatProperties, ProcessedFeaturedProperty{
+		propertyPath := "/" + utils.ReplaceWhiteSpaceWithUnderscore(featProp.Title)
+		propertyPath, err = utils.AddParamToUrl(propertyPath, utils.HumanReadableIdQueryKey, featProp.Humanreadableid)
+
+		propertyThumbnailPath := utils.CreateImagePath(featProp.Thumbnail)
+
+		if err != nil {
+			hs.Log.Error("error creating the property path", "error", err)
+			return []types.ProcessedFeaturedProperty{}, fmt.Errorf("error trying to generate the property path %v", err)
+		}
+		processedFeatProperties = append(processedFeatProperties, types.ProcessedFeaturedProperty{
 			Title:           featProp.Title,
 			TransactionType: featProp.PropertyTransaction,
+			PropertyType:    featProp.PropertyType, // TODO does it need to be processed?
 			Price:           featProp.Price,
 			DisplayPrice:    utils.CreateDisplayPrice(featProp.Price),
-			// PropertyPathUrl: utils.UrlEncodePropertyTitle(featProp.Title, featProp.Humanreadableid), // TODO
-			CreatedTime: utils.CreateDisplayCreatedAt(featProp.CreatedAt),
-			Thumbnail:   featProp.Thumbnail,
+			PropertyPathUrl: propertyPath,
+			CreatedTime:     utils.CreateDisplayCreatedAt(featProp.CreatedAt),
+			ThumbnailPath:   propertyThumbnailPath,
 		})
 	}
 	return processedFeatProperties, nil

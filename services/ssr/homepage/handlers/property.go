@@ -52,7 +52,7 @@ func viewProperty(w http.ResponseWriter, r *http.Request, bannerProps includesTy
 		Navbar:        navbar,
 		Footer:        footer,
 		Scripts:       scripts,
-	}, types.HomeProps{
+	}, types.HomeViewProps{
 		ErrorMessage: "",
 	}).Render(r.Context(), w)
 }

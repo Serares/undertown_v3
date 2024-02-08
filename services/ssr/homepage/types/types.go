@@ -1,10 +1,43 @@
 package types
 
 import (
-	"github.com/Serares/ssr/homepage/service"
-	"github.com/Serares/undertown_v3/repositories/repository/lite"
+	"github.com/Serares/undertown_v3/utils"
 	"github.com/a-h/templ"
 )
+
+type ProcessedSingleProperty struct {
+	Title        string
+	ImagePaths   []string
+	DisplayPrice string
+	Address      string
+	Description  string
+	Features     utils.PropertyFeatures
+}
+
+type ProcessedFeaturedProperty struct {
+	Title           string
+	TransactionType string
+	PropertyType    string
+	Price           int64
+	DisplayPrice    string
+	ThumbnailPath   string
+	PropertyPathUrl string
+	CreatedTime     string
+}
+
+// 🤔 this is for listings (chirii/vanzari)
+type ProcessedListProperty struct {
+	Title           string
+	Address         string
+	TransactionType string
+	Price           int64
+	DisplayPrice    string
+	ThumbnailPath   string
+	PropertyPathUrl string
+	Surface         int64
+	ImagesNumber    int64
+	CreatedTime     string
+}
 
 type BasicIncludes struct {
 	Header        templ.Component
@@ -15,22 +48,22 @@ type BasicIncludes struct {
 	Scripts       templ.Component
 }
 
-type HomeProps struct {
+type SinglePropertyIncludes struct {
+	LeafletMap templ.ComponentScript
+}
+
+type HomeViewProps struct {
 	ErrorMessage       string
-	FeaturedProperties []service.ProcessedFeaturedProperty
+	FeaturedProperties []ProcessedFeaturedProperty
 }
 
-type ContactProps struct {
-	ErrorMessage string
-}
-
-type PropertiesProps struct {
+type PropertiesViewProps struct {
 	// TODO
 	ErrorMessage string
 	Path         string // it's either chirii || vanzari
-	Properties   []service.ProcessedProperties
+	Properties   []ProcessedListProperty
 }
 
-type SinglePropertyProps struct {
-	Property []lite.Property // TODO define a structure for this type
+type SinglePropertyViewProps struct {
+	Property ProcessedSingleProperty // TODO define a structure for this type
 }

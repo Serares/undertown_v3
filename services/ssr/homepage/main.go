@@ -29,19 +29,20 @@ func main() {
 		port = "4030"
 	}
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	client := service.NewHomeClient(log)
+	client := service.NewClient(log)
 	homeService := service.NewHomeService(log, client)
 	propertiesService := service.NewPropertiesService(log, client)
+	singlePropertyService := service.NewPropertyService(log, client)
 
 	m := http.NewServeMux()
 	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService)
-	homeHandler := handlers.NewHomeHandler(log, *homeService)
+	defaultHandler := handlers.NewDefaultHandler(log, homeService, singlePropertyService)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
 	m.Handle("/chirii/", propertiesHandler)
 	m.Handle("/vanzari/", propertiesHandler)
-	m.Handle("/", homeHandler)
+	m.Handle("/", defaultHandler)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf("localhost:%s", port),
