@@ -89,11 +89,12 @@ func (ssrc *SSRClient) sendRequest(url, method, contentType string,
 }
 
 // ❗tokens are base64 encoded
+// TODO check if the error of 'key is of invalid type: ECDSA sign expects *ecsda.PrivateKey' is still occuring
 func (ssrc *SSRClient) generateJwt() (string, error) {
 	claims := utils.JWTClaims{IsSsr: true}
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	secret := os.Getenv("JWT_SECRET")
-	if secret != "" {
+	if secret == "" {
 		return "", fmt.Errorf("the jwt secret is empty")
 	}
 	tokenString, err := token.SignedString([]byte(secret))
