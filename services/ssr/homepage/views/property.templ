@@ -2,6 +2,15 @@ package views
 
 import "github.com/Serares/ssr/homepage/types"
 
+templ Checkbox(checked bool, label string) {
+	if checked {
+		<div class="custom-checkbox">
+			<i class={ "text_primary fa", templ.KV("fa-check-square", checked), templ.KV("fa-square-o", !checked) } aria-hidden="true"></i>
+			<span>{ label }</span>
+		</div>
+	}
+}
+
 templ Property(contents types.BasicIncludes, singlePropertyIncludes types.SinglePropertyIncludes,props types.SinglePropertyViewProps) {
 	<html lang="en">
 		@contents.Header
@@ -17,7 +26,20 @@ templ Property(contents types.BasicIncludes, singlePropertyIncludes types.Single
     #mapid {
         min-height: 400px;
     }
-</style>
+	</style>
+		<style>
+			.custom-span {
+				font-weight: 600; /* Light bold */
+				color: #add8e6; /* Light bluish color */
+			}
+			.custom-checkbox {
+				display: inline-block;
+				margin-right: 10px;
+			}
+			.custom-checkbox span {
+				margin-left: 5px;
+			}
+		</style>
 		<link rel="stylesheet" href="/assets/css/contact.css"/>
 		<body class="page-load">
 			@contents.Preload
@@ -70,20 +92,61 @@ templ Property(contents types.BasicIncludes, singlePropertyIncludes types.Single
 												</div>
 												<h4 class="inner-title mb-4 subtitle_prop">Descriere: </h4>
 												<p class="property_detalii">{ props.Property.Description }</p>
-												// <div class="my-5 d-block">
-												//     <style>
-												//         #features-list li{
-												//             margin: 5px 10px;
-												//         }
-												//     </style>
-												//     <ul id="features-list" style="font-weight: bold; display:flex; font-size: 19px; flex-wrap: wrap;">
-												//         <%- property.suprafata ? `<li><span>Suprafata</span>  ${property.suprafata} mp</li>` : "" %>
-												//         <%- property.etaj ? `<li><span>Etaj: </span>  ${property.etaj}</li>` : "" %>
-												//         <%- property.bai ? `<li><span>Bai: </span>  ${property.bai}</li>` : "" %>
-												//         <%- property.camere ? `<li><span>Camere: </span>  ${property.camere}</li>` : "" %>
-												//         <%- property.mobilat ? '<li><span>Mobilat: </span>  Da</li>' : "" %>
-												//     </ul>
-												// </div>
+												<div class="my-5 d-block">
+													<style>
+														.category-title {
+															font-weight: bold;
+															margin-top: 20px;
+														}
+												    </style>
+													<div class="container" id="features-list">
+														<div class="row">
+															<div class="col-md-6">
+																<div class="category-title">Destinatie:</div>
+																@Checkbox(props.Property.Features.DestinationResidential, "Residential")
+																@Checkbox(props.Property.Features.DestinationCommercial, "Comercial")
+																@Checkbox(props.Property.Features.DestinationOffice, "Birou")
+																@Checkbox(props.Property.Features.DestinationHoliday, "Vacanta")
+															</div>
+															<div class="col-md-6">
+																<div class="category-title">Utilitati:</div>
+																@Checkbox(props.Property.Features.OtherUtilitiesTerrance, "Terasa")
+																@Checkbox(props.Property.Features.OtherUtilitiesServiceToilet, "WC Serviciu")
+																@Checkbox(props.Property.Features.OtherUtilitiesUndergroundStorage, "Boxa subsol")
+																@Checkbox(props.Property.Features.OtherUtilitiesStorage, "Debara")
+															</div>
+														</div>
+														<div class="row">
+															<div class="col-md-6">
+																<div class="category-title">Mobilat:</div>
+																@Checkbox(props.Property.Features.FurnishedNot, "Nemobilat")
+																@Checkbox(props.Property.Features.FurnishedPartially, "Partial")
+																@Checkbox(props.Property.Features.FurnishedComplete, "Complet")
+																@Checkbox(props.Property.Features.FurnishedLuxury, "Lux")
+															</div>
+															<div class="col-md-6">
+																<div class="category-title">Renovare interior:</div>
+																@Checkbox(props.Property.Features.InteriorNeedsRenovation, "Necesita renovare")
+																@Checkbox(props.Property.Features.InteriorHasRenovation, "Renovat")
+																@Checkbox(props.Property.Features.InteriorGoodState, "Stare buna")
+															</div>
+														</div>
+														<div class="row">
+															<div class="col-md-8">
+																<div class="category-title">Incalzire:</div>
+																@Checkbox(props.Property.Features.HeatingTermoficare, "Termoficare")
+																@Checkbox(props.Property.Features.HeatingCentralHeating, "Centrala proprie")
+																@Checkbox(props.Property.Features.HeatingBuilding, "Centrala blocului")
+																@Checkbox(props.Property.Features.HeatingStove, "Soba/teracota")
+																@Checkbox(props.Property.Features.HeatingRadiator, "Calorifere")
+																@Checkbox(props.Property.Features.HeatingOtherElectrical, "Alte metode electrice")
+																@Checkbox(props.Property.Features.HeatingGasConvector, "Convector gaz")
+																@Checkbox(props.Property.Features.HeatingInfraredPanels, "Panouri infrarosu")
+																@Checkbox(props.Property.Features.HeatingFloorHeating, "Incalzire prin pardoseala")
+															</div>
+														</div>
+													</div>
+												</div>
 												// <% if(property.specificatii) {%>
 												// <div class="more_information my-5 d-block">
 												//     <h4 class="inner-title mb-4 subtitle_prop">Informatii utile</h4>
@@ -117,83 +180,85 @@ templ Property(contents types.BasicIncludes, singlePropertyIncludes types.Single
 										<div class="property_listing sidebar-widget">
 											<h4 class="widget-title mb-4">Caracteristici:</h4>
 											<ul>
-												<li>
-													<span>Caracteristica 1</span>
-												</li>
+												<li><div>Suprafata: <span class="custom-span">{ props.Property.Surface } m²</span></div></li>
+												<li><div>Clasa Energetica: <span class="custom-span">{ props.Property.Features.EnergyClass }</span></div></li>
+												<li><div>Consum Primar de energie: <span class="custom-span">{ props.Property.Features.EnergyConsumptionPrimary }</span></div></li>
+												<li><div>Index de emisii: <span class="custom-span">{ props.Property.Features.EnergyEmissionsIndex }</span></div></li>
+												<li><div>Consum din surse regenerabile: <span class="custom-span">{ props.Property.Features.EnergyConsumptionGreen }</span></div></li>
 											</ul>
 										</div>
-										<div class="contact_agent sidebar-widget">
-											<div class="author_img">
-												<img src="img/testimonial/2.png" alt=""/>
-												<div class="agent_info">
-													<h5 class="author_name">
-														// <%- property.persoanaContact.firstName+' ' + property.persoanaContact.lastName%>
-													</h5>
-													// <span><%-property.persoanaContact.phoneNumber %></span>
-												</div>
-											</div>
-											// <form id="contact-form">
-											// 	<input
-											// 		type="hidden"
-											// 		value="<%-property.persoanaContact.email %>"
-											// 		name="CONTACT_PERSON_EMAIL"
-											// 	/>
-											// 	<div class="row">
-											// 		<div class="col-md-12">
-											// 			<div class="form-group">
-											// 				<input
-											// 					type="text"
-											// 					class="form-control"
-											// 					name="firstname"
-											// 					placeholder="Prenume"
-											// 				/>
-											// 			</div>
-											// 		</div>
-											// 		<div class="col-md-12">
-											// 			<div class="form-group">
-											// 				<input
-											// 					type="text"
-											// 					class="form-control"
-											// 					name="lastname"
-											// 					placeholder="Nume"
-											// 				/>
-											// 			</div>
-											// 		</div>
-											// 		<div class="col-md-12">
-											// 			<div class="form-group">
-											// 				<input
-											// 					type="text"
-											// 					class="form-control"
-											// 					name="email"
-											// 					placeholder="Email"
-											// 				/>
-											// 			</div>
-											// 		</div>
-											// 		<div class="col-md-12">
-											// 			<div class="form-group">
-											// 				// <textarea class="form-control" name="message" placeholder="Mesaj"
-											// 				//     rows="5">Aș dori să aflu mai multe detalii pentru proprietaeta cu id-ul: <%-property._id %></textarea>
-											// 			</div>
-											// 		</div>
-											// 		<div class="col-md-12">
-											// 			<button
-											// 				type="submit"
-											// 				class="btn btn_primary"
-											// 				name="submit"
-											// 			>Trimite</button>
-											// 		</div>
-											// 		<div class="col-md-12">
-											// 			<div class="error-handel">
-											// 				<div id="success">Mesajul a fost trimis.</div>
-											// 				<div id="error">
-											// 					Eroare la procesarea mesajului, te rog incearcă din
-											// 					nou.
-											// 				</div>
-											// 			</div>
-											// 		</div>
-											// 	</div>
-											// </form>
-										</div>
+										// <div class="contact_agent sidebar-widget">
+										// 	<div class="author_img">
+										// 		<img src="img/testimonial/2.png" alt=""/>
+										// 		<div class="agent_info">
+										// 			<h5 class="author_name">
+										// 				// <%- property.persoanaContact.firstName+' ' + property.persoanaContact.lastName%>
+										// 			</h5>
+										// 			// <span><%-property.persoanaContact.phoneNumber %></span>
+										// 		</div>
+										// 	</div>
+										// <form id="contact-form">
+										// 	<input
+										// 		type="hidden"
+										// 		value="<%-property.persoanaContact.email %>"
+										// 		name="CONTACT_PERSON_EMAIL"
+										// 	/>
+										// 	<div class="row">
+										// 		<div class="col-md-12">
+										// 			<div class="form-group">
+										// 				<input
+										// 					type="text"
+										// 					class="form-control"
+										// 					name="firstname"
+										// 					placeholder="Prenume"
+										// 				/>
+										// 			</div>
+										// 		</div>
+										// 		<div class="col-md-12">
+										// 			<div class="form-group">
+										// 				<input
+										// 					type="text"
+										// 					class="form-control"
+										// 					name="lastname"
+										// 					placeholder="Nume"
+										// 				/>
+										// 			</div>
+										// 		</div>
+										// 		<div class="col-md-12">
+										// 			<div class="form-group">
+										// 				<input
+										// 					type="text"
+										// 					class="form-control"
+										// 					name="email"
+										// 					placeholder="Email"
+										// 				/>
+										// 			</div>
+										// 		</div>
+										// 		<div class="col-md-12">
+										// 			<div class="form-group">
+										// 				// <textarea class="form-control" name="message" placeholder="Mesaj"
+										// 				//     rows="5">Aș dori să aflu mai multe detalii pentru proprietaeta cu id-ul: <%-property._id %></textarea>
+										// 			</div>
+										// 		</div>
+										// 		<div class="col-md-12">
+										// 			<button
+										// 				type="submit"
+										// 				class="btn btn_primary"
+										// 				name="submit"
+										// 			>Trimite</button>
+										// 		</div>
+										// 		<div class="col-md-12">
+										// 			<div class="error-handel">
+										// 				<div id="success">Mesajul a fost trimis.</div>
+										// 				<div id="error">
+										// 					Eroare la procesarea mesajului, te rog incearcă din
+										// 					nou.
+										// 				</div>
+										// 			</div>
+										// 		</div>
+										// 	</div>
+										// </form>
+										// </div>
 									</div>
 								</div>
 							</div>

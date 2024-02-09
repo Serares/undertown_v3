@@ -9,31 +9,67 @@ import (
 	"github.com/Serares/ssr/homepage/service"
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
+	homepageViewsIncludes "github.com/Serares/ssr/homepage/views/includes"
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
-type PropertiesHandler struct {
-	Log               *slog.Logger
-	PropertiesService service.PropertiesService
+type ISinglePropertyService interface {
+	Get(humanReadableId string) (types.ProcessedSingleProperty, error)
 }
 
-func NewPropertiesHandler(log *slog.Logger, service service.PropertiesService) *PropertiesHandler {
+type PropertiesHandler struct {
+	Log                   *slog.Logger
+	PropertiesService     service.PropertiesService
+	SinglePropertyService ISinglePropertyService
+}
+
+func NewPropertiesHandler(
+	log *slog.Logger,
+	service service.PropertiesService,
+	singlePropertyService ISinglePropertyService,
+) *PropertiesHandler {
 	return &PropertiesHandler{
-		Log:               log.WithGroup("Properties Handler"),
-		PropertiesService: service,
+		Log:                   log.WithGroup("Properties Handler"),
+		PropertiesService:     service,
+		SinglePropertyService: singlePropertyService,
 	}
 }
 
 func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	q := r.URL.Query()
+	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
+		if r.Method == http.MethodGet {
+			processedProperty, err := ph.SinglePropertyService.Get(q[constants.HumanReadableIdQueryKey][0])
+			path := r.URL.Path
+			if err != nil {
+				ph.Log.Error("error trying to render the Single property", "error", err)
+				ViewNotFound(w, r)
+				return
+			}
+			viewSingleProperty(w, r,
+				types.SinglePropertyViewProps{
+					Property: processedProperty,
+				},
+				includesTypes.NavbarProps{
+					Path:    path,
+					IsAdmin: false,
+				},
+			)
+			return
+		}
+	}
+
 	if r.Method == http.MethodGet {
 		// get the transction type from the url
-		transactionType := strings.ReplaceAll(r.URL.Path, "/", "")
-		bannerTitle := strings.ToUpper(transactionType)
+		translatedTransactionType := strings.ReplaceAll(r.URL.Path, "/", "")
+		bannerTitle := strings.ToUpper(translatedTransactionType)
 		pagePath := r.URL.Path
 		// get query strings
 		sortProps := ph.getSortPropsFromQueryStrings(r.URL.Query())
-		properties, err := ph.PropertiesService.ListProperties(sortProps, transactionType)
+		properties, err := ph.PropertiesService.ListProperties(sortProps, translatedTransactionType)
 		if err != nil {
 			ph.Log.Error("error getting properties", "error", err, "urlpath", r.URL.Path)
 			viewProperties(
@@ -67,6 +103,7 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			includesTypes.BannerSectionProps{
 				Title: bannerTitle,
 			})
+		return
 	}
 
 	message := "Method not supported"
@@ -127,4 +164,30 @@ func viewProperties(
 		Footer:        footer,
 		Scripts:       scripts,
 	}, props).Render(r.Context(), w)
+}
+
+func viewSingleProperty(w http.ResponseWriter, r *http.Request, props types.SinglePropertyViewProps, navbarProps includesTypes.NavbarProps) {
+
+	views.Property(
+		types.BasicIncludes{
+			Header: components.Header("UNDERTOWN"),
+			BannerSection: components.BannerSection(
+				includesTypes.BannerSectionProps{
+					Title: props.Property.Title,
+				},
+			),
+			Preload: components.Preload(),
+			Navbar:  components.Navbar(navbarProps),
+			Footer:  components.Footer(),
+			Scripts: components.Scripts(),
+		},
+		types.SinglePropertyIncludes{
+			LeafletMap: homepageViewsIncludes.LeafletMap(
+				props.Property.Features.Lat,
+				props.Property.Features.Lng,
+			),
+		},
+		props,
+	).Render(r.Context(), w)
+
 }

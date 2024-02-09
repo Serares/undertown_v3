@@ -10,6 +10,7 @@ import (
 	"github.com/Serares/undertown_v3/services/api/addProperty/service"
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 	"github.com/akrylysov/algnhsa"
 )
 
@@ -60,38 +61,15 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			utils.ReplyError(w, r, http.StatusExpectationFailed, "files are too large")
 			return
 		}
-		images := r.MultipartForm.File[utils.ImagesFormKey]
-		imagesToBeRemoved := r.MultipartForm.Value[utils.DeleteImagesFormKey]
-
-		// ❗TODO run the images update and delete concurrentlly
-		if len(images) > 0 {
-			var processImagesErr error
-			if isLocal == "true" {
-				imagesNames, processImagesErr = h.SubmitService.ProcessImagesLocal(r.Context(), images)
-			} else {
-				imagesNames, processImagesErr = h.SubmitService.ProcessImagesS3(r.Context(), images)
-			}
-			if processImagesErr != nil {
-				h.Log.Error("error on processing the images", "error", processImagesErr)
-				utils.ReplyError(w, r, http.StatusInternalServerError, "error processing the images")
-				return
-			}
+		images := r.MultipartForm.File[constants.ImagesFormKey]
+		imagesToBeRemoved := r.MultipartForm.Value[constants.DeleteImagesFormKey]
+		// ❗TODO append the humanReadableId in the images name
+		imagesNames, err = h.SubmitService.ProcessDeleteAndPersistImages(r.Context(), images, imagesToBeRemoved)
+		if err != nil {
+			h.Log.Error("Error trying to process the images", "error", err)
+			utils.ReplyError(w, r, http.StatusInternalServerError, "Error processing the images")
+			return
 		}
-
-		if len(imagesToBeRemoved) > 0 {
-			var deleteImagesError error
-			if isLocal == "true" {
-				deleteImagesError = h.SubmitService.DeleteImagesLocal(imagesToBeRemoved)
-			} else {
-				deleteImagesError = h.SubmitService.DeleteImagesS3(r.Context(), imagesToBeRemoved)
-			}
-			if deleteImagesError != nil {
-				h.Log.Error("error trying to delete the images", "error", err, "images names:", imagesToBeRemoved)
-				utils.ReplyError(w, r, http.StatusInternalServerError, "error deleting the image")
-				return
-			}
-		}
-
 		// TODO ❗
 		// this pattern of using conditions seems a bit odd
 		// check if it's an edit request
@@ -101,8 +79,8 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// but you won't have the images paths (get the images names from the multipartForm.File? and store the paths before uploading the images?)
 		// think how to solve this
 		q := r.URL.Query()
-		if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
-			humanReadableId := q[utils.HumanReadableIdQueryKey][0]
+		if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
+			humanReadableId := q[constants.HumanReadableIdQueryKey][0]
 			err = h.SubmitService.ProcessPropertyUpdateData(r.Context(), imagesNames, imagesToBeRemoved, r.MultipartForm, humanReadableId)
 		} else {
 			_, _, err = h.SubmitService.ProcessPropertyData(r.Context(), imagesNames, r.MultipartForm, userId)

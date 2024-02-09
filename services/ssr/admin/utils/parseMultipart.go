@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 // ❔
@@ -55,12 +55,12 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 
 	// ❗images that are removed will be sent as a form field
 	// because the images have to be removed before doing all the json unmarshalling and db updates on the backend
-	if len(r.MultipartForm.Value[utils.DeleteImagesFormKey]) > 0 {
+	if len(r.MultipartForm.Value[constants.DeleteImagesFormKey]) > 0 {
 		if err != nil {
 			return nil, "", nil, fmt.Errorf("error creating the remove images form key %v", err)
 		}
-		for _, ri := range r.MultipartForm.Value[utils.DeleteImagesFormKey] {
-			err = writer.WriteField(utils.DeleteImagesFormKey, ri)
+		for _, ri := range r.MultipartForm.Value[constants.DeleteImagesFormKey] {
+			err = writer.WriteField(constants.DeleteImagesFormKey, ri)
 			if err != nil {
 				return nil, "", nil, fmt.Errorf("error writing the remove images form value %v", err)
 			}
@@ -86,7 +86,7 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 			}
 			defer file.Close()
 
-			fw, err := writer.CreateFormFile(utils.ImagesFormKey, fileHeader.Filename)
+			fw, err := writer.CreateFormFile(constants.ImagesFormKey, fileHeader.Filename)
 			if err != nil {
 				return nil, "", nil, fmt.Errorf("error creating file writer %v", err)
 			}

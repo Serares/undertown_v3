@@ -9,6 +9,7 @@ import (
 
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type PropertyService struct {
@@ -25,7 +26,7 @@ func NewPropertyService(log *slog.Logger, client ISSRClient) *PropertyService {
 
 func (s *PropertyService) Get(humanReadableId string) (types.ProcessedSingleProperty, error) {
 	getPropertyUrl := os.Getenv("GET_PROPERTY_URL")
-	url, err := utils.AddParamToUrl(getPropertyUrl, utils.HumanReadableIdQueryKey, humanReadableId)
+	url, err := utils.AddParamToUrl(getPropertyUrl, constants.HumanReadableIdQueryKey, humanReadableId)
 	if err != nil {
 		return types.ProcessedSingleProperty{}, fmt.Errorf("error trying to create the get property url %v", err)
 	}
@@ -48,6 +49,7 @@ func (s *PropertyService) Get(humanReadableId string) (types.ProcessedSingleProp
 	processedProperty.Description = liteProperty.PropertyDescription
 	processedProperty.DisplayPrice = utils.CreateDisplayPrice(liteProperty.Price)
 	processedProperty.ImagePaths = utils.CreateImagePathList(strings.Split(liteProperty.Images, ";"))
+	processedProperty.Surface = fmt.Sprintf("%d", liteProperty.PropertySurface)
 
 	return processedProperty, nil
 }

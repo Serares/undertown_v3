@@ -188,9 +188,7 @@ templ Properties(contents types.BasicIncludes, props types.PropertiesViewProps) 
 													<div class="property_list_1 property_item bg-white mb_30">
 														<div class="zoom_effect_1">
 															<a
- 																href="/${createPropertyPath(property.status)}/${
-        property._id
-      }"
+ 																href={ templ.SafeURL(property.PropertyPathUrl) }
 															>
 																<img src={ property.ThumbnailPath } alt="Image Found"/>
 															</a>
@@ -205,9 +203,7 @@ templ Properties(contents types.BasicIncludes, props types.PropertiesViewProps) 
 															<div class="property_text">
 																<h5 class="title">
 																	<a
- 																		href="/${createPropertyPath(
-                                      property.status
-                                    )}/${property._id}"
+ 																		href={ templ.SafeURL(property.PropertyPathUrl) }
 																	>{ property.Title }</a>
 																</h5>
 																<span class="my-3 d-block">
@@ -216,7 +212,10 @@ templ Properties(contents types.BasicIncludes, props types.PropertiesViewProps) 
 																</span>
 																<!-- caracteristici prev -->
 																<div class="quantity">
-																	<ul></ul>
+																	<ul>
+																		<li>Suprafata: { fmt.Sprintf("%d", property.Surface) } m²</li>
+																		// <li>Adaugat: { fmt.Sprintf("%s", property.CreatedTime) } </li>
+																	</ul>
 																</div>
 															</div>
 															<div class="bed_area d-table w-100">
@@ -224,9 +223,7 @@ templ Properties(contents types.BasicIncludes, props types.PropertiesViewProps) 
 																	<li>{ property.DisplayPrice }</li>
 																	<li>
 																		<a
- 																			href="/${createPropertyPath(
-                                      property.status
-                                    )}/${property._id}"
+ 																			href={ templ.SafeURL(property.PropertyPathUrl) }
 																		>
 																			<button
  																				type="button"

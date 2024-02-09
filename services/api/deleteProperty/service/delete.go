@@ -21,6 +21,8 @@ func NewDeleteService(log *slog.Logger, propertiesRepo *repository.Properties) D
 }
 
 func (s DeleteService) DeleteProperty(ctx context.Context, id, humanReadableId string) error {
+	// ❗TODO
+	// send a request to another lambda to delete the images of the deleter property
 	err := s.PropertiesRepo.DeleteByHumanReadableId(ctx, humanReadableId)
 	if err != nil {
 		s.Log.Error("error when trying to delete the property", "error", err)

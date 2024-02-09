@@ -2,12 +2,6 @@ package utils
 
 import "github.com/golang-jwt/jwt/v5"
 
-const (
-	HumanReadableIdQueryKey = "ID"
-	DeleteImagesFormKey     = "deleted_images"
-	ImagesFormKey           = "images"
-)
-
 type JWTClaims struct {
 	Email   string `json:"email"`
 	UserId  string `json:"userId"`

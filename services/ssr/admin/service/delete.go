@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type DeleteService struct {
@@ -24,14 +25,14 @@ func (ds *DeleteService) Delete(humanReadableId, id, authToken string) error {
 	var err error
 	var url string
 	if humanReadableId != "" {
-		url, err = utils.AddParamToUrl(deleteUrl, utils.HumanReadableIdQueryKey, humanReadableId)
+		url, err = utils.AddParamToUrl(deleteUrl, constants.HumanReadableIdQueryKey, humanReadableId)
 		if err != nil {
 			return err
 		}
 	}
 
 	if id != "" {
-		url, err = utils.AddParamToUrl(deleteUrl, utils.HumanReadableIdQueryKey, id)
+		url, err = utils.AddParamToUrl(deleteUrl, constants.HumanReadableIdQueryKey, id)
 		if err != nil {
 			return err
 		}

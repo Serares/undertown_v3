@@ -7,6 +7,7 @@ import (
 	"github.com/Serares/ssr/admin/middleware"
 	"github.com/Serares/ssr/admin/types"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type IDeleteService interface {
@@ -29,8 +30,8 @@ func NewDeleteHandler(log *slog.Logger, service IDeleteService) *DeleteHandler {
 func (dh *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := middleware.ID(r)
 	q := r.URL.Query()
-	if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
-		humanReadableId := q[utils.HumanReadableIdQueryKey][0]
+	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
+		humanReadableId := q[constants.HumanReadableIdQueryKey][0]
 		// ❗the delete method is actually sent by a js script not by the form submission
 		if r.Method == http.MethodDelete {
 			err := dh.Service.Delete(humanReadableId, "", token)

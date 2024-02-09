@@ -26,7 +26,7 @@ func (at AuthorizerType) String() string {
 type IntegrationLambda struct {
 	goLambda   *awslambdago.GoFunction
 	path       string
-	method     string
+	method     []string
 	authorizer string
 }
 
@@ -111,7 +111,11 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		}
 
 		integration := awsapigateway.NewLambdaIntegration(*lambda.goLambda, &awsapigateway.LambdaIntegrationOptions{})
-		spaApi.Root().AddResource(jsii.String(lambda.path), &awsapigateway.ResourceOptions{}).AddMethod(jsii.String(lambda.method), integration, methodOptions)
+
+		resource := spaApi.Root().AddResource(jsii.String(lambda.path), &awsapigateway.ResourceOptions{})
+		for _, httpVerb := range lambda.method {
+			resource.AddMethod(jsii.String(httpVerb), integration, methodOptions)
+		}
 	}
 
 	deployment := awsapigateway.NewDeployment(stack, jsii.Sprintf("UndertownAPIDeployment-%s", props.Env), &awsapigateway.DeploymentProps{

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 func ReplyError(w http.ResponseWriter, r *http.Request, status int, message string) {
@@ -102,6 +104,7 @@ func AddParamToUrl(baseUrl, param, value string) (string, error) {
 	return finalURL, nil
 }
 
+// TODO the base path should be a variable?
 func CreateImagePath(imageName string) string {
 	return "/assets/uploads/" + imageName
 }
@@ -117,6 +120,20 @@ func CreateImagePathList(imageNames []string) []string {
 	return listOfPaths
 }
 
+func CreatePropertyPath(transactionType, title, humanReadableId string) (string, error) {
+	t := ReplaceWhiteSpaceWithUnderscore(title)
+	translatedTransactionType, err := TranslatePropertyTransactionType(transactionType)
+	if err != nil {
+		return "", err
+	}
+	baseUrl := fmt.Sprintf("/%s/%s", translatedTransactionType, t)
+	url, err := AddParamToUrl(baseUrl, constants.HumanReadableIdQueryKey, humanReadableId)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
+
 // replaces the whitespace with an underscore
 func ReplaceWhiteSpaceWithUnderscore(s string) string {
 	newString := strings.Split(s, " ")
@@ -124,4 +141,18 @@ func ReplaceWhiteSpaceWithUnderscore(s string) string {
 	joinedString := strings.Join(newString, "_")
 
 	return joinedString
+}
+
+// Return a translated transaction type
+// See ssr/admin/types/PropertyTransactions
+func TranslatePropertyTransactionType(transactionType string) (string, error) {
+	if transactionType == "" {
+		return "", fmt.Errorf("transaction type not provided")
+	}
+
+	if strings.EqualFold(transactionType, "SELL") {
+		return constants.TranslatedTransactionSell, nil
+	}
+
+	return constants.TranslatedTransactionRent, nil
 }

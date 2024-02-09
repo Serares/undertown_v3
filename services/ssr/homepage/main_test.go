@@ -29,8 +29,8 @@ func setupAPI(t *testing.T) (string, func()) {
 	singlePropertyService := service.NewPropertyService(log, client)
 
 	m := http.NewServeMux()
-	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService)
-	defaultHandler := handlers.NewDefaultHandler(log, homeService, singlePropertyService)
+	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService, singlePropertyService)
+	defaultHandler := handlers.NewDefaultHandler(log, homeService)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))

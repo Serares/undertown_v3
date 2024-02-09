@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type DeleteResponse struct {
@@ -36,8 +37,8 @@ func (gh DeletePropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	if r.Method == http.MethodDelete {
 		q := r.URL.Query()
 		// ❗TODO at this point it will make sense to create a midleware util module to get the query params/cookies
-		if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
-			theId := q[utils.HumanReadableIdQueryKey][0]
+		if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
+			theId := q[constants.HumanReadableIdQueryKey][0]
 			err := gh.Service.DeleteProperty(r.Context(), "", theId)
 			if err != nil {
 				gh.Log.Error("error trying to delete the property", "error", err)

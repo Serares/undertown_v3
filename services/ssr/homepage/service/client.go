@@ -137,7 +137,7 @@ func (ssrc *SSRClient) GetProperties(url string) ([]lite.Property, error) {
 }
 
 func (ssrc *SSRClient) GetPropertiesByTransactionType(url string) ([]lite.ListPropertiesByTransactionTypeRow, error) {
-	r, err := ssrc.sendRequest(url, http.MethodGet, "application/json", http.StatusAccepted, nil)
+	r, err := ssrc.sendRequest(url, http.MethodGet, "application/json", http.StatusOK, nil)
 	if err != nil {
 		ssrc.Log.Error("error requesting properties by transaction type", "error", err, "url", url)
 		return []lite.ListPropertiesByTransactionTypeRow{}, fmt.Errorf("error trying to query the url: %s error", err.Error())
