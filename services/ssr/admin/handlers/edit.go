@@ -15,6 +15,7 @@ import (
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type EditHandler struct {
@@ -33,22 +34,22 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := middleware.ID(r)
 	q := r.URL.Query()
 
-	if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
+	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
 		var err error
 		// ❗TODO watch the delete handler
 		// on reusing the token and the query params
 		// this is too much spaggeti conditions
 		propertyTitle := strings.Split(r.URL.Path, "/")[2]
-		theId := q[utils.HumanReadableIdQueryKey][0]
+		theId := q[constants.HumanReadableIdQueryKey][0]
 		deleteUrl := fmt.Sprintf("%s/%s", types.DeletePath, utils.UrlEncodeString(propertyTitle))
 		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodeString(propertyTitle))
 
 		// add property human readable id as query string
-		deleteUrl, err = utils.AddParamToUrl(deleteUrl, utils.HumanReadableIdQueryKey, theId)
+		deleteUrl, err = utils.AddParamToUrl(deleteUrl, constants.HumanReadableIdQueryKey, theId)
 		if err != nil {
 			h.Log.Error("error creating the delete url", "error", err)
 		}
-		editUrl, err = utils.AddParamToUrl(editUrl, utils.HumanReadableIdQueryKey, theId)
+		editUrl, err = utils.AddParamToUrl(editUrl, constants.HumanReadableIdQueryKey, theId)
 		if err != nil {
 			h.Log.Error("error creating the edit url", "error", err)
 		}
@@ -135,7 +136,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// If the user changes the property title, the ridirect will display the old property title in the url path
 			// because on a success backend query the liteProperty, features, err are all nullish values
 			fullUrl := r.URL.Path
-			fullUrl, err = utils.AddParamToUrl(fullUrl, utils.HumanReadableIdQueryKey, q[utils.HumanReadableIdQueryKey][0])
+			fullUrl, err = utils.AddParamToUrl(fullUrl, constants.HumanReadableIdQueryKey, q[constants.HumanReadableIdQueryKey][0])
 			if err != nil {
 				h.Log.Error("error trying to create the redirect url", "error", err)
 				http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
@@ -172,7 +173,7 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 			HandleDeleteButton: includes.HandleDeleteButton(types.DeleteScriptProps{
 				DeleteUrl: deleteUrl,
 			}),
-			EditDropzoneScript: includes.DropzoneEdit(props.ImagePaths, props.FormAction, utils.DeleteImagesFormKey),
+			EditDropzoneScript: includes.DropzoneEdit(props.ImagePaths, props.FormAction, constants.DeleteImagesFormKey),
 			Modal:              components.Modal(""),
 			LeafletMap:         includes.LeafletMap(props.PropertyFeatures.Lat, props.PropertyFeatures.Lng),
 		},

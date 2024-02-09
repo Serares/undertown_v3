@@ -11,6 +11,8 @@ import "io"
 import "bytes"
 
 import "github.com/Serares/undertown_v3/ssr/includes/types"
+import "strings"
+import "github.com/Serares/undertown_v3/utils/constants"
 
 func Navbar(props types.NavbarProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -34,7 +36,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var2 = []any{"nav-link", templ.KV("active", props.Path == "/list")}
+			var templ_7745c5c3_Var2 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, "list"))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -60,7 +62,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 = []any{"nav-link", templ.KV("active", props.Path == "/submit/")}
+			var templ_7745c5c3_Var4 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, "submit"))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -118,7 +120,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 = []any{"nav-link", templ.KV("active", props.Path == "/")}
+			var templ_7745c5c3_Var8 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, "home"))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -144,7 +146,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 = []any{"nav-link", templ.KV("active", props.Path == "/chirii/")}
+			var templ_7745c5c3_Var10 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionRent))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -170,7 +172,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 = []any{"nav-link", templ.KV("active", props.Path == "/vanzari/")}
+			var templ_7745c5c3_Var12 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionSell))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var12...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

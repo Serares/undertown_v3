@@ -10,6 +10,7 @@ import (
 
 	"github.com/Serares/ssr/homepage/handlers"
 	"github.com/Serares/ssr/homepage/service"
+	"github.com/Serares/undertown_v3/utils/constants"
 	"github.com/joho/godotenv"
 )
 
@@ -35,13 +36,16 @@ func main() {
 	singlePropertyService := service.NewPropertyService(log, client)
 
 	m := http.NewServeMux()
-	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService)
-	defaultHandler := handlers.NewDefaultHandler(log, homeService, singlePropertyService)
+	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService, singlePropertyService)
+	defaultHandler := handlers.NewDefaultHandler(log, homeService)
+
+	rentPath := fmt.Sprintf("/%s/", constants.TranslatedTransactionRent)
+	sellPath := fmt.Sprintf("/%s/", constants.TranslatedTransactionSell)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
-	m.Handle("/chirii/", propertiesHandler)
-	m.Handle("/vanzari/", propertiesHandler)
+	m.Handle(rentPath, propertiesHandler)
+	m.Handle(sellPath, propertiesHandler)
 	m.Handle("/", defaultHandler)
 
 	server := &http.Server{

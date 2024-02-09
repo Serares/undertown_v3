@@ -1,6 +1,8 @@
 package components
 
 import "github.com/Serares/undertown_v3/ssr/includes/types"
+import "strings"
+import "github.com/Serares/undertown_v3/utils/constants"
 
 templ Navbar(props types.NavbarProps) {
 	<span>
@@ -38,13 +40,13 @@ templ Navbar(props types.NavbarProps) {
 									<ul class="navbar-nav ml-5">
 										<li class="nav-item">
 											<a
- 												class={ "nav-link", templ.KV("active", props.Path == "/list") }
+ 												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "list")) }
  												href="/list"
 											>Proprietati</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", props.Path == "/submit/") }
+ 												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, "submit")) }
  												href="/submit/"
 											>Adauga proprietate</a>
 										</li>
@@ -62,19 +64,19 @@ templ Navbar(props types.NavbarProps) {
 									<ul class="navbar-nav ml-5">
 										<li class="nav-item">
 											<a
- 												class={ "nav-link", templ.KV("active", props.Path == "/") }
+ 												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "home")) }
  												href="/"
 											>Acasa</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", props.Path == "/chirii/") }
+ 												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionRent)) }
  												href="/chirii/"
 											>Chirii</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", props.Path == "/vanzari/") }
+ 												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionSell)) }
  												href="/vanzari/"
 											>Vanzari</a>
 										</li>

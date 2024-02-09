@@ -9,13 +9,9 @@ import (
 
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
-	repositoryTypes "github.com/Serares/undertown_v3/repositories/repository/types"
+	"github.com/Serares/undertown_v3/utils"
 	rootUtils "github.com/Serares/undertown_v3/utils"
-)
-
-const (
-	Sell = "vanzari"
-	Rent = "chirii"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type SortValue int
@@ -48,15 +44,16 @@ func NewPropertiesService(log *slog.Logger, client ISSRClient) *PropertiesServic
 	}
 }
 
-func (ps *PropertiesService) ListProperties(props SortProps, transactionType string) ([]types.ProcessedListProperty, error) {
+func (ps *PropertiesService) ListProperties(props SortProps, transaltedTransactionType string) ([]types.ProcessedListProperty, error) {
 	getPropertiesUrl := os.Getenv("GET_PROPERTIES_URL")
 	var processedFeatProperties []types.ProcessedListProperty
 
-	constructedUrl := ps.constructGetUrl(transactionType, getPropertiesUrl)
-
+	constructedUrl, err := ps.constructGetUrl(transaltedTransactionType, getPropertiesUrl)
+	if err != nil {
+		return []types.ProcessedListProperty{}, err
+	}
 	properties, err := ps.Client.GetPropertiesByTransactionType(constructedUrl)
 	if err != nil {
-		ps.Log.Error("what's going on here?", "properties", properties)
 		return []types.ProcessedListProperty{}, err
 	}
 	if rootUtils.CheckIfStructIsEmpty(props) {
@@ -87,13 +84,13 @@ func (ps *PropertiesService) ListProperties(props SortProps, transactionType str
 		}
 	}
 	for _, featProp := range properties {
-		propertyPath := "/" + rootUtils.ReplaceWhiteSpaceWithUnderscore(featProp.Title)
-		propertyPath, err = rootUtils.AddParamToUrl(propertyPath, rootUtils.HumanReadableIdQueryKey, featProp.Humanreadableid)
+		propertyPath, err := rootUtils.CreatePropertyPath(featProp.PropertyTransaction, featProp.Title, featProp.Humanreadableid)
 		if err != nil {
 			return []types.ProcessedListProperty{}, fmt.Errorf("error trying to create the property path %v", err)
 		}
 
 		thumbnailPath := rootUtils.CreateImagePath(featProp.Thumbnail)
+		imagesLength := len(strings.Split(featProp.Images, ";"))
 
 		processedFeatProperties = append(processedFeatProperties, types.ProcessedListProperty{
 			Title:           featProp.Title,
@@ -103,24 +100,23 @@ func (ps *PropertiesService) ListProperties(props SortProps, transactionType str
 			PropertyPathUrl: propertyPath,
 			CreatedTime:     rootUtils.CreateDisplayCreatedAt(featProp.CreatedAt),
 			ThumbnailPath:   thumbnailPath,
+			Address:         featProp.PropertyAddress,
+			Surface:         featProp.PropertySurface,
+			ImagesNumber:    int64(imagesLength),
 		})
 	}
 	return processedFeatProperties, nil
 }
 
-func (ps *PropertiesService) constructGetUrl(transactionType, getUrl string) string {
-	var pType = strings.ToLower(transactionType)
-	var url = getUrl
-	switch pType {
-	case Sell:
-		url = url + fmt.Sprintf("?transactionType=%s", repositoryTypes.Sell.String())
-	case Rent:
-		url = url + fmt.Sprintf("?transactionType=%s", repositoryTypes.Rent.String())
-	default:
-		url = ""
-	}
+// ❗
+// if there are more transaction types than two this had to be solved with a switch statement
+func (ps *PropertiesService) constructGetUrl(translatedTransactionType, getUrl string) (string, error) {
+	if strings.EqualFold(translatedTransactionType, constants.TranslatedTransactionRent) {
+		return utils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionRent)
+	} else {
+		return utils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionSell)
 
-	return url
+	}
 }
 
 // TODO sorting on the SSR is a bad pattern,

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type FeaturedPropertiesResponse struct {
@@ -47,8 +48,8 @@ func (gh GetPropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	if r.Method == http.MethodGet {
 		q := r.URL.Query()
 
-		if _, ok := q["featured"]; ok {
-			if q["featured"][0] == "true" {
+		if _, ok := q[constants.FeaturedQueryKey]; ok {
+			if q[constants.FeaturedQueryKey][0] == "true" {
 				properties, err := gh.GetPropertiesService.ListFeaturedProperties(r.Context())
 				if err != nil {
 					gh.Log.Error("error trying to get featured properties", "error", err)
@@ -65,9 +66,9 @@ func (gh GetPropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		}
 
 		// TODO should you support both featured and propertyType filters?
-		if _, ok := q["transactionType"]; ok {
-			if q["transactionType"][0] != "" {
-				var transactionType string = q["transactionType"][0]
+		if _, ok := q[constants.TransactionTypeQueryKey]; ok {
+			if q[constants.TransactionTypeQueryKey][0] != "" {
+				var transactionType string = q[constants.TransactionTypeQueryKey][0]
 				properties, err := gh.GetPropertiesService.ListPropertiesByTransactionType(r.Context(), transactionType)
 				if err != nil {
 					gh.Log.Error("error trying to get featured properties", "error", err)

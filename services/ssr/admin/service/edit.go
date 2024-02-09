@@ -10,6 +10,7 @@ import (
 	adminUtils "github.com/Serares/ssr/admin/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type EditService struct {
@@ -32,7 +33,7 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 	// have to add the human readable id to the url
 	// ❗TODO
 	// this might need some validations
-	getPropertyBackendUrl, err := utils.AddParamToUrl(getPropertyUrl, utils.HumanReadableIdQueryKey, humanReadableId)
+	getPropertyBackendUrl, err := utils.AddParamToUrl(getPropertyUrl, constants.HumanReadableIdQueryKey, humanReadableId)
 	if err != nil {
 		es.Log.Error("error trying to create the backend delete url", "error", err)
 	}
@@ -61,7 +62,7 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 
 func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lite.Property, utils.PropertyFeatures, error) {
 	url := os.Getenv("SUBMIT_PROPERTY_URL")
-	url, err := utils.AddParamToUrl(url, utils.HumanReadableIdQueryKey, humanReadableId)
+	url, err := utils.AddParamToUrl(url, constants.HumanReadableIdQueryKey, humanReadableId)
 	if err != nil {
 		es.Log.Error("error trying to construct the url")
 		return lite.Property{}, utils.PropertyFeatures{}, err

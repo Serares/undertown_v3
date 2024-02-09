@@ -11,6 +11,7 @@ type ProcessedSingleProperty struct {
 	DisplayPrice string
 	Address      string
 	Description  string
+	Surface      string
 	Features     utils.PropertyFeatures
 }
 

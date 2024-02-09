@@ -6,15 +6,9 @@ import (
 
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/ssr/homepage/views"
-	homepageViewsIncludes "github.com/Serares/ssr/homepage/views/includes"
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
-	"github.com/Serares/undertown_v3/utils"
 )
-
-type ISinglePropertyService interface {
-	Get(humanReadableId string) (types.ProcessedSingleProperty, error)
-}
 
 type IHomeService interface {
 	Get() ([]types.ProcessedFeaturedProperty, error)
@@ -24,45 +18,21 @@ type IHomeService interface {
 // for the moment this handler will handle the home and the single property landing pages
 // because the base paths are similar for now
 type DefaultHandler struct {
-	Log                   *slog.Logger
-	HomeService           IHomeService
-	SinglePropertyService ISinglePropertyService // TODO
+	Log         *slog.Logger
+	HomeService IHomeService
 }
 
 func NewDefaultHandler(
 	log *slog.Logger,
 	homeService IHomeService,
-	singlePropertyService ISinglePropertyService,
 ) *DefaultHandler {
 	return &DefaultHandler{
-		Log:                   log,
-		HomeService:           homeService,
-		SinglePropertyService: singlePropertyService,
+		Log:         log,
+		HomeService: homeService,
 	}
 }
 
 func (hh *DefaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query()
-	if _, ok := q[utils.HumanReadableIdQueryKey]; ok {
-		if r.Method == http.MethodGet {
-			processedProperty, err := hh.SinglePropertyService.Get(q[utils.HumanReadableIdQueryKey][0])
-			path := processedProperty.Title
-			if err != nil {
-				ViewNotFound(w, r)
-				return
-			}
-			viewSingleProperty(w, r,
-				types.SinglePropertyViewProps{
-					Property: processedProperty,
-				},
-				includesTypes.NavbarProps{
-					Path:    path,
-					IsAdmin: false,
-				},
-			)
-			return
-		}
-	}
 
 	if r.Method == http.MethodGet {
 		if r.URL.Path == "/" {
@@ -75,7 +45,7 @@ func (hh *DefaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						FeaturedProperties: properties,
 					},
 					includesTypes.NavbarProps{
-						Path: "/",
+						Path: "/home",
 					})
 				return
 			}
@@ -85,7 +55,7 @@ func (hh *DefaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					FeaturedProperties: properties,
 				},
 				includesTypes.NavbarProps{
-					Path: "/",
+					Path: "/home",
 				})
 			return
 		}
@@ -112,32 +82,6 @@ func viewHome(
 		},
 		props,
 	).Render(r.Context(), w)
-}
-
-func viewSingleProperty(w http.ResponseWriter, r *http.Request, props types.SinglePropertyViewProps, navbarProps includesTypes.NavbarProps) {
-
-	views.Property(
-		types.BasicIncludes{
-			Header: components.Header("UNDERTOWN"),
-			BannerSection: components.BannerSection(
-				includesTypes.BannerSectionProps{
-					Title: props.Property.Title,
-				},
-			),
-			Preload: components.Preload(),
-			Navbar:  components.Navbar(navbarProps),
-			Footer:  components.Footer(),
-			Scripts: components.Scripts(),
-		},
-		types.SinglePropertyIncludes{
-			LeafletMap: homepageViewsIncludes.LeafletMap(
-				props.Property.Features.Lat,
-				props.Property.Features.Lng,
-			),
-		},
-		props,
-	).Render(r.Context(), w)
-
 }
 
 func ViewNotFound(w http.ResponseWriter, r *http.Request) {
