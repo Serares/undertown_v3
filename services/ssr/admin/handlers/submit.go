@@ -28,8 +28,6 @@ func NewSubmitHandler(log *slog.Logger, submitService *service.SubmitService) *A
 	}
 }
 
-// ❗TODO
-// 🤔 TODO investigate Submission is not WORKING
 func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		if !strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
@@ -51,7 +49,6 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				SuccessMessage:      "",
 				ErrorMessage:        "Failed to submit the property, try again",
 			},
-				http.StatusInternalServerError,
 			)
 			return
 		}
@@ -64,7 +61,6 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			PropertyFeatures:    utils.PropertyFeatures{},
 			Property:            lite.Property{},
 		},
-			http.StatusOK,
 		)
 		return
 	}
@@ -75,7 +71,6 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			PropertyTypes:       types.PropertyTypes,
 			PropertyTransaction: types.PropertyTransactions,
 		},
-			http.StatusOK,
 		)
 		return
 	}
@@ -83,11 +78,10 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // ❗ TODO is the Submit template needed?
-func viewSubmit(w http.ResponseWriter, r *http.Request, props types.SubmitProps, statusCode int64) {
+func viewSubmit(w http.ResponseWriter, r *http.Request, props types.SubmitProps) {
 	// if it failes to submit
 	// reuse the edit.templ template to persist the fields in the form and
 	// not have to readd the fields again if something goes wrong
-	w.WriteHeader(int(statusCode))
 	views.Submit(types.BasicIncludes{
 		Header: components.Header("Submit"),
 		BannerSection: components.BannerSection(includesTypes.BannerSectionProps{
