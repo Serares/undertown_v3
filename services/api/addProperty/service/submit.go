@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
@@ -357,4 +359,58 @@ func (ss *Submit) DeleteImagesS3(ctx context.Context, imagesList []string) error
 	}
 
 	return nil
+}
+
+func (s *Submit) ProcessDeleteAndPersistImages(ctx context.Context, files []*multipart.FileHeader, imagesToRemove []string) ([]string, error) {
+	isLocal := os.Getenv("IS_LOCAL")
+	var imageProcessErrors []error = make([]error, 2)
+	var imageProcessWg sync.WaitGroup
+	var imageNames []string
+	// ❗
+	// There might be issues if the processing takes longer than lambda execution context
+	// TODO, use channels and a select block to implement a timeout
+	/**
+	done := make(chan struct{})
+	// Goroutine to close the done channel once all goroutines have finished
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	// Implement timeout logic
+	select {
+	case <-done:
+		// All goroutines have finished
+		fmt.Println("All goroutines finished successfully")
+	case <-time.After(3 * time.Second):
+		// Timeout occurred
+		fmt.Println("Timeout occurred waiting for goroutines to finish")
+	}
+	**/
+	imageProcessWg.Add(2)
+	go func() {
+		defer imageProcessWg.Done()
+		if len(files) > 0 {
+			if isLocal == "true" {
+				imageNames, imageProcessErrors[0] = s.ProcessImagesLocal(ctx, files)
+			} else {
+				imageNames, imageProcessErrors[0] = s.ProcessImagesS3(ctx, files)
+			}
+		}
+	}()
+
+	go func() {
+		defer imageProcessWg.Done()
+		if len(imagesToRemove) > 0 {
+			if isLocal == "true" {
+				imageProcessErrors[1] = s.DeleteImagesLocal(imagesToRemove)
+			} else {
+				imageProcessErrors[1] = s.DeleteImagesS3(ctx, imagesToRemove)
+			}
+		}
+	}()
+
+	imageProcessWg.Wait()
+
+	return imageNames, errors.Join(imageProcessErrors...)
 }
