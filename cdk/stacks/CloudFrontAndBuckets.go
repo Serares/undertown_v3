@@ -22,13 +22,15 @@ type BucketProps struct {
 
 func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketProps) awscdk.Stack {
 	stack := awscdk.NewStack(scope, &id, nil)
-	assetsBucket := awss3.NewBucket(stack, jsii.String("assets"), &awss3.BucketProps{
-		BlockPublicAccess: awss3.BlockPublicAccess_BLOCK_ALL(),
-		Encryption:        awss3.BucketEncryption_S3_MANAGED,
-		EnforceSSL:        jsii.Bool(true),
-		RemovalPolicy:     awscdk.RemovalPolicy_DESTROY,
-		Versioned:         jsii.Bool(false),
-	})
+	// ❗The bucket is created in a previous stack
+	// because the arn has to be passed to lambdas before creating cloudfront
+	// assetsBucket := awss3.NewBucket(stack, jsii.String("assets"), &awss3.BucketProps{
+	// 	BlockPublicAccess: awss3.BlockPublicAccess_BLOCK_ALL(),
+	// 	Encryption:        awss3.BucketEncryption_S3_MANAGED,
+	// 	EnforceSSL:        jsii.Bool(true),
+	// 	RemovalPolicy:     awscdk.RemovalPolicy_DESTROY,
+	// 	Versioned:         jsii.Bool(false),
+	// })
 
 	// // Add a CloudFront distribution to route between the public directory and the Lambda function URL.
 	homeLambdaUrl := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), props.HomeLambdaUrl.Url(), nil))
@@ -36,7 +38,7 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	lambdaOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
-	cf := awscloudfront.NewDistribution(stack, jsii.String("customerFacing"), &awscloudfront.DistributionProps{
+	cf := awscloudfront.NewDistribution(stack, jsii.String("cdn-ssr-facing"), &awscloudfront.DistributionProps{
 		DefaultBehavior: &awscloudfront.BehaviorOptions{
 			AllowedMethods:       awscloudfront.AllowedMethods_ALLOW_ALL(),
 			Origin:               lambdaOrigin,
@@ -49,7 +51,7 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 
 	// Add /assets* to the distribution backed by S3.
-	assetsOrigin := awscloudfrontorigins.NewS3Origin(assetsBucket, &awscloudfrontorigins.S3OriginProps{
+	assetsOrigin := awscloudfrontorigins.NewS3Origin(props.AssetsBucket, &awscloudfrontorigins.S3OriginProps{
 		// Get content from the / directory in the bucket.
 		OriginPath:           jsii.String("/"),
 		OriginAccessIdentity: props.OAI,
@@ -83,14 +85,24 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	submitPropertyOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
+
 	cf.AddBehavior(jsii.String("/submit"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
+		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+	})
+
+	listOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
+		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
+	})
+
+	cf.AddBehavior(jsii.String("/list"), listOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 	})
 
 	// // Deploy the contents of the ./assets directory to the S3 bucket.
 	awss3deployment.NewBucketDeployment(stack, jsii.String("assetsDeployment"), &awss3deployment.BucketDeploymentProps{
-		DestinationBucket: assetsBucket,
+		DestinationBucket: props.AssetsBucket,
 		Sources: &[]awss3deployment.ISource{
 			awss3deployment.Source_Asset(jsii.String("../services/ssr/assets"), nil),
 		},

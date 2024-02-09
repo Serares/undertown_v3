@@ -81,10 +81,15 @@ func (ls *LoginService) comparePasswords(plainPassword string, hashedPassword []
 	return nil
 }
 func (ls *LoginService) signAndGenerateToken(email string, userId string, isadmin bool) (string, error) {
-	claims := utils.JWTClaims{Email: email, UserId: userId, Isadmin: isadmin}
+	claims := utils.JWTClaims{
+		Email:   email,
+		UserId:  userId,
+		Isadmin: isadmin,
+		IsSsr:   true,
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	secret := os.Getenv("JWT_SECRET")
+	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return "", err
 	}

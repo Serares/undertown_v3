@@ -59,14 +59,11 @@ func (ssrc *SSRClient) sendRequest(url, method, contentType string,
 	if contentType == "" {
 		contentType = "applicaiton/json"
 	}
-	isLocal := os.Getenv("IS_LOCAL")
-	if isLocal != "true" {
-		token, err := ssrc.generateJwt()
-		if err != nil {
-			return []byte{}, err
-		}
-		req.Header.Set("Authorization", token)
+	token, err := ssrc.generateJwt()
+	if err != nil {
+		return []byte{}, err
 	}
+	req.Header.Set("Authorization", token)
 	req.Header.Set("Content-Type", contentType)
 	r, err := ssrc.Client.Do(req)
 	if err != nil {
@@ -91,8 +88,13 @@ func (ssrc *SSRClient) sendRequest(url, method, contentType string,
 // ❗tokens are base64 encoded
 // TODO check if the error of 'key is of invalid type: ECDSA sign expects *ecsda.PrivateKey' is still occuring
 func (ssrc *SSRClient) generateJwt() (string, error) {
-	claims := utils.JWTClaims{IsSsr: true}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	claims := utils.JWTClaims{
+		Email:   "",
+		UserId:  "",
+		Isadmin: false,
+		IsSsr:   true,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		return "", fmt.Errorf("the jwt secret is empty")

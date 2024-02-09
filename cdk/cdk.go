@@ -44,14 +44,14 @@ func main() {
 		Env:                theEnv,
 	})
 
-	ssrStack := stacks.SSR(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRStackProps{
+	ssrStack := stacks.SSRHomepage(app, fmt.Sprintf("SSRLambda-%s", theEnv), &stacks.SSRHomepageProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
 		Env: theEnv,
 	})
 
-	adminStack := stacks.AdminSSR(app, "UndertownAdmin-Stack", &stacks.AdminSSRStackProps{
+	adminStack := stacks.SSRAdmin(app, "UndertownAdmin-Stack", &stacks.SSRAdminStackProps{
 		StackProps: awscdk.StackProps{
 			Env: env(),
 		},
