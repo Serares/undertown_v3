@@ -79,13 +79,13 @@ func A1Lambda(scope constructs.Construct, id string, props *A1LambdaProps) []Int
 	lambdas = append(lambdas, IntegrationLambda{
 		goLambda:   &registerLambda,
 		path:       RegisterEndpoint.String(),
-		method:     http.MethodPost,
+		method:     []string{http.MethodPost},
 		authorizer: RegisterAuthorizer.String(),
 	})
 	lambdas = append(lambdas, IntegrationLambda{
 		goLambda:   &loginLambda,
 		path:       LoginEndpoint.String(),
-		method:     http.MethodPost,
+		method:     []string{http.MethodPost},
 		authorizer: "",
 	})
 
