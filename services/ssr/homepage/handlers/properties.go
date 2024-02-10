@@ -114,7 +114,6 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // TODO test this function
 func (ph *PropertiesHandler) getSortPropsFromQueryStrings(queryStrings url.Values) service.SortProps {
-	ph.Log.Info("those are the queries", "queries", queryStrings)
 	var sortProps service.SortProps
 	sortOrder := queryStrings.Get("sort_order")
 	if sortOrder != "" {
@@ -128,7 +127,7 @@ func (ph *PropertiesHandler) getSortPropsFromQueryStrings(queryStrings url.Value
 			sortProps.PublishedDate = resolveClientSortDirection(values[1])
 		}
 	}
-	return service.SortProps{}
+	return sortProps
 }
 
 func resolveClientSortDirection(sortDirection string) string {

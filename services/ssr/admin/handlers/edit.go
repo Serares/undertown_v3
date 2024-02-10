@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -35,24 +36,23 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
 	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
-		var err error
+		var urlErrors = make([]error, 2)
+		var deleteUrl string
+		var editUrl string
 		// ❗TODO watch the delete handler
 		// on reusing the token and the query params
 		// this is too much spaggeti conditions
 		propertyTitle := strings.Split(r.URL.Path, "/")[2]
 		theId := q[constants.HumanReadableIdQueryKey][0]
-		deleteUrl := fmt.Sprintf("%s/%s", types.DeletePath, utils.UrlEncodeString(propertyTitle))
-		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodeString(propertyTitle))
+		deleteUrl, urlErrors[0] = utils.CreatePropertyPath(types.DeletePath, propertyTitle, theId)
+		editUrl, urlErrors[1] = utils.CreatePropertyPath(types.EditPath, propertyTitle, theId)
+		err := errors.Join(urlErrors...)
 
-		// add property human readable id as query string
-		deleteUrl, err = utils.AddParamToUrl(deleteUrl, constants.HumanReadableIdQueryKey, theId)
-		if err != nil {
-			h.Log.Error("error creating the delete url", "error", err)
-		}
-		editUrl, err = utils.AddParamToUrl(editUrl, constants.HumanReadableIdQueryKey, theId)
-		if err != nil {
-			h.Log.Error("error creating the edit url", "error", err)
-		}
+		h.Log.Info("The url strings",
+			"edit", editUrl,
+			"deleteUrl", deleteUrl,
+			"propertyTitle", propertyTitle,
+		)
 		if err != nil {
 			h.Log.Error("malformed request", "id", theId, "error", err)
 			viewEdit(w, r, types.EditProps{
@@ -66,7 +66,6 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				FormAction:          editUrl,
 			},
 				deleteUrl,
-				http.StatusInternalServerError,
 			)
 			return
 		}
@@ -90,7 +89,6 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					FormAction:          editUrl,
 				},
 					deleteUrl,
-					http.StatusInternalServerError,
 				)
 				return
 			}
@@ -105,7 +103,6 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				FormAction:          editUrl,
 			},
 				deleteUrl,
-				http.StatusOK,
 			)
 			return
 		}
@@ -127,7 +124,6 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					FormAction:          editUrl,
 				},
 					deleteUrl,
-					http.StatusInternalServerError,
 				)
 				return
 			}
@@ -152,8 +148,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // TODO maybe I can reuse the submit.templ template
 // but for now just create a new template
 // The reason for the deleteUrl parm is because the types.EditProps is reused with the submit path and submit doesn't really need the delete url
-func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl string, statusCode int64) {
-	w.WriteHeader(int(statusCode))
+func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl string) {
 	views.Edit(
 		types.BasicIncludes{
 			Header: components.Header("Edit"),

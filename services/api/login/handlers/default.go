@@ -41,6 +41,7 @@ func (lh *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		jwt, err := lh.LoginService.LoginUser(r.Context(), userInfo.Email, userInfo.Password)
 		if err != nil {
+			lh.Log.Error("error trying to login the user", "error", err)
 			utils.ReplyError(w, r, http.StatusUnauthorized, err.Error())
 			return
 		}

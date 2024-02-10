@@ -8,7 +8,6 @@ import (
 
 	"github.com/Serares/ssr/admin/types"
 	"github.com/Serares/undertown_v3/utils"
-	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type ListingsService struct {
@@ -32,9 +31,8 @@ func (ls *ListingsService) List(authToken string) ([]types.ListingProperty, erro
 	}
 	listingProperties := make([]types.ListingProperty, 0)
 	for _, property := range properties {
-		editUrl := fmt.Sprintf("%s/%s", types.EditPath, utils.UrlEncodeString(property.Title))
+		editUrl, err := utils.CreatePropertyPath(types.EditPath, property.Title, property.Humanreadableid)
 		// add property human readable id as query string
-		editUrl, err = utils.AddParamToUrl(editUrl, constants.HumanReadableIdQueryKey, property.Humanreadableid)
 		if err != nil {
 			ls.Log.Error("error creating the edit url for proeprty:", "hrID", property.Humanreadableid)
 			editUrl = fmt.Sprintf("%s/brokenurl", types.EditPath)
