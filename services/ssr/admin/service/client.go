@@ -127,8 +127,10 @@ func (ssrc *SSRAdminClient) List(url, authToken string) ([]lite.Property, error)
 }
 
 func (ssrc *SSRAdminClient) GetProperty(url, authToken string) (lite.Property, error) {
+	ssrc.Log.Info("the get property params", "url", url, "authToken", authToken)
 	resp, err := ssrc.sendRequest(url, http.MethodGet, "", authToken, http.StatusAccepted, nil)
 	if err != nil {
+		ssrc.Log.Error("the admin client error", "error", err)
 		return lite.Property{}, err
 	}
 	var response GetPropertyResponse

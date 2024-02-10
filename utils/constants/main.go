@@ -8,4 +8,5 @@ const (
 	ImagesFormKey             = "images"
 	TranslatedTransactionSell = "vanzari"
 	TranslatedTransactionRent = "chirii"
+	CookieTokenKey            = "token"
 )

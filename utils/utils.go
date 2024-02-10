@@ -120,17 +120,32 @@ func CreateImagePathList(imageNames []string) []string {
 	return listOfPaths
 }
 
-func CreatePropertyPath(transactionType, title, humanReadableId string) (string, error) {
-	t := ReplaceWhiteSpaceWithUnderscore(title)
+// this is used for homepage single property
+func CreateSinglePropertyPath(transactionType, title, humanReadableId string) (string, error) {
+	underscoredTitle := ReplaceWhiteSpaceWithUnderscore(title)
 	translatedTransactionType, err := TranslatePropertyTransactionType(transactionType)
 	if err != nil {
 		return "", err
 	}
-	baseUrl := fmt.Sprintf("/%s/%s", translatedTransactionType, t)
-	url, err := AddParamToUrl(baseUrl, constants.HumanReadableIdQueryKey, humanReadableId)
+	firstPart := fmt.Sprintf("/%s/%s", translatedTransactionType, underscoredTitle)
+
+	url, err := AddParamToUrl(firstPart, constants.HumanReadableIdQueryKey, humanReadableId)
 	if err != nil {
 		return "", err
 	}
+	return url, nil
+}
+
+// used to just attach the title and HumanReadableId query string
+func CreatePropertyPath(baseUrl, title, humanReadableId string) (string, error) {
+	underscoredTitle := ReplaceWhiteSpaceWithUnderscore(title)
+	firstPart := fmt.Sprintf("%s/%s", baseUrl, underscoredTitle)
+
+	url, err := AddParamToUrl(firstPart, constants.HumanReadableIdQueryKey, humanReadableId)
+	if err != nil {
+		return "", err
+	}
+
 	return url, nil
 }
 

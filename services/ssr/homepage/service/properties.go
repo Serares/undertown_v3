@@ -9,7 +9,6 @@ import (
 
 	"github.com/Serares/ssr/homepage/types"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
-	"github.com/Serares/undertown_v3/utils"
 	rootUtils "github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
 )
@@ -56,35 +55,33 @@ func (ps *PropertiesService) ListProperties(props SortProps, transaltedTransacti
 	if err != nil {
 		return []types.ProcessedListProperty{}, err
 	}
-	if rootUtils.CheckIfStructIsEmpty(props) {
-		if props.Price != "" {
-			sortProperties(properties, func(a, b lite.ListPropertiesByTransactionTypeRow) bool {
-				if props.Price == ASC {
-					return a.Price < b.Price
-				} else {
-					return a.Price > b.Price
-				}
-			})
-		} else if props.Surface != "" {
-			sortProperties(properties, func(a, b lite.ListPropertiesByTransactionTypeRow) bool {
-				if props.Price == ASC {
-					return a.PropertySurface < b.PropertySurface
-				} else {
-					return a.PropertySurface > b.PropertySurface
-				}
-			})
-		} else if props.PublishedDate != "" {
-			sortProperties(properties, func(a, b lite.ListPropertiesByTransactionTypeRow) bool {
-				if props.Price == ASC {
-					return a.CreatedAt.Before(b.CreatedAt)
-				} else {
-					return a.CreatedAt.After(b.CreatedAt)
-				}
-			})
-		}
+	if props.Price != "" {
+		sortProperties(properties, func(a, b lite.ListPropertiesByTransactionTypeRow) bool {
+			if props.Price == ASC {
+				return a.Price < b.Price
+			} else {
+				return a.Price > b.Price
+			}
+		})
+	} else if props.Surface != "" {
+		sortProperties(properties, func(a, b lite.ListPropertiesByTransactionTypeRow) bool {
+			if props.Price == ASC {
+				return a.PropertySurface < b.PropertySurface
+			} else {
+				return a.PropertySurface > b.PropertySurface
+			}
+		})
+	} else if props.PublishedDate != "" {
+		sortProperties(properties, func(a, b lite.ListPropertiesByTransactionTypeRow) bool {
+			if props.Price == ASC {
+				return a.CreatedAt.Before(b.CreatedAt)
+			} else {
+				return a.CreatedAt.After(b.CreatedAt)
+			}
+		})
 	}
 	for _, featProp := range properties {
-		propertyPath, err := rootUtils.CreatePropertyPath(featProp.PropertyTransaction, featProp.Title, featProp.Humanreadableid)
+		propertyPath, err := rootUtils.CreateSinglePropertyPath(featProp.PropertyTransaction, featProp.Title, featProp.Humanreadableid)
 		if err != nil {
 			return []types.ProcessedListProperty{}, fmt.Errorf("error trying to create the property path %v", err)
 		}
@@ -112,9 +109,9 @@ func (ps *PropertiesService) ListProperties(props SortProps, transaltedTransacti
 // if there are more transaction types than two this had to be solved with a switch statement
 func (ps *PropertiesService) constructGetUrl(translatedTransactionType, getUrl string) (string, error) {
 	if strings.EqualFold(translatedTransactionType, constants.TranslatedTransactionRent) {
-		return utils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionRent)
+		return rootUtils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionRent)
 	} else {
-		return utils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionSell)
+		return rootUtils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionSell)
 
 	}
 }
