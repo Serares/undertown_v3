@@ -37,6 +37,7 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 
 	if err != nil || !parsedToken.Valid {
 		// Return a policy document that denies access
+		log.Error("the token is invalid", "error", err)
 		return generatePolicy("user", "Deny", event.MethodArn, ""), nil
 	}
 	return generatePolicy("user", "Allow", event.MethodArn, claims.UserId), nil

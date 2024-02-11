@@ -21,7 +21,7 @@ import (
 
 func setupAPI(t *testing.T) (string, func()) {
 	t.Helper()
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
 		t.Error("error loading the .env file")
 	}
@@ -108,6 +108,7 @@ func setupAPI(t *testing.T) (string, func()) {
 	_, err = io.Copy(image2Writer, mockImage2)
 
 	multipartWriter.Close()
+	// TODO the method is GET on purpose to not trigger a submit request
 	request, err := http.NewRequest(http.MethodGet, ts.URL+"/submit", &requestBody)
 	if err != nil {
 		t.Fatal(err)
