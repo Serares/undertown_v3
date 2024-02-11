@@ -33,22 +33,49 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	// 	Versioned:         jsii.Bool(false),
 	// })
 
+	// origin request policy for admin
+	// to allow query string and cookie to be forwarded
+
+	adminOriginRequestPolicy := awscloudfront.NewOriginRequestPolicy(stack, jsii.String("admin-origin-request-policy"), &awscloudfront.OriginRequestPolicyProps{
+		CookieBehavior: awscloudfront.OriginRequestCookieBehavior_AllowList(
+			jsii.String(constants.CookieTokenKey),
+		),
+		QueryStringBehavior: awscloudfront.OriginRequestQueryStringBehavior_AllowList(
+			jsii.String(constants.HumanReadableIdQueryKey),
+		),
+	})
+
+	homepageOriginRequestPolicy := awscloudfront.NewOriginRequestPolicy(stack, jsii.String("homepage-origin-request-policy"), &awscloudfront.OriginRequestPolicyProps{
+		QueryStringBehavior: awscloudfront.OriginRequestQueryStringBehavior_AllowList(
+			jsii.String(constants.HumanReadableIdQueryKey),
+		),
+	})
+
 	// Cache Policy for chirii/vanzari
 	// bacause the user can sort the properties
 	// caching will just return the same page without sorted content
 	// Also used for single property because it might get updated
 	propertiesCachePolicy := awscloudfront.NewCachePolicy(stack, jsii.String("properties-cache-policy"), &awscloudfront.CachePolicyProps{
-		CachePolicyName:            jsii.String("homepageProperties"),
-		Comment:                    jsii.String("Custom cache policy for properties pages"),
-		DefaultTtl:                 awscdk.Duration_Seconds(jsii.Number(0)),
-		MinTtl:                     awscdk.Duration_Seconds(jsii.Number(10)),
-		MaxTtl:                     awscdk.Duration_Seconds(jsii.Number(86400)),
-		CookieBehavior:             awscloudfront.CacheCookieBehavior_None(),
-		HeaderBehavior:             awscloudfront.CacheHeaderBehavior_None(),
-		QueryStringBehavior:        awscloudfront.CacheQueryStringBehavior_None(),
-		EnableAcceptEncodingBrotli: jsii.Bool(true),
-		EnableAcceptEncodingGzip:   jsii.Bool(true),
+		CachePolicyName:     jsii.String("homepageProperties"),
+		Comment:             jsii.String("Custom cache policy for properties pages"),
+		DefaultTtl:          awscdk.Duration_Seconds(jsii.Number(0)),
+		MinTtl:              awscdk.Duration_Seconds(jsii.Number(0)),
+		MaxTtl:              awscdk.Duration_Seconds(jsii.Number(0)),
+		CookieBehavior:      awscloudfront.CacheCookieBehavior_None(),
+		HeaderBehavior:      awscloudfront.CacheHeaderBehavior_None(),
+		QueryStringBehavior: awscloudfront.CacheQueryStringBehavior_None(),
 	})
+
+	// Cache Policy to forward cookies for admin
+	// Admin page should have no caching
+	adminCachePolicy := awscloudfront.NewCachePolicy(stack, jsii.String("admin-cache-policy"), &awscloudfront.CachePolicyProps{
+		CachePolicyName: jsii.String("adminSSRCachePolicy"),
+		Comment:         jsii.String("Custom cache policy for admin ssr, it's not caching anything, cloudfront used only as a proxy"),
+		DefaultTtl:      awscdk.Duration_Seconds(jsii.Number(0)),
+		MinTtl:          awscdk.Duration_Seconds(jsii.Number(0)),
+		MaxTtl:          awscdk.Duration_Seconds(jsii.Number(0)),
+	})
+
 	// // Add a CloudFront distribution to route between the public directory and the Lambda function URL.
 	homeLambdaUrl := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), props.HomeLambdaUrl.Url(), nil))
 	adminLambdaUrl := awscdk.Fn_Select(jsii.Number(2), awscdk.Fn_Split(jsii.String("/"), props.AdminLambdaUrl.Url(), nil))
@@ -83,17 +110,19 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
 	cf.AddBehavior(jsii.String("/chirii"), chiriiOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    propertiesCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         propertiesCachePolicy,
+		OriginRequestPolicy: homepageOriginRequestPolicy,
 	})
 	vanzariOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
 	cf.AddBehavior(jsii.String("/vanzari"), vanzariOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    propertiesCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         propertiesCachePolicy,
+		OriginRequestPolicy: homepageOriginRequestPolicy,
 	})
 	// // Export the domain.
 	awscdk.NewCfnOutput(stack, jsii.String("cloudFrontDomain"), &awscdk.CfnOutputProps{
@@ -101,21 +130,6 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 		Value:      cf.DomainName(),
 	})
 
-	// Cache Policy to forward cookies for admin
-	// Admin page should have no caching
-	adminCachePolicy := awscloudfront.NewCachePolicy(stack, jsii.String("admin-cache-policy"), &awscloudfront.CachePolicyProps{
-		CachePolicyName: jsii.String("adminSSRCachePolicy"),
-		Comment:         jsii.String("Custom cache policy for admin ssr"),
-		DefaultTtl:      awscdk.Duration_Seconds(jsii.Number(0)),
-		MinTtl:          awscdk.Duration_Seconds(jsii.Number(10)),
-		MaxTtl:          awscdk.Duration_Seconds(jsii.Number(86400)),
-		CookieBehavior: awscloudfront.CacheCookieBehavior_AllowList(
-			jsii.String(constants.CookieTokenKey)),
-		HeaderBehavior:             awscloudfront.CacheHeaderBehavior_None(),
-		QueryStringBehavior:        awscloudfront.CacheQueryStringBehavior_None(),
-		EnableAcceptEncodingBrotli: jsii.Bool(true),
-		EnableAcceptEncodingGzip:   jsii.Bool(true),
-	})
 	// ❗
 	// TODO try to create the origins and behavoiurs in a loop
 	// Add ADMIN routes
@@ -123,15 +137,17 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
 	})
 	cf.AddBehavior(jsii.String("/login"), loginOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	cf.AddBehavior(jsii.String("/login/"), loginOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	submitPropertyOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
@@ -139,15 +155,17 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 
 	cf.AddBehavior(jsii.String("/submit"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	cf.AddBehavior(jsii.String("/submit/"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	listOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
@@ -155,14 +173,16 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 
 	cf.AddBehavior(jsii.String("/list"), listOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 	cf.AddBehavior(jsii.String("/list/"), listOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	editOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
@@ -170,14 +190,16 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 
 	cf.AddBehavior(jsii.String("/edit"), editOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 	cf.AddBehavior(jsii.String("/edit/*"), editOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	deleteOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
@@ -185,14 +207,16 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	})
 
 	cf.AddBehavior(jsii.String("/delete"), deleteOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 	cf.AddBehavior(jsii.String("/delete/*"), deleteOrigin, &awscloudfront.AddBehaviorOptions{
-		AllowedMethods: awscloudfront.AllowedMethods_ALLOW_ALL(),
-		CachedMethods:  awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:    adminCachePolicy,
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         adminCachePolicy,
+		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	// // Deploy the contents of the ./assets directory to the S3 bucket.

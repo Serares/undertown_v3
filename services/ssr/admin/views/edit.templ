@@ -94,6 +94,7 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 												</div>
 												<div class="col-md-6 col-sm-6">
 													<div class="form-group">
+														<label for="price">Pretul</label>
 														<input
  															value={ fmt.Sprintf("%d", props.Property.Price) }
  															name="price"
@@ -123,6 +124,7 @@ templ Edit(contents types.BasicIncludes, editIncludes types.EditIncludes, props 
 												</div>
 												<div class="col-md-4 col-sm-4">
 													<div class="form-group">
+														<label for="property_surface">Suprafata m²</label>
 														<input
  															value={ fmt.Sprintf("%d", props.Property.PropertySurface) }
  															name="property_surface"

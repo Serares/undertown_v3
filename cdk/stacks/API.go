@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslogs"
 	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -51,9 +52,9 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 
 	// Define the API Gateway
 	spaApi := awsapigateway.NewRestApi(stack, jsii.Sprintf("UndertownAPI-%s", props.Env), &awsapigateway.RestApiProps{
-		RestApiName: jsii.Sprintf("UndertownAPI-%s", props.Env),
-		Deploy:      jsii.Bool(false),
-		// CloudWatchRole: jsii.Bool(true),
+		RestApiName:    jsii.Sprintf("UndertownAPI-%s", props.Env),
+		Deploy:         jsii.Bool(false),
+		CloudWatchRole: jsii.Bool(true),
 	})
 	//Register Authorizer
 	registerAuthorizerLambda := awslambdago.NewGoFunction(stack, jsii.Sprintf("RegisterAuthorizer-%s", props.Env), &awslambdago.GoFunctionProps{
@@ -85,6 +86,7 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		IdentitySources: &[]*string{
 			awsapigateway.IdentitySource_Header(jsii.String(authorizationHeader)),
 		},
+		ResultsCacheTtl: awscdk.Duration_Seconds(jsii.Number(0)),
 	})
 	// Define the Register Authorizer
 	registerAuth := awsapigateway.NewRequestAuthorizer(stack, jsii.String(RegisterAuthorizer.String()), &awsapigateway.RequestAuthorizerProps{
@@ -92,6 +94,7 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		IdentitySources: &[]*string{
 			awsapigateway.IdentitySource_Header(jsii.String(authorizationHeader)),
 		},
+		ResultsCacheTtl: awscdk.Duration_Seconds(jsii.Number(0)),
 	})
 
 	for _, lambda := range props.IntegrationLambdas {
@@ -122,23 +125,23 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		Api: spaApi,
 	})
 
-	// devLogGroup := awslogs.NewLogGroup(stack, jsii.String("devlogs"), &awslogs.LogGroupProps{})
+	devLogGroup := awslogs.NewLogGroup(stack, jsii.String("api-logs"), &awslogs.LogGroupProps{})
 
 	stage := awsapigateway.NewStage(stack, jsii.Sprintf("APISTAGE-%s", props.Env), &awsapigateway.StageProps{
-		Deployment: deployment,
-		StageName:  jsii.String(props.Env),
-		// AccessLogDestination: awsapigateway.NewLogGroupLogDestination(devLogGroup),
-		// AccessLogFormat: awsapigateway.AccessLogFormat_JsonWithStandardFields(&awsapigateway.JsonWithStandardFieldProps{
-		// 	Caller:         jsii.Bool(false),
-		// 	HttpMethod:     jsii.Bool(true),
-		// 	Ip:             jsii.Bool(true),
-		// 	Protocol:       jsii.Bool(true),
-		// 	RequestTime:    jsii.Bool(true),
-		// 	ResourcePath:   jsii.Bool(true),
-		// 	ResponseLength: jsii.Bool(true),
-		// 	Status:         jsii.Bool(true),
-		// 	User:           jsii.Bool(true),
-		// }),
+		Deployment:           deployment,
+		StageName:            jsii.String(props.Env),
+		AccessLogDestination: awsapigateway.NewLogGroupLogDestination(devLogGroup),
+		AccessLogFormat: awsapigateway.AccessLogFormat_JsonWithStandardFields(&awsapigateway.JsonWithStandardFieldProps{
+			Caller:         jsii.Bool(false),
+			HttpMethod:     jsii.Bool(true),
+			Ip:             jsii.Bool(true),
+			Protocol:       jsii.Bool(true),
+			RequestTime:    jsii.Bool(true),
+			ResourcePath:   jsii.Bool(true),
+			ResponseLength: jsii.Bool(true),
+			Status:         jsii.Bool(true),
+			User:           jsii.Bool(true),
+		}),
 	})
 	spaApi.SetDeploymentStage(stage)
 	var exportedPaths = make(ExportedApiPathResources)
