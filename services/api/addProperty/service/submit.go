@@ -6,11 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"image/jpeg"
 	"log/slog"
 	"mime/multipart"
 	"os"
-	"os/exec"
 	"strings"
 	"sync"
 	"time"
@@ -25,6 +24,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/chai2010/webp"
 	"github.com/google/uuid"
 )
 
@@ -47,9 +47,27 @@ func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
 	}
 }
 
+func (ss *Submit) encodeToWebP(file multipart.File) (*bytes.Buffer, error) {
+	var buf bytes.Buffer
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		ss.Log.Error("error deconding the file",
+			"error", err,
+		)
+	}
+
+	err = webp.Encode(&buf, img, &webp.Options{Lossless: true})
+	if err != nil {
+		ss.Log.Error("error encoding the file",
+			"error", err,
+		)
+	}
+
+	return &buf, err
+}
+
 func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
 	var imageNames []string
-	var outErr bytes.Buffer
 	err := os.Mkdir(LocalAssetsRelativePath, 0755)
 	if err != nil {
 		ss.Log.Error("Error creating the temp dir", "err", err)
@@ -63,26 +81,30 @@ func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.Fil
 		}
 		defer file.Close()
 		fileName := utils.ReplaceWhiteSpaceWithUnderscore(fileHeader.Filename)
-		filePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, fileName)
-		dst, err := os.Create(filePath)
+
+		buf, err := ss.encodeToWebP(file)
 		if err != nil {
-			ss.Log.Error("error trying to create the file path")
+			ss.Log.Error("error trying to encode to webp",
+				"error", err,
+			)
 		}
-		defer dst.Close()
-		if _, err := io.Copy(dst, file); err != nil {
-			ss.Log.Error("error copying the file")
+		webpFileName := LocalAssetsRelativePath + "/" + fileName + ".webp"
+		webpFile, err := os.Create(webpFileName)
+		if err != nil {
+			ss.Log.Error("error creating webFile the file",
+				"error", err,
+			)
 		}
-		webpFileName := fileName + ".webp"
-		webpFilePath := fmt.Sprintf("%s/%s", LocalAssetsRelativePath, webpFileName)
-		// convert to webp
-		cmd := exec.Command("cwebp", "-q", "75", filePath, "-o", webpFilePath)
-		cmd.Stderr = &outErr
-		if err := cmd.Run(); err != nil {
-			ss.Log.Error("error converting the file", "cmd error:", outErr.String())
+		defer webpFile.Close()
+
+		_, err = webpFile.Write(buf.Bytes())
+		if err != nil {
+			ss.Log.Error("error writing webFile the file",
+				"error", err,
+			)
 		}
 		imageNames = append(imageNames, webpFileName)
 		// remove files after beeing uploaded to s3 to not overflow to storage
-		defer os.Remove(filePath)
 	}
 	return imageNames, nil
 }
@@ -95,95 +117,33 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 		ss.Log.Error("error loading the default config for lambda", "error", err)
 	}
 	s3Client := s3.NewFromConfig(cfg)
-	var outErr bytes.Buffer
 	bucketName := os.Getenv(types.ASSETS_BUCKET_ENV)
-	webpDir, err := os.MkdirTemp("", "webp")
-	if err != nil {
-		ss.Log.Error("error creating webp dir")
-	}
-	formImagesTempDir, err := os.MkdirTemp("", "images")
-	if err != nil {
-		ss.Log.Error("Error creating the temp dir")
-	}
 
-	defer os.RemoveAll(formImagesTempDir)
-	defer os.RemoveAll(webpDir)
-	// read uploaded images
 	for _, fileHeader := range files {
-		var stdOut bytes.Buffer
 		file, err := fileHeader.Open()
 		if err != nil {
 			ss.Log.Error("error trying to read the file header")
 		}
 		defer file.Close()
 		fileName := utils.ReplaceWhiteSpaceWithUnderscore(fileHeader.Filename)
-		filePath := fmt.Sprintf("%s/%s", formImagesTempDir, fileName)
-		dst, err := os.Create(filePath)
+		buf, err := ss.encodeToWebP(file)
 		if err != nil {
-			ss.Log.Error("error trying to create the file path")
-		}
-		ss.Log.Info("destination of the file",
-			"filePath", filePath,
-		)
-		defer dst.Close()
-		if _, err := io.Copy(dst, file); err != nil {
-			ss.Log.Error("error copying the file")
+			ss.Log.Error("error trying to encode to webp",
+				"error", err,
+			)
 		}
 		webpFileName := fileName + ".webp"
-		webpFilePath := fmt.Sprintf("%s/%s", webpDir, webpFileName)
-		lookPath, err := exec.LookPath("/opt/bin/cwebp")
-		if err != nil {
-			ss.Log.Error("The cwebp command is not in the path", "error", err)
-		}
-		ss.Log.Info("Lookpath returned", "lookpath", lookPath)
 
-		// Check the cwebp file info
-		fileInfoCmd := exec.Command("file /opt/bin/cwebp")
-		fileInfoCmd.Stdout = &stdOut
-		fileInfoCmd.Stderr = &outErr
-		err = fileInfoCmd.Run()
-		if err != nil {
-			ss.Log.Error("error checking the cwebp file headers",
-				"std err:", outErr.String(),
-				"std out:", stdOut.String(),
-				"error:", err,
-			)
-		}
-		ss.Log.Info("results of checking the cwebp file headers",
-			"std err:", outErr.String(),
-			"std out:", stdOut.String(),
-			"error:", err,
-		)
-		// convert to webp
-		cmd := exec.Command("/opt/bin/cwebp", "-q", "75", filePath, "-o", webpFilePath)
-		cmd.Stderr = &outErr
-		cmd.Stdout = &stdOut
-		if err := cmd.Run(); err != nil {
-			ss.Log.Error("error converting the file",
-				"std err:", outErr.String(),
-				"std out:", stdOut.String(),
-				"error:", err,
-			)
-		}
-
-		// read the webp generated file
-		webpFile, err := os.Open(webpFilePath)
-		if err != nil {
-			ss.Log.Error("error opening the webp file path:", "path", webpFilePath)
-		}
-		defer webpFile.Close()
 		_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String("uploads/" + webpFileName),
-			Body:   webpFile,
+			Body:   buf,
 		})
 		if err != nil {
 			ss.Log.Error("error uploading the file to s3", "error", err)
 		}
 		imageNames = append(imageNames, webpFileName)
 		// remove files after beeing uploaded to s3 to not overflow to storage
-		defer os.Remove(webpFilePath)
-		defer os.Remove(filePath)
 	}
 	return imageNames, nil
 }

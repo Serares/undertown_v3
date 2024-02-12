@@ -76,30 +76,23 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 	lambdaRole := utils.CreateLambdaBasicRole(stack, "lambdaBasicRoleU1", props.Env)
 	s3BucketAccessRole := utils.CreateLambdaBasicRole(stack, "s3fullaccesslambdarole", props.Env)
 	s3BucketAccessRole.AddManagedPolicy(awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonS3FullAccess")))
-	// Create the cwebp layer for image optimization
-	cwebpLayer := awslambda.NewLayerVersion(stack, jsii.String("cwebp-layer"), &awslambda.LayerVersionProps{
-		Code: awslambda.AssetCode_FromAsset(jsii.String("../layers/cwebp/cwebp-layer.zip"), nil),
-		CompatibleRuntimes: &[]awslambda.Runtime{
-			awslambda.Runtime_PROVIDED_AL2(),
-		},
-		CompatibleArchitectures: &[]awslambda.Architecture{
-			awslambda.Architecture_ARM_64(),
-		},
-		LayerVersionName: jsii.String("cwebp-layer"),
-		Description:      jsii.String("Layer with cwebp binary"),
-	})
 
 	addProperty := awslambdago.NewGoFunction(stack, jsii.Sprintf("AddProperty-%s", props.Env), &awslambdago.GoFunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
 		MemorySize:   jsii.Number(1024),
 		Architecture: awslambda.Architecture_ARM_64(),
 		Entry:        jsii.String("../services/api/addProperty/lambda"),
-		Bundling:     BundlingOptions,
-		Environment:  &addPropertyEnv,
-		Role:         s3BucketAccessRole,
-		Timeout:      awscdk.Duration_Seconds(jsii.Number(3 * 60)),
-		Layers:       &[]awslambda.ILayerVersion{cwebpLayer},
-	})
+		Bundling: &awslambdago.BundlingOptions{
+			GoBuildFlags: &[]*string{jsii.String(`-ldflags "-s -w" -tags lambda.norpc`)},
+			DockerImage: awscdk.DockerImage_FromBuild(jsii.String("../services/api/addProperty/Dockerfile"),
+				&awscdk.DockerBuildOptions{},
+			),
+		},
+		Environment: &addPropertyEnv,
+		Role:        s3BucketAccessRole,
+		Timeout:     awscdk.Duration_Seconds(jsii.Number(3 * 60)),
+	},
+	)
 
 	getProperties := awslambdago.NewGoFunction(stack, jsii.Sprintf("GetProperties-%s", props.Env), &awslambdago.GoFunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
