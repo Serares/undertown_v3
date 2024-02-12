@@ -15,7 +15,7 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 	token := event.Headers["Authorization"]
 	// err := godotenv.Load("../.env.local")
 	secret := os.Getenv("JWT_SECRET")
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	log := slog.New(slog.NewJSONHandler(os.Stdout, nil)).WithGroup("CRUD AUTHORIZER")
 	log.Info("The event object", "event", event)
 	// if err != nil {
 	// 	log.Debug("env file is used only for local testing")
@@ -40,7 +40,9 @@ func Handler(ctx context.Context, event events.APIGatewayCustomAuthorizerRequest
 		log.Error("the token is invalid", "error", err)
 		return generatePolicy("user", "Deny", event.MethodArn, ""), nil
 	}
-	return generatePolicy("user", "Allow", event.MethodArn, claims.UserId), nil
+	generatedPolicy := generatePolicy("user", "Allow", event.MethodArn, claims.UserId)
+	log.Info("Generated policy", "policy", generatedPolicy)
+	return generatedPolicy, nil
 }
 
 func main() {

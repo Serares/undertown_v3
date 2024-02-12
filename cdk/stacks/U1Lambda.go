@@ -20,10 +20,11 @@ const (
 	AddProperty CrudEndpoints = iota
 	GetProperties
 	GetProperty
+	DeleteProperty
 )
 
 func (ce CrudEndpoints) String() string {
-	return [...]string{"addProperty", "getProperties", "getProperty"}[ce]
+	return [...]string{"addProperty", "getProperties", "getProperty", "deleteProperty"}[ce]
 }
 
 type U1LambdaProps struct {
@@ -80,7 +81,9 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 		Code: awslambda.AssetCode_FromAsset(jsii.String("../layers/cwebp/cwebp-layer.zip"), nil),
 		CompatibleRuntimes: &[]awslambda.Runtime{
 			awslambda.Runtime_PROVIDED_AL2(),
-			// Add other compatible runtimes if needed
+		},
+		CompatibleArchitectures: &[]awslambda.Architecture{
+			awslambda.Architecture_ARM_64(),
 		},
 		LayerVersionName: jsii.String("cwebp-layer"),
 		Description:      jsii.String("Layer with cwebp binary"),
@@ -120,6 +123,17 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 
+	deleteProperty := awslambdago.NewGoFunction(stack, jsii.Sprintf("DeleteProperty-%s", props.Env), &awslambdago.GoFunctionProps{
+		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
+		MemorySize:   jsii.Number(1024),
+		Architecture: awslambda.Architecture_ARM_64(),
+		Entry:        jsii.String("../services/api/deleteProperty/lambda"),
+		Bundling:     BundlingOptions,
+		Environment:  &lambdasEnvVars,
+		Role:         lambdaRole,
+		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
+	})
+
 	lambdas = append(lambdas, IntegrationLambda{
 		goLambda:   &addProperty,
 		path:       AddProperty.String(),
@@ -138,6 +152,13 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 		goLambda:   &getProperty,
 		path:       GetProperty.String(),
 		method:     []string{http.MethodGet},
+		authorizer: CRUDAuthorizer.String(),
+	})
+
+	lambdas = append(lambdas, IntegrationLambda{
+		goLambda:   &deleteProperty,
+		path:       DeleteProperty.String(),
+		method:     []string{http.MethodDelete},
 		authorizer: "",
 	})
 

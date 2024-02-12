@@ -143,6 +143,7 @@ func (ssrc *SSRAdminClient) GetProperty(url, authToken string) (lite.Property, e
 }
 
 func (ssrc *SSRAdminClient) DeleteProperty(url, authToken string) error {
+	ssrc.Log.Info("The delete property request", "url", url, "token", authToken)
 	_, err := ssrc.sendRequest(url, http.MethodDelete, "", authToken, http.StatusOK, nil)
 	if err != nil {
 		return err

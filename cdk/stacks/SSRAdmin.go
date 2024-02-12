@@ -27,12 +27,14 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 	getPropertyUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", GetProperty.String(), props.Env))
 	loginUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", LoginEndpoint.String(), props.Env))
 	addPropertyUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", AddProperty.String(), props.Env))
+	deletePropertyUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", DeleteProperty.String(), props.Env))
 
 	envVars := map[string]*string{
 		"GET_PROPERTIES_URL":  getPropertiesUrl,
 		"GET_PROPERTY_URL":    getPropertyUrl,
 		"LOGIN_URL":           loginUrl,
 		"SUBMIT_PROPERTY_URL": addPropertyUrl,
+		"DELETE_PROPERTY_URL": deletePropertyUrl,
 		// "JWT_SECRET":          jsii.String(os.Getenv("JWT_SECRET")), // THIS is not needed because the token is in the cookie after login
 	}
 	// SSR

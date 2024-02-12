@@ -110,6 +110,7 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 	defer os.RemoveAll(webpDir)
 	// read uploaded images
 	for _, fileHeader := range files {
+		var stdOut bytes.Buffer
 		file, err := fileHeader.Open()
 		if err != nil {
 			ss.Log.Error("error trying to read the file header")
@@ -121,17 +122,48 @@ func (ss *Submit) ProcessImagesS3(ctx context.Context, files []*multipart.FileHe
 		if err != nil {
 			ss.Log.Error("error trying to create the file path")
 		}
+		ss.Log.Info("destination of the file",
+			"filePath", filePath,
+		)
 		defer dst.Close()
 		if _, err := io.Copy(dst, file); err != nil {
 			ss.Log.Error("error copying the file")
 		}
 		webpFileName := fileName + ".webp"
 		webpFilePath := fmt.Sprintf("%s/%s", webpDir, webpFileName)
+		lookPath, err := exec.LookPath("/opt/bin/cwebp")
+		if err != nil {
+			ss.Log.Error("The cwebp command is not in the path", "error", err)
+		}
+		ss.Log.Info("Lookpath returned", "lookpath", lookPath)
+
+		// Check the cwebp file info
+		fileInfoCmd := exec.Command("file /opt/bin/cwebp")
+		fileInfoCmd.Stdout = &stdOut
+		fileInfoCmd.Stderr = &outErr
+		err = fileInfoCmd.Run()
+		if err != nil {
+			ss.Log.Error("error checking the cwebp file headers",
+				"std err:", outErr.String(),
+				"std out:", stdOut.String(),
+				"error:", err,
+			)
+		}
+		ss.Log.Info("results of checking the cwebp file headers",
+			"std err:", outErr.String(),
+			"std out:", stdOut.String(),
+			"error:", err,
+		)
 		// convert to webp
-		cmd := exec.Command("cwebp", "-q", "75", filePath, "-o", webpFilePath)
+		cmd := exec.Command("/opt/bin/cwebp", "-q", "75", filePath, "-o", webpFilePath)
 		cmd.Stderr = &outErr
+		cmd.Stdout = &stdOut
 		if err := cmd.Run(); err != nil {
-			ss.Log.Error("error converting the file", "cmd error:", outErr.String())
+			ss.Log.Error("error converting the file",
+				"std err:", outErr.String(),
+				"std out:", stdOut.String(),
+				"error:", err,
+			)
 		}
 
 		// read the webp generated file
