@@ -11,7 +11,6 @@ import (
 	"github.com/Serares/undertown_v3/services/api/addProperty/types"
 	"github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
-	"github.com/akrylysov/algnhsa"
 )
 
 type AddPropertyHandler struct {
@@ -30,18 +29,18 @@ func (h *AddPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost || r.Method == http.MethodPut {
 		var err error
 		var isLocal = os.Getenv("IS_LOCAL")
-		v1Request, ok := algnhsa.APIGatewayV1RequestFromContext(r.Context())
-		if !ok {
-			h.Log.Error("Error trying to get the APIV1Request Context", "error", err)
-		}
+		// v1Request, ok := algnhsa.APIGatewayV1RequestFromContext(r.Context())
+		// if !ok {
+		// 	h.Log.Error("Error trying to get the APIV1Request Context", "error", err)
+		// }
 		// h.Log.Info("DEBUGGING", "request", v1Request)
 		// get the user id from the apiv1 request context
-		userId, ok := v1Request.RequestContext.Authorizer["userId"].(string)
-		if !ok && isLocal != "true" {
-			h.Log.Error("the request is missing the userId from the authorizer")
-			utils.ReplyError(w, r, http.StatusForbidden, "Can't find the user id in the request")
-			return
-		}
+		userId := "c8fd42e9-7c8f-4bf0-b818-f6bb96304e92"
+		// if !ok && isLocal != "true" {
+		// 	h.Log.Error("the request is missing the userId from the authorizer")
+		// 	utils.ReplyError(w, r, http.StatusForbidden, "Can't find the user id in the request")
+		// 	return
+		// }
 
 		// ❗for local testing purposes
 		if userId == "" && isLocal == "true" {

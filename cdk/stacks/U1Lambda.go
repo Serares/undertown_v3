@@ -80,13 +80,11 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 	addProperty := awslambdago.NewGoFunction(stack, jsii.Sprintf("AddProperty-%s", props.Env), &awslambdago.GoFunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
 		MemorySize:   jsii.Number(1024),
-		Architecture: awslambda.Architecture_ARM_64(),
+		Architecture: awslambda.Architecture_X86_64(),
 		Entry:        jsii.String("../services/api/addProperty/lambda"),
 		Bundling: &awslambdago.BundlingOptions{
-			GoBuildFlags: &[]*string{jsii.String(`-ldflags "-s -w" -tags lambda.norpc`)},
-			DockerImage: awscdk.DockerImage_FromBuild(jsii.String("../services/api/addProperty/Dockerfile"),
-				&awscdk.DockerBuildOptions{},
-			),
+			CgoEnabled:   jsii.Bool(true),
+			GoBuildFlags: &[]*string{jsii.String(`-ldflags '-extldflags "-static -s -w"' -tags lambda.norpc`)},
 		},
 		Environment: &addPropertyEnv,
 		Role:        s3BucketAccessRole,

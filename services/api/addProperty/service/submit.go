@@ -81,7 +81,7 @@ func (ss *Submit) ProcessImagesLocal(ctx context.Context, files []*multipart.Fil
 		}
 		defer file.Close()
 		fileName := utils.ReplaceWhiteSpaceWithUnderscore(fileHeader.Filename)
-
+		ss.Log.Info("the file to be encoded:", "filename", fileName)
 		buf, err := ss.encodeToWebP(file)
 		if err != nil {
 			ss.Log.Error("error trying to encode to webp",
