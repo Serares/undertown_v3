@@ -11,6 +11,7 @@ use (
 	./services/api/login
 	./services/api/register
 	./services/api/registerAuthorizer
+	./services/events/processImages
 	./services/ssr/admin
 	./services/ssr/homepage
 	./services/ssr/includes

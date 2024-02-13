@@ -12,15 +12,7 @@ import (
 	"github.com/Serares/undertown_v3/utils/constants"
 )
 
-// ❔
-// this is going to return the buffered body
-// the content type of the multipart/form request
-// the json string used to rerender the data in case something fails
-// and error
-// ❗DEPRECATED
-// the forwarded request to addProperty will be a json
-// the files will be sent to S3
-func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
+func ParseMultipartToJson(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 	err := r.ParseMultipartForm(32 << 20)
 	if err != nil {
 		return nil, "", nil, err

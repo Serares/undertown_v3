@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/jpeg"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"log/slog"
 	"mime/multipart"
 	"os"
@@ -49,11 +51,13 @@ func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
 
 func (ss *Submit) encodeToWebP(file multipart.File) (*bytes.Buffer, error) {
 	var buf bytes.Buffer
-	img, err := jpeg.Decode(file)
+	ss.Log.Info("the file bytes", "file", file)
+	img, _, err := image.Decode(file)
 	if err != nil {
 		ss.Log.Error("error deconding the file",
 			"error", err,
 		)
+		return nil, fmt.Errorf("error trying to decode the image")
 	}
 
 	err = webp.Encode(&buf, img, &webp.Options{Lossless: true})
