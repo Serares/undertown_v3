@@ -16,7 +16,7 @@ require (
 	github.com/Serares/undertown_v3/repositories/repository v0.0.0
 	github.com/Serares/undertown_v3/ssr/includes v0.0.0
 	github.com/Serares/undertown_v3/utils v0.0.0
-	github.com/aws/aws-lambda-go v1.44.0 // indirect
+	github.com/aws/aws-lambda-go v1.46.0 // indirect
 )
 
 replace github.com/Serares/undertown_v3/utils => ../../../utils

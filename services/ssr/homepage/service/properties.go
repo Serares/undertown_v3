@@ -86,7 +86,7 @@ func (ps *PropertiesService) ListProperties(props SortProps, transaltedTransacti
 			return []types.ProcessedListProperty{}, fmt.Errorf("error trying to create the property path %v", err)
 		}
 
-		thumbnailPath := rootUtils.CreateImagePath(featProp.Thumbnail)
+		thumbnailPath := rootUtils.CreateImagePath("/images/", featProp.Thumbnail)
 		imagesLength := len(strings.Split(featProp.Images, ";"))
 
 		processedFeatProperties = append(processedFeatProperties, types.ProcessedListProperty{

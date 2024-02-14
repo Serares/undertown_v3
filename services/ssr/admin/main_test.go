@@ -21,7 +21,7 @@ import (
 
 func setupAPI(t *testing.T) (string, func()) {
 	t.Helper()
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
 		t.Error("error loading the .env file")
 	}

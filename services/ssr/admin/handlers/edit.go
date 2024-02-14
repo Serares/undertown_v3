@@ -129,16 +129,34 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// ❗TODO
-			// If the user changes the property title, the ridirect will display the old property title in the url path
+			// If the user changes the property title, the redirect will display the old property title in the url path
 			// because on a success backend query the liteProperty, features, err are all nullish values
-			fullUrl := r.URL.Path
-			fullUrl, err = utils.AddParamToUrl(fullUrl, constants.HumanReadableIdQueryKey, q[constants.HumanReadableIdQueryKey][0])
-			if err != nil {
-				h.Log.Error("error trying to create the redirect url", "error", err)
-				http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
-				return
-			}
-			http.Redirect(w, r, fullUrl, http.StatusSeeOther)
+			// fullUrl := r.URL.Path
+			// fullUrl, err = utils.AddParamToUrl(
+			// 	fullUrl,
+			// 	constants.HumanReadableIdQueryKey,
+			// 	q[constants.HumanReadableIdQueryKey][0],
+			// )
+			// if err != nil {
+			// 	h.Log.Error("error trying to create the redirect url", "error", err)
+			// 	http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+			// 	return
+			// }
+			viewEdit(
+				w,
+				r,
+				types.EditProps{
+					ErrorMessage:        "",
+					SuccessMessage:      "Property is getting updated, be patient",
+					Property:            liteProperty,
+					PropertyFeatures:    features,
+					ImagePaths:          []string{}, // images are rip
+					PropertyTypes:       types.PropertyTypes,
+					PropertyTransaction: types.PropertyTransactions,
+					FormAction:          editUrl,
+				},
+				deleteUrl,
+			)
 			return
 		}
 	}

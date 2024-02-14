@@ -2,6 +2,31 @@ package utils
 
 import "github.com/golang-jwt/jwt/v5"
 
+type TransactionType int
+
+const (
+	Sell TransactionType = iota
+	Rent
+	Default // using this value to call the ToInt method
+)
+
+// Will return SELL or RENT strings
+func (t TransactionType) String() string {
+	return [...]string{"SELL", "RENT"}[t]
+}
+
+// Not sure if this is needed
+func (t TransactionType) ToInt(stringType string) TransactionType {
+	switch stringType {
+	case "SELL":
+		return Sell
+	case "RENT":
+		return Rent
+	default:
+		return Sell
+	}
+}
+
 type JWTClaims struct {
 	Email   string `json:"email"`
 	UserId  string `json:"userId"`
@@ -20,6 +45,8 @@ type RequestProperty struct {
 	PropertyAddress     string           `json:"property_address"`
 	PropertyTransaction int64            `json:"property_transaction"` // this is sent as 0 and 1 see repository/types/PropertyTransaction
 	PropertySurface     int64            `json:"property_surface"`
+	ImageNames          []string         `json:"images"`
+	DeletedImages       []string         `json:"deleted_images"`
 	Features            PropertyFeatures `json:"-"`
 	// Features            map[string]interface{} `json:"-"` // This was used before to unmarshal all the fields that come from SSR and are not specifically placed
 }
@@ -58,4 +85,8 @@ type PropertyFeatures struct {
 	HeatingFloorHeating              bool   `json:"heating_floor_heating"`
 	Lat                              string `json:"latitude"`
 	Lng                              string `json:"longitude"`
+}
+
+type SQSDeleteImages struct {
+	Images []string `json:"images"`
 }

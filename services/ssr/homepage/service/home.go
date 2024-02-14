@@ -33,7 +33,7 @@ func (hs *HomeService) Get() ([]types.ProcessedFeaturedProperty, error) {
 	}
 
 	for _, featProp := range properties {
-		propertyThumbnailPath := utils.CreateImagePath(featProp.Thumbnail)
+		propertyThumbnailPath := utils.CreateImagePath("/images/", featProp.Thumbnail)
 
 		propertyPath, err := utils.CreateSinglePropertyPath(featProp.PropertyTransaction, featProp.Title, featProp.Humanreadableid)
 		if err != nil {

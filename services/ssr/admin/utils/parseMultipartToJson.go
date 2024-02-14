@@ -1,26 +1,25 @@
 package utils
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"strconv"
 
+	"github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func ParseMultipartToJson(r *http.Request) (*bytes.Buffer, string, []byte, error) {
+// ❗TODO
+//
+//	Split the S3 upload logic into a separate function
+func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
 	err := r.ParseMultipartForm(32 << 20)
 	if err != nil {
-		return nil, "", nil, err
+		return nil, "", err
 	}
-
-	var newReaderBuffer bytes.Buffer
-	writer := multipart.NewWriter(&newReaderBuffer)
-	defer writer.Close()
 
 	var jsonStructure map[string]interface{} = make(map[string]interface{})
 	for key, values := range r.PostForm {
@@ -48,51 +47,69 @@ func ParseMultipartToJson(r *http.Request) (*bytes.Buffer, string, []byte, error
 		}
 	}
 
-	// ❗images that are removed will be sent as a form field
-	// because the images have to be removed before doing all the json unmarshalling and db updates on the backend
-	if len(r.MultipartForm.Value[constants.DeleteImagesFormKey]) > 0 {
-		if err != nil {
-			return nil, "", nil, fmt.Errorf("error creating the remove images form key %v", err)
-		}
-		for _, ri := range r.MultipartForm.Value[constants.DeleteImagesFormKey] {
-			err = writer.WriteField(constants.DeleteImagesFormKey, ri)
+	var imagesNamesList = make([]string, 0)
+	cfg, err := config.LoadDefaultConfig(r.Context())
+	if err != nil {
+		return nil, "", err
+	}
+
+	s3Client := s3.NewFromConfig(cfg)
+	// Get the files from the multipart form and persist them to S3
+	// Add the file names to the json string
+
+	// ❗TODO
+	// find a different way of getting the property_transaction from the form
+	propertyTransactionFormValue := r.PostForm.Get(constants.TransactionTypeFormInputKey)
+	propertyTransactionToInt, err := strconv.Atoi(propertyTransactionFormValue)
+	if err != nil {
+		return nil, "", err
+	}
+	transactionType := utils.TransactionType(propertyTransactionToInt)
+
+	humanReadableId := utils.HumanReadableId(
+		transactionType,
+	)
+
+	for _, fileHeaders := range r.MultipartForm.File {
+		for _, fileHeader := range fileHeaders {
+			imageName := utils.ReplaceWhiteSpaceWithUnderscore(
+				fmt.Sprintf(
+					"%s/%s_%s",
+					humanReadableId,
+					utils.GenerateStringTimestamp(),
+					fileHeader.Filename,
+				),
+			)
+			bucketKey := "/" + imageName
+			file, err := fileHeader.Open()
+
 			if err != nil {
-				return nil, "", nil, fmt.Errorf("error writing the remove images form value %v", err)
+				return nil, "", fmt.Errorf("error reading the file from the form %v", err)
+			}
+
+			defer file.Close()
+			imagesNamesList = append(imagesNamesList, imageName)
+			// ❗
+			// TODO run this in goroutines after checking it works
+			err = UploadFilesToS3(
+				r.Context(),
+				*fileHeader,
+				s3Client,
+				bucketKey,
+			)
+			if err != nil {
+				return nil, "", fmt.Errorf("error uploading the file '%s' to s3 %v", bucketKey, err)
 			}
 		}
 	}
 
-	textWriter, _ := writer.CreateFormField("property")
+	jsonStructure[constants.ImagesFormKey] = imagesNamesList
+
 	// json marshal
 	jsonString, err := json.Marshal(jsonStructure)
 	if err != nil {
-		return nil, "", nil, fmt.Errorf("error marshaling the json structure %v", err)
+		return nil, "", fmt.Errorf("error marshaling the json structure %v", err)
 	}
-	_, err = textWriter.Write(jsonString)
-	if err != nil {
-		return nil, "", jsonString, fmt.Errorf("error writing json string to the body %v", err)
-	}
-	// ❗No longer parsing the files to add them to the multipart form
-	// Given the fact that there will be no multipart form request
-	// the request will transform to a json
-	// get the files from the multipar form
-	for _, fileHeaders := range r.MultipartForm.File {
-		for _, fileHeader := range fileHeaders {
-			file, err := fileHeader.Open()
-			if err != nil {
-				return nil, "", nil, fmt.Errorf("error reading the file from the form %v", err)
-			}
-			defer file.Close()
 
-			fw, err := writer.CreateFormFile(constants.ImagesFormKey, fileHeader.Filename)
-			if err != nil {
-				return nil, "", nil, fmt.Errorf("error creating file writer %v", err)
-			}
-			if _, err = io.Copy(fw, file); err != nil {
-				return nil, "", nil, fmt.Errorf("error writing the form file to the request multipart form file %v", err)
-			}
-		}
-	}
-	contentType := writer.FormDataContentType()
-	return &newReaderBuffer, contentType, jsonString, err
+	return jsonString, humanReadableId, err
 }

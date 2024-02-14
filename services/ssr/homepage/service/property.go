@@ -48,7 +48,7 @@ func (s *PropertyService) Get(humanReadableId string) (types.ProcessedSingleProp
 	processedProperty.Address = liteProperty.PropertyAddress
 	processedProperty.Description = liteProperty.PropertyDescription
 	processedProperty.DisplayPrice = utils.CreateDisplayPrice(liteProperty.Price)
-	processedProperty.ImagePaths = utils.CreateImagePathList(strings.Split(liteProperty.Images, ";"))
+	processedProperty.ImagePaths = utils.CreateImagePathList("/images/", strings.Split(liteProperty.Images, ";"))
 	processedProperty.Surface = fmt.Sprintf("%d", liteProperty.PropertySurface)
 
 	return processedProperty, nil

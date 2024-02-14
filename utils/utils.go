@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func ReplyError(w http.ResponseWriter, r *http.Request, status int, message string) {
@@ -105,15 +106,15 @@ func AddParamToUrl(baseUrl, param, value string) (string, error) {
 }
 
 // TODO the base path should be a variable?
-func CreateImagePath(imageName string) string {
-	return "/assets/uploads/" + imageName
+func CreateImagePath(basePath, imageName string) string {
+	return basePath + imageName
 }
 
-func CreateImagePathList(imageNames []string) []string {
+func CreateImagePathList(basePath string, imageNames []string) []string {
 	listOfPaths := make([]string, 0)
 
 	for _, imgName := range imageNames {
-		imagePath := CreateImagePath(imgName)
+		imagePath := CreateImagePath(basePath, imgName)
 		listOfPaths = append(listOfPaths, imagePath)
 	}
 
@@ -170,4 +171,42 @@ func TranslatePropertyTransactionType(transactionType string) (string, error) {
 	}
 
 	return constants.TranslatedTransactionRent, nil
+}
+
+func GenerateStringTimestamp() string {
+	// You can customize the time format here.
+	// This example uses the format: YYYY-MM-DD HH:MM:SS
+	const layout = "2006-01-02-15-04-05"
+	currentTime := time.Now()
+	return currentTime.Format(layout)
+}
+
+func ParseJwtWithClaims(token string, secret string) (JWTClaims, error) {
+	claims := JWTClaims{}
+	// ❗get the token claims to get the userId
+	parsedAuthToken, err := jwt.ParseWithClaims(string(token), &claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrInvalidKeyType
+		}
+		return []byte(secret), nil
+	})
+
+	if err != nil || !parsedAuthToken.Valid {
+		// Return a policy document that denies access
+		return claims, fmt.Errorf("error the auth token is invalid %v", err)
+	}
+
+	return claims, nil
+}
+
+func AppendFileExtension(fileName, extension string) string {
+	return fileName + "." + extension
+}
+
+func AppendMultipleFileExtension(fileNames []string, extension string) []string {
+	var fileNamesWithExtension = make([]string, 0)
+	for _, fileName := range fileNames {
+		fileNamesWithExtension = append(fileNamesWithExtension, AppendFileExtension(fileName, extension))
+	}
+	return fileNamesWithExtension
 }
