@@ -12,6 +12,7 @@ CREATE TABLE properties (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     title TEXT NOT NULL,
+    is_processing INTEGER NOT NULL,
     user_id TEXT NOT NULL,
     images TEXT NOT NULL,
     thumbnail TEXT NOT NULL,
