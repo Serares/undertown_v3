@@ -8,6 +8,11 @@ import (
 	adminUtils "github.com/Serares/ssr/admin/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
 type SubmitService struct {
@@ -26,25 +31,67 @@ type PropertyFormField struct {
 	Title string
 }
 
-func (s *SubmitService) Submit(r *http.Request, authToken, humanReadableId string) (lite.Property, utils.PropertyFeatures, error) {
+func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property, utils.PropertyFeatures, error) {
+	piuQueuUrl := os.Getenv("PIU_QUEUE_URL")
+	jwtSecret := os.Getenv("JWT_SECRET")
 	var err error
-	// TODO
-	// run some validations here if needed
-	// get the token from cookie
-	url := os.Getenv("SUBMIT_PROPERTY_URL")
-	// 🤔
-	// If the requests fail
-	// This method should return the form fields back to the view
-	// to fill the values of the inputs
-	bufferedBody, contentType, jsonString, err := adminUtils.ParseMultipart(r)
+	cfg, err := config.LoadDefaultConfig(r.Context())
 	if err != nil {
+		s.Log.Error(
+			"error trying to load the lambda context",
+			"error", err,
+		)
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
 
-	err = s.Client.AddProperty(bufferedBody, url, authToken, contentType, http.MethodPost)
+	sqsClient := sqs.NewFromConfig(cfg)
 
+	claims, err := utils.ParseJwtWithClaims(authToken, jwtSecret)
 	if err != nil {
-		s.Log.Error("error trying to send the request", "error", err)
+		s.Log.Error("error trying to parse the auth token",
+			"error", err,
+		)
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+	// TODO
+	// run some validations here if needed
+	// get the token from cookie
+	// 🤔
+	// If the request fails
+	// This method should return the form fields back to the view
+	// to fill the values of the inputs
+	jsonString, humanReadableId, err := adminUtils.ParseMultipartToJson(r)
+	if err != nil {
+		s.Log.Error("error trying to parse the multipart/form",
+			"error", err,
+		)
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+
+	messageAttributes := map[string]sqsTypes.MessageAttributeValue{
+		constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE: {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(humanReadableId),
+		},
+		constants.USER_ID: {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(claims.UserId),
+		},
+	}
+
+	output, err := sqsClient.SendMessage(
+		r.Context(),
+		&sqs.SendMessageInput{
+			QueueUrl:          &piuQueuUrl,
+			MessageBody:       aws.String(string(jsonString)),
+			MessageAttributes: messageAttributes,
+		},
+	)
+	s.Log.Info("sqs output",
+		"output:", output,
+	)
+	if err != nil {
+		s.Log.Error("error trying to send the sqs message", "error", err)
 		property, features, unmarshallingErrors := adminUtils.UnmarshalProperty(jsonString)
 		// ❗
 		// populating a lite.Property struct with the types.RequestProperty fields

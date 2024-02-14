@@ -10,7 +10,10 @@ require (
 	modernc.org/sqlite v1.28.0
 )
 
+require github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
+
 require (
+	github.com/Serares/undertown_v3/utils v0.0.0
 	github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20230512164433-5d1fd1a340c9 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.16.14 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.11 // indirect
@@ -46,3 +49,5 @@ require (
 	modernc.org/token v1.0.1 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )
+
+replace github.com/Serares/undertown_v3/utils => ../../utils

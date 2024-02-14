@@ -17,6 +17,7 @@ INSERT INTO properties(
         created_at,
         updated_at,
         title,
+        is_processing,
         user_id,
         images,
         thumbnail,
@@ -45,6 +46,7 @@ VALUES (
         ?,
         ?,
         ?,
+        ?,
         ?
     )
 `
@@ -55,6 +57,7 @@ type AddPropertyParams struct {
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	Title               string
+	IsProcessing        int64
 	UserID              string
 	Images              string
 	Thumbnail           string
@@ -75,6 +78,7 @@ func (q *Queries) AddProperty(ctx context.Context, arg AddPropertyParams) error 
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Title,
+		arg.IsProcessing,
 		arg.UserID,
 		arg.Images,
 		arg.Thumbnail,
@@ -101,7 +105,7 @@ func (q *Queries) DeletePropertyByHumanReadableId(ctx context.Context, humanread
 }
 
 const getByHumanReadableId = `-- name: GetByHumanReadableId :one
-SELECT id, humanreadableid, created_at, updated_at, title, user_id, images, thumbnail, is_featured, price, property_type, property_description, property_address, property_transaction, property_surface, features
+SELECT id, humanreadableid, created_at, updated_at, title, is_processing, user_id, images, thumbnail, is_featured, price, property_type, property_description, property_address, property_transaction, property_surface, features
 FROM properties
 WHERE humanReadableId = ?
 LIMIT 1
@@ -116,6 +120,7 @@ func (q *Queries) GetByHumanReadableId(ctx context.Context, humanreadableid stri
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.IsProcessing,
 		&i.UserID,
 		&i.Images,
 		&i.Thumbnail,
@@ -132,7 +137,7 @@ func (q *Queries) GetByHumanReadableId(ctx context.Context, humanreadableid stri
 }
 
 const getProperty = `-- name: GetProperty :one
-SELECT id, humanreadableid, created_at, updated_at, title, user_id, images, thumbnail, is_featured, price, property_type, property_description, property_address, property_transaction, property_surface, features
+SELECT id, humanreadableid, created_at, updated_at, title, is_processing, user_id, images, thumbnail, is_featured, price, property_type, property_description, property_address, property_transaction, property_surface, features
 FROM properties
 WHERE id = ?
 LIMIT 1
@@ -147,6 +152,7 @@ func (q *Queries) GetProperty(ctx context.Context, id string) (Property, error) 
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.IsProcessing,
 		&i.UserID,
 		&i.Images,
 		&i.Thumbnail,
@@ -173,6 +179,7 @@ SELECT id,
     property_type
 FROM properties
 WHERE is_featured = 1
+    AND is_processing = 0
 ORDER BY created_at DESC
 `
 
@@ -220,8 +227,9 @@ func (q *Queries) ListFeaturedProperties(ctx context.Context) ([]ListFeaturedPro
 }
 
 const listProperties = `-- name: ListProperties :many
-SELECT id, humanreadableid, created_at, updated_at, title, user_id, images, thumbnail, is_featured, price, property_type, property_description, property_address, property_transaction, property_surface, features
+SELECT id, humanreadableid, created_at, updated_at, title, is_processing, user_id, images, thumbnail, is_featured, price, property_type, property_description, property_address, property_transaction, property_surface, features
 FROM properties
+WHERE is_processing = 0
 ORDER BY created_at DESC
 `
 
@@ -240,6 +248,7 @@ func (q *Queries) ListProperties(ctx context.Context) ([]Property, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
+			&i.IsProcessing,
 			&i.UserID,
 			&i.Images,
 			&i.Thumbnail,
@@ -278,6 +287,7 @@ SELECT id,
     images
 FROM properties
 WHERE property_transaction = ?
+    AND is_processing = 0
 ORDER BY created_at DESC
 `
 

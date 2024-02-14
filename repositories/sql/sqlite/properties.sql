@@ -5,6 +5,7 @@ INSERT INTO properties(
         created_at,
         updated_at,
         title,
+        is_processing,
         user_id,
         images,
         thumbnail,
@@ -18,6 +19,7 @@ INSERT INTO properties(
         features
     )
 VALUES (
+        ?,
         ?,
         ?,
         ?,
@@ -51,6 +53,7 @@ WHERE humanReadableId = ?;
 -- name: ListProperties :many
 SELECT *
 FROM properties
+WHERE is_processing = 0
 ORDER BY created_at DESC;
 -- name: ListFeaturedProperties :many
 SELECT id,
@@ -63,6 +66,7 @@ SELECT id,
     property_type
 FROM properties
 WHERE is_featured = 1
+    AND is_processing = 0
 ORDER BY created_at DESC;
 -- name: ListPropertiesByTransactionType :many
 SELECT id,
@@ -77,6 +81,7 @@ SELECT id,
     images
 FROM properties
 WHERE property_transaction = ?
+    AND is_processing = 0
 ORDER BY created_at DESC;
 -- name: UpdatePropertyImages :exec
 UPDATE properties

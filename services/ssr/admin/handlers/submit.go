@@ -37,7 +37,7 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		token := middleware.ID(r)
-		property, features, err := h.SubmitService.Submit(r, token, "")
+		property, features, err := h.SubmitService.Submit(r, token)
 
 		if err != nil {
 			h.Log.Error("failed to submit", err)

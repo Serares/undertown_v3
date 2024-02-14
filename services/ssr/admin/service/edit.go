@@ -11,6 +11,10 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
 type EditService struct {
@@ -47,7 +51,7 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 	}
 
 	images := strings.Split(property.Images, ";")
-	images = utils.CreateImagePathList(images)
+	images = utils.CreateImagePathList("/images/", images)
 	// have to decode the property features into the utils.PropertyFeatures struct to be able to fill
 	// up input values
 	var propertyFeatures utils.PropertyFeatures
@@ -61,19 +65,38 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 }
 
 func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lite.Property, utils.PropertyFeatures, error) {
-	url := os.Getenv("SUBMIT_PROPERTY_URL")
-	url, err := utils.AddParamToUrl(url, constants.HumanReadableIdQueryKey, humanReadableId)
+	piuQueuUrl := os.Getenv("PIU_QUEUE_URL")
+
+	jsonString, _, err := adminUtils.ParseMultipartToJson(r)
 	if err != nil {
-		es.Log.Error("error trying to construct the url")
 		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+	cfg, err := config.LoadDefaultConfig(r.Context())
+	if err != nil {
+		es.Log.Error(
+			"error trying to load the lambda context",
+			"error", err,
+		)
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+	sqsClient := sqs.NewFromConfig(cfg)
+
+	messageAttributes := map[string]sqsTypes.MessageAttributeValue{
+		constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE: {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(humanReadableId),
+		},
 	}
 
-	bufferedBody, contentType, jsonString, err := adminUtils.ParseMultipart(r)
-	if err != nil {
-		return lite.Property{}, utils.PropertyFeatures{}, err
-	}
+	_, err = sqsClient.SendMessage(
+		r.Context(),
+		&sqs.SendMessageInput{
+			QueueUrl:          &piuQueuUrl,
+			MessageBody:       aws.String(string(jsonString)),
+			MessageAttributes: messageAttributes,
+		},
+	)
 	// TODO handle the case where iamges are removed
-	err = es.Client.AddProperty(bufferedBody, url, token, contentType, http.MethodPut)
 	if err != nil {
 		es.Log.Error("error trying to send the request", "error", err)
 		property, features, unmarshallingErrors := adminUtils.UnmarshalProperty(jsonString)

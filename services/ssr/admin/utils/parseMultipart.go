@@ -17,6 +17,9 @@ import (
 // the content type of the multipart/form request
 // the json string used to rerender the data in case something fails
 // and error
+// ❗DEPRECATED
+// the forwarded request to addProperty will be a json
+// the files will be sent to S3
 func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 	err := r.ParseMultipartForm(32 << 20)
 	if err != nil {
@@ -77,6 +80,9 @@ func ParseMultipart(r *http.Request) (*bytes.Buffer, string, []byte, error) {
 	if err != nil {
 		return nil, "", jsonString, fmt.Errorf("error writing json string to the body %v", err)
 	}
+	// ❗No longer parsing the files to add them to the multipart form
+	// Given the fact that there will be no multipart form request
+	// the request will transform to a json
 	// get the files from the multipar form
 	for _, fileHeaders := range r.MultipartForm.File {
 		for _, fileHeader := range fileHeaders {

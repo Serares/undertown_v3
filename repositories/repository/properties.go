@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
-	"github.com/Serares/undertown_v3/repositories/repository/types"
 	"github.com/Serares/undertown_v3/repositories/repository/utils"
+	rootUtils "github.com/Serares/undertown_v3/utils"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 	_ "modernc.org/sqlite"
 )
@@ -100,7 +100,7 @@ func (d *Properties) List(ctx context.Context) ([]lite.Property, error) {
 	return properties, nil
 }
 
-func (d *Properties) ListByTransactionType(ctx context.Context, transactionType types.TransactionType) ([]lite.ListPropertiesByTransactionTypeRow, error) {
+func (d *Properties) ListByTransactionType(ctx context.Context, transactionType rootUtils.TransactionType) ([]lite.ListPropertiesByTransactionTypeRow, error) {
 	properties, err := d.db.ListPropertiesByTransactionType(ctx, transactionType.String())
 	if err != nil {
 		return make([]lite.ListPropertiesByTransactionTypeRow, 0), fmt.Errorf("error listing properties by transaction type: %v", err)
