@@ -10,8 +10,6 @@ const (
 	TranslatedTransactionSell       = "vanzari"
 	TranslatedTransactionRent       = "chirii"
 	CookieTokenKey                  = "token"
-	RAW_IMAGES_BUCKET               = "RAW_IMAGES_BUCKET"
-	PROCESSED_IMAGES_BUCKET         = "PROCESSED_IMAGES_BUCKET"
 	USER_ID                         = "userId"
 	HUMAN_READABLE_ID_SQS_ATTRIBUTE = "humanReadableId"
 )

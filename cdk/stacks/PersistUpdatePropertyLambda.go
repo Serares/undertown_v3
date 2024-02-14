@@ -4,6 +4,7 @@ import (
 	"cdk/utils"
 	"os"
 
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -40,12 +41,12 @@ func PersistUpdatePropertyLambda(scope constructs.Construct, id string, props *P
 		// don't store them in plain text
 		// store them as an encrypted string?
 		// how to decrypt them
-		"DB_HOST":                 jsii.String(os.Getenv("DB_HOST")),
-		"DB_NAME":                 jsii.String(os.Getenv("DB_NAME")),
-		"DB_PROTOCOL":             jsii.String(os.Getenv("DB_PROTOCOL")),
-		"TURSO_DB_TOKEN":          jsii.String(os.Getenv("TURSO_DB_TOKEN")),
-		"PIU_QUEUE_URL":           jsii.String(piuQueueUrl),
-		"DELETE_IMAGES_QUEUE_URL": jsii.String(deleteImagesQueueUrl), // used to dispatch the names of images that needs to be deleted
+		env.DB_HOST:                 jsii.String(os.Getenv(env.DB_HOST)),
+		env.DB_NAME:                 jsii.String(os.Getenv(env.DB_NAME)),
+		env.DB_PROTOCOL:             jsii.String(os.Getenv(env.DB_PROTOCOL)),
+		env.TURSO_DB_TOKEN:          jsii.String(env.TURSO_DB_TOKEN),
+		env.PIU_QUEUE_URL:           jsii.String(piuQueueUrl),
+		env.DELETE_IMAGES_QUEUE_URL: jsii.String(deleteImagesQueueUrl), // used to dispatch the names of images that needs to be deleted
 	}
 
 	s3BucketAccessRole := utils.CreateLambdaBasicRole(stack, "s3fullaccesslambdarole", props.Env)
@@ -74,6 +75,10 @@ func PersistUpdatePropertyLambda(scope constructs.Construct, id string, props *P
 	)
 	// grant piuqueue access to addPropertyLambda
 	props.PIUQueue.GrantConsumeMessages(persistUpdateProperty)
+
+	// ❗
+	// dispatch delete permissions
+	props.DeleteImagesQueue.GrantSendMessages(persistUpdateProperty)
 
 	return stack
 }

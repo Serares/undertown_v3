@@ -9,6 +9,7 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -32,8 +33,8 @@ type PropertyFormField struct {
 }
 
 func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property, utils.PropertyFeatures, error) {
-	piuQueuUrl := os.Getenv("PIU_QUEUE_URL")
-	jwtSecret := os.Getenv("JWT_SECRET")
+	piuQueuUrl := os.Getenv(env.PIU_QUEUE_URL)
+	jwtSecret := os.Getenv(env.JWT_SECRET)
 	var err error
 	cfg, err := config.LoadDefaultConfig(r.Context())
 	if err != nil {
@@ -53,13 +54,7 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 		)
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
-	// TODO
-	// run some validations here if needed
-	// get the token from cookie
-	// 🤔
-	// If the request fails
-	// This method should return the form fields back to the view
-	// to fill the values of the inputs
+
 	jsonString, humanReadableId, err := adminUtils.ParseMultipartToJson(r)
 	if err != nil {
 		s.Log.Error("error trying to parse the multipart/form",
@@ -79,16 +74,13 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 		},
 	}
 
-	output, err := sqsClient.SendMessage(
+	_, err = sqsClient.SendMessage(
 		r.Context(),
 		&sqs.SendMessageInput{
 			QueueUrl:          &piuQueuUrl,
 			MessageBody:       aws.String(string(jsonString)),
 			MessageAttributes: messageAttributes,
 		},
-	)
-	s.Log.Info("sqs output",
-		"output:", output,
 	)
 	if err != nil {
 		s.Log.Error("error trying to send the sqs message", "error", err)

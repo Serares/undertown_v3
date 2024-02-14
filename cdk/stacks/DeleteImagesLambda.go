@@ -57,6 +57,10 @@ func DeleteProcessedImagesLambda(scope constructs.Construct, id string, props *D
 		),
 	)
 
+	props.DeleteImagesQueue.GrantConsumeMessages(
+		deleteProcessImages,
+	)
+
 	return stack
 
 }

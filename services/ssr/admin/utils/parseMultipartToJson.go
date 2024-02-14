@@ -64,6 +64,7 @@ func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
+
 	transactionType := utils.TransactionType(propertyTransactionToInt)
 
 	humanReadableId := utils.HumanReadableId(
@@ -80,7 +81,6 @@ func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
 					fileHeader.Filename,
 				),
 			)
-			bucketKey := "/" + imageName
 			file, err := fileHeader.Open()
 
 			if err != nil {
@@ -95,10 +95,11 @@ func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
 				r.Context(),
 				*fileHeader,
 				s3Client,
-				bucketKey,
+				imageName,
 			)
+
 			if err != nil {
-				return nil, "", fmt.Errorf("error uploading the file '%s' to s3 %v", bucketKey, err)
+				return nil, "", fmt.Errorf("error uploading the file '%s' to s3 %v", imageName, err)
 			}
 		}
 	}

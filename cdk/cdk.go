@@ -33,7 +33,9 @@ func main() {
 			Env: theEnv,
 		},
 	)
-
+	// ❗
+	// grant send message permissions to persistUpdateProperty and deleteProperty lambdas
+	// grant consume permission to deleteProcessedImagesLambda
 	deleteImagesQueue := stacks.DeleteImagesQueue(
 		app,
 		fmt.Sprintf("DeleteImagesQueue-%s", theEnv),
@@ -50,7 +52,7 @@ func main() {
 		fmt.Sprintf("assets-bucket-%s", theEnv),
 	)
 
-	rawImagesBucket := stacks.RawImagesBucket(
+	rawImagesBucketStack := stacks.RawImagesBucket(
 		app,
 		fmt.Sprintf("raw-images-bucket-%s", theEnv),
 	)
@@ -71,6 +73,7 @@ func main() {
 		},
 	)
 
+	// deleteProperty lambda is going to send messages to deleteImagesQueue
 	crudLambdas := stacks.U1Lambda(
 		app,
 		fmt.Sprintf("U1Lambda-%s", theEnv),
@@ -83,6 +86,8 @@ func main() {
 		},
 	)
 
+	// This is only triggered by S3 events
+	// needs access to ImagesBucket
 	processImagesLambda := stacks.ProcessImagesLambda(
 		app,
 		fmt.Sprintf("ProcessImages-%s", theEnv),
@@ -90,11 +95,12 @@ func main() {
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
-			Env:                   theEnv,
-			ProcessedImagesBucket: processedImagesBucket.Bucket,
+			Env: theEnv,
 		},
 	)
 
+	// polls from sqs deleteImagesQueue
+	// needs access to S3 ImagesBucket
 	stacks.DeleteProcessedImagesLambda(
 		app,
 		fmt.Sprintf("DeleteImagesLambda-%s", theEnv),
@@ -108,6 +114,8 @@ func main() {
 		},
 	)
 
+	// Polls from PIUQueue
+	// sends messages to DeleteImagesQueue
 	stacks.PersistUpdatePropertyLambda(
 		app,
 		fmt.Sprintf("PersistUpdateLambda-%s", theEnv),
@@ -153,24 +161,18 @@ func main() {
 			},
 			Env:             theEnv,
 			PIUQueue:        piuqueue.Queue,
-			RawImagesBucket: rawImagesBucket.Bucket,
+			RawImagesBucket: rawImagesBucketStack.Bucket,
 		})
 
-	rawImagesBucket.Bucket.AddEventNotification(
+	// ❗
+	// Attach the S3 event to the process images lambda
+	rawImagesBucketStack.Bucket.AddEventNotification(
 		awss3.EventType_OBJECT_CREATED_PUT,
 		awss3notifications.NewLambdaDestination(processImagesLambda.Lambda),
 	)
 
 	ssrStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway getProperty and getProperties paths"))
 	adminStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway crud and login paths"))
-	// crudLambdas.Stack.AddDependency(piuqueue.Queue.Stack(), jsii.String("the addProperty lambda needs the piuqueue"))
-	// crudLambdas.Stack.AddDependency(assetsBucket.Stack, jsii.String("CRUD lambdas need the Assets bucket stack deployed first"))
-	// adminStack.Stack.AddDependency(piuqueue.Queue.Stack(), jsii.String("admin stack needs the queue to dispatch messages"))
-	// processImagesLambda.Stack.AddDependency(rawImagesBucket.Stack, jsii.String("process images lambda needs raw images bucket to be deployed"))
-	// processImagesLambda.Stack.AddDependency(processedImagesBucket.Stack, jsii.String("process images lambda needs processed images bucket to be deployed"))
-	// deleteImagesLambdaStack.AddDependency(deleteImagesQueue.Queue.Stack(), jsii.String("needs the delete images queue to be deployed first"))
-	// persistUpdateLambdaStack.AddDependency(piuqueue.Queue.Stack(), jsii.String("need the piu queue "))
-	// persistUpdateLambdaStack.AddDependency(deleteImagesQueue.Queue.Stack(), jsii.String("need the delete images queue"))
 
 	cfStack := stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
 		StackProps: awscdk.StackProps{

@@ -25,6 +25,7 @@ func AssetsBucket(scope constructs.Construct, id string) *AssetsBucketStack {
 		EnforceSSL:        jsii.Bool(true),
 		RemovalPolicy:     awscdk.RemovalPolicy_DESTROY,
 		Versioned:         jsii.Bool(false),
+		AutoDeleteObjects: jsii.Bool(true),
 	})
 	// // Allow CloudFront to read from the bucket.
 	cfOAI := awscloudfront.NewOriginAccessIdentity(stack, jsii.String("cfnOriginAccessIdentity"), &awscloudfront.OriginAccessIdentityProps{})
