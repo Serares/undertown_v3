@@ -3,7 +3,6 @@ go 1.21.6
 use (
 	./cdk
 	./repositories/repository
-	./services/api/addProperty
 	./services/api/authorizer
 	./services/api/deleteProperty
 	./services/api/getProperties
@@ -11,6 +10,8 @@ use (
 	./services/api/login
 	./services/api/register
 	./services/api/registerAuthorizer
+	./services/events/deleteProcessedImages
+	./services/events/persistUpdateProperty
 	./services/events/processImages
 	./services/ssr/admin
 	./services/ssr/homepage
