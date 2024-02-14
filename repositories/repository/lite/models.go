@@ -14,6 +14,7 @@ type Property struct {
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	Title               string
+	IsProcessing        int64
 	UserID              string
 	Images              string
 	Thumbnail           string
