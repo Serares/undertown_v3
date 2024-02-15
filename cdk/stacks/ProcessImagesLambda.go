@@ -3,6 +3,7 @@ package stacks
 import (
 	"cdk/utils"
 
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -25,15 +26,14 @@ type ProcessImagesLambdaReturn struct {
 
 func ProcessImagesLambda(scope constructs.Construct, id string, props *ProcessImagesLambdaProps) ProcessImagesLambdaReturn {
 	stack := awscdk.NewStack(scope, &id, &props.StackProps)
+	var processedImagesBucketName string
 
-	var processedImagesBucket string
-
-	if props.ProcessedImagesBucket.BucketName() != nil {
-		processedImagesBucket = *props.ProcessedImagesBucket.BucketName()
+	if props.ProcessedImagesBucket != nil {
+		processedImagesBucketName = *props.ProcessedImagesBucket.BucketName()
 	}
 
 	processImagesEnv := map[string]*string{
-		"PROCESSED_IMAGES_BUCKET": jsii.String(processedImagesBucket),
+		env.PROCESSED_IMAGES_BUCKET: jsii.String(processedImagesBucketName),
 	}
 	s3BucketAccessRole := utils.CreateLambdaBasicRole(stack, "s3fullaccesslambdarole", props.Env)
 	s3BucketAccessRole.AddManagedPolicy(
@@ -56,7 +56,7 @@ func ProcessImagesLambda(scope constructs.Construct, id string, props *ProcessIm
 			},
 			Environment: &processImagesEnv,
 			Role:        s3BucketAccessRole,
-			Timeout:     awscdk.Duration_Seconds(jsii.Number(30)),
+			Timeout:     awscdk.Duration_Seconds(jsii.Number(3 * 60)),
 		},
 	)
 

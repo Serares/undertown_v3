@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/services/api/deleteProperty/handlers"
 	"github.com/Serares/undertown_v3/services/api/deleteProperty/service"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/joho/godotenv"
 )
 
@@ -24,13 +27,22 @@ func main() {
 	if port == "" {
 		port = "3037"
 	}
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 
+	if err != nil {
+		log.Error(
+			"error trying to load the lambda context",
+			"error", err,
+		)
+	}
+
+	sqsClient := sqs.NewFromConfig(cfg)
 	repo, err := repository.NewPropertiesRepo()
 	if err != nil {
 		log.Error("error creating the repository")
 		return
 	}
-	service := service.NewDeleteService(log, repo)
+	service := service.NewDeleteService(log, repo, sqsClient)
 
 	gh := handlers.New(log, service)
 

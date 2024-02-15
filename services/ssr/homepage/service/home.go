@@ -35,15 +35,22 @@ func (hs *HomeService) Get() ([]types.ProcessedFeaturedProperty, error) {
 	for _, featProp := range properties {
 		propertyThumbnailPath := utils.CreateImagePath("/images/", featProp.Thumbnail)
 
-		propertyPath, err := utils.CreateSinglePropertyPath(featProp.PropertyTransaction, featProp.Title, featProp.Humanreadableid)
+		propertyPath, err := utils.CreateSinglePropertyPath(
+			featProp.PropertyTransaction,
+			featProp.Title,
+			featProp.Humanreadableid,
+		)
 		if err != nil {
 			hs.Log.Error("error creating the property path", "error", err)
 			return []types.ProcessedFeaturedProperty{}, fmt.Errorf("error trying to generate the property path %v", err)
 		}
+
 		processedFeatProperties = append(processedFeatProperties, types.ProcessedFeaturedProperty{
 			Title:           featProp.Title,
 			TransactionType: featProp.PropertyTransaction,
 			PropertyType:    featProp.PropertyType, // TODO does it need to be processed?
+			PropertyAddress: featProp.PropertyAddress,
+			PropertySurface: fmt.Sprintf("%d", featProp.PropertySurface),
 			Price:           featProp.Price,
 			DisplayPrice:    utils.CreateDisplayPrice(featProp.Price),
 			PropertyPathUrl: propertyPath,

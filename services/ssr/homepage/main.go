@@ -21,7 +21,7 @@ import (
 // Entrypoint for deployment in inside lambda directory
 
 func main() {
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}

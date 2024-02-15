@@ -23,6 +23,8 @@ type DbStackProps struct {
 	Vpc awsec2.Vpc
 }
 
+// ❗DEPRECATED
+// using TURSO
 func AuroraServerlessV1(scope constructs.Construct, id string, props *DbStackProps) awscdk.Stack {
 	var sprops awscdk.StackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)

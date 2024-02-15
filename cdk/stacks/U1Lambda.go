@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -29,8 +30,8 @@ func (ce CrudEndpoints) String() string {
 
 type U1LambdaProps struct {
 	awscdk.StackProps
-	Env               string
-	DeleteImagesQueue awssqs.Queue
+	Env                        string
+	DeleteProcessedImagesQueue awssqs.Queue
 }
 
 type U1LambdaStack struct {
@@ -42,7 +43,7 @@ type U1LambdaStack struct {
 func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1LambdaStack {
 	var sprops awscdk.StackProps
 	var lambdas []IntegrationLambda
-	var deleteImagesQueueUrl string
+	var deleteProcessedImagesQueueUrl string
 
 	lambdasEnvVars := map[string]*string{
 		// ❗
@@ -50,14 +51,14 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 		// don't store them in plain text
 		// store them as an encrypted string?
 		// how to decrypt them
-		"DB_HOST":        jsii.String(os.Getenv("DB_HOST")),
-		"DB_NAME":        jsii.String(os.Getenv("DB_NAME")),
-		"DB_PROTOCOL":    jsii.String(os.Getenv("DB_PROTOCOL")),
-		"TURSO_DB_TOKEN": jsii.String(os.Getenv("TURSO_DB_TOKEN")),
+		env.DB_HOST:        jsii.String(os.Getenv(env.DB_HOST)),
+		env.DB_NAME:        jsii.String(os.Getenv(env.DB_NAME)),
+		env.DB_PROTOCOL:    jsii.String(os.Getenv(env.DB_PROTOCOL)),
+		env.TURSO_DB_TOKEN: jsii.String(os.Getenv(env.TURSO_DB_TOKEN)),
 	}
 
-	if props.DeleteImagesQueue.QueueUrl() != nil {
-		deleteImagesQueueUrl = *props.DeleteImagesQueue.QueueUrl()
+	if props.DeleteProcessedImagesQueue.QueueUrl() != nil {
+		deleteProcessedImagesQueueUrl = *props.DeleteProcessedImagesQueue.QueueUrl()
 	}
 
 	deletePropertyLambdaEnv := map[string]*string{
@@ -66,11 +67,11 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 		// don't store them in plain text
 		// store them as an encrypted string?
 		// how to decrypt them
-		"DB_HOST":                 jsii.String(os.Getenv("DB_HOST")),
-		"DB_NAME":                 jsii.String(os.Getenv("DB_NAME")),
-		"DB_PROTOCOL":             jsii.String(os.Getenv("DB_PROTOCOL")),
-		"TURSO_DB_TOKEN":          jsii.String(os.Getenv("TURSO_DB_TOKEN")),
-		"DELETE_IMAGES_QUEUE_URL": jsii.String(deleteImagesQueueUrl), // used to dispatch the names of images that needs to be deleted
+		env.DB_HOST:        jsii.String(os.Getenv(env.DB_HOST)),
+		env.DB_NAME:        jsii.String(os.Getenv(env.DB_NAME)),
+		env.DB_PROTOCOL:    jsii.String(os.Getenv(env.DB_PROTOCOL)),
+		env.TURSO_DB_TOKEN: jsii.String(os.Getenv(env.TURSO_DB_TOKEN)),
+		env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL: jsii.String(deleteProcessedImagesQueueUrl), // used to dispatch the names of images that needs to be deleted
 	}
 
 	if props != nil {
@@ -137,7 +138,7 @@ func U1Lambda(scope constructs.Construct, id string, props *U1LambdaProps) U1Lam
 	})
 
 	// Delete property lambda will dispatch a delete images event
-	props.DeleteImagesQueue.GrantSendMessages(deleteProperty)
+	props.DeleteProcessedImagesQueue.GrantSendMessages(deleteProperty)
 
 	return U1LambdaStack{
 		Lambdas: lambdas,

@@ -96,7 +96,7 @@ func Properties(contents types.BasicIncludes, props types.PropertiesViewProps) t
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(property.ImagesNumber))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/properties.templ`, Line: 197, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/properties.templ`, Line: 197, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -118,7 +118,7 @@ func Properties(contents types.BasicIncludes, props types.PropertiesViewProps) t
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(property.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/properties.templ`, Line: 206, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/properties.templ`, Line: 206, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -131,7 +131,7 @@ func Properties(contents types.BasicIncludes, props types.PropertiesViewProps) t
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(property.Address)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/properties.templ`, Line: 210, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/properties.templ`, Line: 210, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -144,7 +144,7 @@ func Properties(contents types.BasicIncludes, props types.PropertiesViewProps) t
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", property.Surface))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/properties.templ`, Line: 215, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/properties.templ`, Line: 215, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -157,7 +157,7 @@ func Properties(contents types.BasicIncludes, props types.PropertiesViewProps) t
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(property.DisplayPrice)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/properties.templ`, Line: 222, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/properties.templ`, Line: 222, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {

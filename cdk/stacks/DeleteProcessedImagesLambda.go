@@ -3,6 +3,7 @@ package stacks
 import (
 	"cdk/utils"
 
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -32,12 +33,12 @@ func DeleteProcessedImagesLambda(scope constructs.Construct, id string, props *D
 	}
 
 	deleteImagesLambdaEnv := map[string]*string{
-		"PROCESSED_IMAGES_BUCKET": jsii.String(processedImagesBucket),
+		env.PROCESSED_IMAGES_BUCKET: jsii.String(processedImagesBucket),
 	}
 
 	deleteProcessImages := awslambdago.NewGoFunction(
 		stack,
-		jsii.Sprintf("DeleteImages-%s", props.Env),
+		jsii.Sprintf("DeleteProcessedImages-%s", props.Env),
 		&awslambdago.GoFunctionProps{
 			Runtime:      awslambda.Runtime_PROVIDED_AL2(),
 			MemorySize:   jsii.Number(1024),
@@ -55,6 +56,10 @@ func DeleteProcessedImagesLambda(scope constructs.Construct, id string, props *D
 			props.DeleteImagesQueue,
 			&awslambdaeventsources.SqsEventSourceProps{},
 		),
+	)
+
+	props.DeleteImagesQueue.GrantConsumeMessages(
+		deleteProcessImages,
 	)
 
 	return stack

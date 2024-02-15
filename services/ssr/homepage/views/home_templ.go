@@ -88,7 +88,7 @@ func Home(contents types.BasicIncludes, props types.HomeViewProps) templ.Compone
 					return templ_7745c5c3_Err
 				}
 			} else {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>'Cumparare'</div>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>'Chirie'</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -122,7 +122,7 @@ func Home(contents types.BasicIncludes, props types.HomeViewProps) templ.Compone
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(featProp.CreatedTime)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/home.templ`, Line: 148, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 148, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -149,26 +149,52 @@ func Home(contents types.BasicIncludes, props types.HomeViewProps) templ.Compone
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(featProp.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/home.templ`, Line: 156, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 156, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><span class=\"my-3 d-block\"><i class=\"fas fa-map-marker-alt\"></i> address</span><div class=\"quantity\"><ul>Other things</ul></div></div><div class=\"bed_area d-table w-100\"><ul><li>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></h5><span class=\"my-3 d-block\"><i class=\"fas fa-map-marker-alt\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(featProp.DisplayPrice)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(featProp.PropertyAddress)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/homepage/views/home.templ`, Line: 170, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 160, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li><li class=\"icon_medium\"><a href=\"#\"><i class=\"flaticon-like\"></i></a></li><li class=\"icon_medium\"><a href=\"#\"><i class=\"flaticon-connections\"></i></a></li></ul></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><div class=\"quantity\"><ul>Suprafata m² ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(featProp.PropertySurface)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 164, Col: 58}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></div><div class=\"bed_area d-table w-100\"><ul><li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(featProp.DisplayPrice)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 170, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li></ul></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

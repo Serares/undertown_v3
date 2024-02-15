@@ -7,12 +7,16 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/env"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/google/uuid"
 )
 
@@ -21,19 +25,26 @@ import (
 
 // TODO make sure all fields are mapped from repository model
 // TODO move this struct to the handler
-type Submit struct {
+type PUService struct {
 	Log                *slog.Logger
 	PropertyRepository *repository.Properties
+	SQSClient          *sqs.Client
 }
 
-func NewSubmitService(log *slog.Logger, pr *repository.Properties) Submit {
-	return Submit{
+func NewPUService(
+	log *slog.Logger,
+	pr *repository.Properties,
+	sqsClient *sqs.Client,
+) PUService {
+	return PUService{
 		Log:                log.WithGroup("Submit Service"),
 		PropertyRepository: pr,
+		SQSClient:          sqsClient,
 	}
 }
 
-func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, sqsBody string, humanReadableId string) error {
+func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId string) error {
+	sqsDeleteImagesQueue := os.Getenv(env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL)
 	var requestProperty utils.RequestProperty
 
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty); err != nil {
@@ -73,6 +84,41 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, sqsBody string,
 			filteredImages = append(filteredImages, img)
 		}
 	}
+	if requestProperty.DeletedImages != nil && len(requestProperty.DeletedImages) > 0 {
+
+		sqsDeleteImagesObject := utils.SQSDeleteImages{
+			Images: requestProperty.DeletedImages,
+		}
+
+		jsonDeletedImagesList, err := json.Marshal(sqsDeleteImagesObject)
+		ss.Log.Info("images to delete dispatched to sqs queue",
+			"list", requestProperty.DeletedImages,
+			"jsoned", string(jsonDeletedImagesList),
+		)
+
+		if err != nil {
+			ss.Log.Error(
+				"error trying to marshal the sqs delete images",
+				"error", err,
+			)
+			return err
+		}
+		_, err = ss.SQSClient.SendMessage(
+			ctx,
+			&sqs.SendMessageInput{
+				QueueUrl:    &sqsDeleteImagesQueue,
+				MessageBody: aws.String(string(jsonDeletedImagesList)),
+			},
+		)
+
+		if err != nil {
+			ss.Log.Error(
+				"error trying to dispatch the sqs delete images message",
+				"error", err,
+			)
+			return err
+		}
+	}
 
 	// TODO handle the case where no new images are uploaded
 	// OR when new images are uploaded and the old ones are not deleted
@@ -96,7 +142,7 @@ func (ss *Submit) ProcessPropertyUpdateData(ctx context.Context, sqsBody string,
 	return nil
 }
 
-func (ss *Submit) ProcessPropertyData(ctx context.Context, sqsBody string, userId, humanReadableId string) error {
+func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId, humanReadableId string) error {
 	var propertyId = uuid.New().String()
 	var requestProperty utils.RequestProperty
 	thumbnail := ""

@@ -13,7 +13,7 @@ import (
 	"os"
 
 	"github.com/Serares/undertown_v3/utils"
-	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/chai2010/webp"
 )
@@ -54,16 +54,16 @@ func (ss *ProcessImagesService) encodeToWebP(file io.Reader) (*bytes.Buffer, err
 
 // Uploads the files to S3
 // s3RawImagekey is composed of the humanReadableId of the property /humanreadableId/ImageName
-func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImagekey, s3RawImagesBucketName string) error {
-	processedImagesBucket := os.Getenv(constants.PROCESSED_IMAGES_BUCKET)
+func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImageKey, s3RawImagesBucketName string) error {
+	processedImagesBucketName := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
 	ss.Log.Info("received image:",
-		"s3key", s3RawImagekey,
+		"s3key", s3RawImageKey,
 	)
 	s3getObject, err := ss.S3Client.GetObject(
 		ctx,
 		&s3.GetObjectInput{
 			Bucket: &s3RawImagesBucketName,
-			Key:    &s3RawImagekey,
+			Key:    &s3RawImageKey,
 		},
 	)
 	if err != nil {
@@ -81,12 +81,13 @@ func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImagek
 			"error", err,
 		)
 	}
-	processImageKey := utils.AppendFileExtension(s3RawImagekey, "webp")
+	processedImageKey := utils.AppendFileExtension("images/"+s3RawImageKey, "webp")
+	ss.Log.Info("the processed image key", "key", processedImageKey)
 	_, err = ss.S3Client.PutObject(
 		ctx,
 		&s3.PutObjectInput{
-			Bucket: &processedImagesBucket,
-			Key:    &processImageKey,
+			Bucket: &processedImagesBucketName,
+			Key:    &processedImageKey,
 			Body:   buf,
 		},
 	)
@@ -102,7 +103,7 @@ func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImagek
 		ctx,
 		&s3.DeleteObjectInput{
 			Bucket: &s3RawImagesBucketName,
-			Key:    &s3RawImagekey,
+			Key:    &s3RawImageKey,
 		},
 	)
 

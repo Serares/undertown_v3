@@ -4,6 +4,7 @@ import (
 	"cdk/utils"
 	"os"
 
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -51,13 +52,13 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 		awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonS3FullAccess")))
 
 	envVars := map[string]*string{
-		"GET_PROPERTIES_URL":  getPropertiesUrl,
-		"GET_PROPERTY_URL":    getPropertyUrl,
-		"LOGIN_URL":           loginUrl,
-		"DELETE_PROPERTY_URL": deletePropertyUrl,
-		"PIU_QUEUE_URL":       jsii.String(piuQueueUrl),
-		"RAW_IMAGES_BUCKET":   jsii.String(rawImagesBucketName),
-		"JWT_SECRET":          jsii.String(os.Getenv("JWT_SECRET")), // this is needed to decode the cookie and add the user id into the sqs message
+		env.GET_PROPERTIES_URL:  getPropertiesUrl,
+		env.GET_PROPERTY_URL:    getPropertyUrl,
+		env.LOGIN_URL:           loginUrl,
+		env.DELETE_PROPERTY_URL: deletePropertyUrl,
+		env.SQS_PIU_QUEUE_URL:   jsii.String(piuQueueUrl),
+		env.RAW_IMAGES_BUCKET:   jsii.String(rawImagesBucketName),
+		env.JWT_SECRET:          jsii.String(os.Getenv(env.JWT_SECRET)), // this is needed to decode the cookie and add the user id into the sqs message
 	}
 	// SSR
 	// TODO how to import the api root path?
