@@ -176,7 +176,7 @@ func TranslatePropertyTransactionType(transactionType string) (string, error) {
 func GenerateStringTimestamp() string {
 	// You can customize the time format here.
 	// This example uses the format: YYYY-MM-DD HH:MM:SS
-	const layout = "2006-01-02-15-04-05"
+	const layout = "20060102-150405"
 	currentTime := time.Now()
 	return currentTime.Format(layout)
 }

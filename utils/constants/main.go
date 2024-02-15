@@ -12,4 +12,5 @@ const (
 	CookieTokenKey                  = "token"
 	USER_ID                         = "userId"
 	HUMAN_READABLE_ID_SQS_ATTRIBUTE = "humanReadableId"
+	S3_PROCESSED_IMAGES_PREFIX      = "images"
 )
