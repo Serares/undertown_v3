@@ -90,7 +90,7 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 			Origin:               lambdaOrigin,
 			CachedMethods:        awscloudfront.CachedMethods_CACHE_GET_HEAD(),
 			OriginRequestPolicy:  homepageOriginRequestPolicy,
-			CachePolicy:          propertiesCachePolicy,
+			CachePolicy:          awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 			ViewerProtocolPolicy: awscloudfront.ViewerProtocolPolicy_REDIRECT_TO_HTTPS,
 		},
 		PriceClass: awscloudfront.PriceClass_PRICE_CLASS_100,

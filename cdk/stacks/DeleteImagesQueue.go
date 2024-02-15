@@ -7,17 +7,17 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-type DeleteImagesQueueProps struct {
+type DeleteProcessedImagesQueueProps struct {
 	awscdk.StackProps
 	Env string
 }
 
-type DeleteImagesQueueReturn struct {
+type DeleteProcessedImagesQueueReturn struct {
 	Queue awssqs.Queue
 }
 
 // 🪪
-func DeleteImagesQueue(scope constructs.Construct, id string, props DeleteImagesQueueProps) *DeleteImagesQueueReturn {
+func DeleteProcessedImagesQueue(scope constructs.Construct, id string, props DeleteProcessedImagesQueueProps) *DeleteProcessedImagesQueueReturn {
 	stack := awscdk.NewStack(scope, &id, &props.StackProps)
 
 	dlq := awssqs.NewQueue(
@@ -37,7 +37,7 @@ func DeleteImagesQueue(scope constructs.Construct, id string, props DeleteImages
 		},
 	)
 
-	return &DeleteImagesQueueReturn{
+	return &DeleteProcessedImagesQueueReturn{
 		Queue: queue,
 	}
 }

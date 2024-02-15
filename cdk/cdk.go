@@ -36,10 +36,10 @@ func main() {
 	// ❗
 	// grant send message permissions to persistUpdateProperty and deleteProperty lambdas
 	// grant consume permission to deleteProcessedImagesLambda
-	deleteImagesQueue := stacks.DeleteImagesQueue(
+	deleteProcessedImagesQueue := stacks.DeleteProcessedImagesQueue(
 		app,
-		fmt.Sprintf("DeleteImagesQueue-%s", theEnv),
-		stacks.DeleteImagesQueueProps{
+		fmt.Sprintf("DeleteProcessedImagesQueue-%s", theEnv),
+		stacks.DeleteProcessedImagesQueueProps{
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
@@ -81,8 +81,8 @@ func main() {
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
-			Env:               theEnv,
-			DeleteImagesQueue: deleteImagesQueue.Queue,
+			Env:                        theEnv,
+			DeleteProcessedImagesQueue: deleteProcessedImagesQueue.Queue,
 		},
 	)
 
@@ -95,7 +95,8 @@ func main() {
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
-			Env: theEnv,
+			Env:                   theEnv,
+			ProcessedImagesBucket: processedImagesBucket.Bucket,
 		},
 	)
 
@@ -103,14 +104,14 @@ func main() {
 	// needs access to S3 ImagesBucket
 	stacks.DeleteProcessedImagesLambda(
 		app,
-		fmt.Sprintf("DeleteImagesLambda-%s", theEnv),
+		fmt.Sprintf("DeleteProcessedImagesLambda-%s", theEnv),
 		&stacks.DeleteProcessedImagesLambdaProps{
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
 			Env:                   theEnv,
 			ProcessedImagesBucket: processedImagesBucket.Bucket,
-			DeleteImagesQueue:     deleteImagesQueue.Queue,
+			DeleteImagesQueue:     deleteProcessedImagesQueue.Queue,
 		},
 	)
 
@@ -123,9 +124,9 @@ func main() {
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
-			Env:               theEnv,
-			PIUQueue:          piuqueue.Queue,
-			DeleteImagesQueue: deleteImagesQueue.Queue,
+			Env:                        theEnv,
+			PIUQueue:                   piuqueue.Queue,
+			DeleteProcessedImagesQueue: deleteProcessedImagesQueue.Queue,
 		},
 	)
 

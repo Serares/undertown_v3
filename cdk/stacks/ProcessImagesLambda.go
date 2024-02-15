@@ -3,9 +3,11 @@ package stacks
 import (
 	"cdk/utils"
 
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -13,7 +15,8 @@ import (
 
 type ProcessImagesLambdaProps struct {
 	awscdk.StackProps
-	Env string
+	Env                   string
+	ProcessedImagesBucket awss3.Bucket
 }
 
 type ProcessImagesLambdaReturn struct {
@@ -23,8 +26,15 @@ type ProcessImagesLambdaReturn struct {
 
 func ProcessImagesLambda(scope constructs.Construct, id string, props *ProcessImagesLambdaProps) ProcessImagesLambdaReturn {
 	stack := awscdk.NewStack(scope, &id, &props.StackProps)
+	var processedImagesBucketName string
 
-	processImagesEnv := map[string]*string{}
+	if props.ProcessedImagesBucket != nil {
+		processedImagesBucketName = *props.ProcessedImagesBucket.BucketName()
+	}
+
+	processImagesEnv := map[string]*string{
+		env.PROCESSED_IMAGES_BUCKET: jsii.String(processedImagesBucketName),
+	}
 	s3BucketAccessRole := utils.CreateLambdaBasicRole(stack, "s3fullaccesslambdarole", props.Env)
 	s3BucketAccessRole.AddManagedPolicy(
 		awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonS3FullAccess")))

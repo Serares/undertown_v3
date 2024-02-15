@@ -56,7 +56,7 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 		env.GET_PROPERTY_URL:    getPropertyUrl,
 		env.LOGIN_URL:           loginUrl,
 		env.DELETE_PROPERTY_URL: deletePropertyUrl,
-		env.PIU_QUEUE_URL:       jsii.String(piuQueueUrl),
+		env.SQS_PIU_QUEUE_URL:   jsii.String(piuQueueUrl),
 		env.RAW_IMAGES_BUCKET:   jsii.String(rawImagesBucketName),
 		env.JWT_SECRET:          jsii.String(os.Getenv(env.JWT_SECRET)), // this is needed to decode the cookie and add the user id into the sqs message
 	}
