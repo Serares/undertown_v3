@@ -3,6 +3,8 @@ package utils
 import (
 	"fmt"
 	"os"
+
+	"github.com/Serares/undertown_v3/utils/env"
 )
 
 func CreateSqliteUrl() (string, error) {
@@ -11,7 +13,7 @@ func CreateSqliteUrl() (string, error) {
 	protocol := os.Getenv("DB_PROTOCOL")
 	dbLocal := os.Getenv("DB_LOCAL")
 	dbName := os.Getenv("DB_NAME")
-	authToken := os.Getenv("TURSO_DB_TOKEN")
+	authToken := os.Getenv(env.TURSO_DB_TOKEN)
 	if dbLocal == "true" {
 		return host, nil
 	}

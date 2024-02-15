@@ -62,8 +62,11 @@ SELECT id,
     title,
     thumbnail,
     price,
+    property_type,
     property_transaction,
-    property_type
+    property_address,
+    property_surface,
+    images
 FROM properties
 WHERE is_featured = 1
     AND is_processing = 0

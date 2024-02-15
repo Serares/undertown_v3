@@ -123,7 +123,7 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 											<div class="row filter-list clearfix">
 												for _,featProp := range props.FeaturedProperties {
 													<div
- 														class={ fmt.Sprintf("column mix mix_all col-lg-4 col-md-6 %s", featProp.PropertyType) }
+														class={ fmt.Sprintf("column mix mix_all col-lg-4 col-md-6 %s", featProp.PropertyType) }
 													>
 														<div class="property_grid_1 property_item bg-white mb_30">
 															<div class="zoom_effect_1">
@@ -132,16 +132,16 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 																	if featProp.TransactionType == "SELL" {
 																		<div>'Vanzare'</div>
 																	} else {
-																		<div>'Cumparare'</div>
+																		<div>'Chirie'</div>
 																	}
 																</div>
 																<div class="upper_2 bg_primary text-white">Recomandare</div>
 																<a
- 																	href={ templ.URL(featProp.PropertyPathUrl) }
+																	href={ templ.URL(featProp.PropertyPathUrl) }
 																>
 																	<img
- 																		src={ featProp.ThumbnailPath }
- 																		alt="Image Not Found!"
+																		src={ featProp.ThumbnailPath }
+																		alt="Image Not Found!"
 																	/>
 																</a>
 																if featProp.CreatedTime != "" {
@@ -153,36 +153,36 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 															<div class="property_text p-3">
 																<h5 class="title">
 																	<a
- 																		href={ templ.URL(featProp.PropertyPathUrl) }
+																		href={ templ.URL(featProp.PropertyPathUrl) }
 																	>{ featProp.Title }</a>
 																</h5>
 																<span class="my-3 d-block">
 																	<i class="fas fa-map-marker-alt"></i>
-																	address
+																	{ featProp.PropertyAddress }
 																</span>
 																<div class="quantity">
 																	<ul>
-																		Other things
+																		Suprafata m² { featProp.PropertySurface }
 																	</ul>
 																</div>
 															</div>
 															<div class="bed_area d-table w-100">
 																<ul>
 																	<li>{ featProp.DisplayPrice }</li>
-																	<li class="icon_medium">
-																		<a href="#">
-																			<i
- 																				class="flaticon-like"
-																			></i>
-																		</a>
-																	</li>
-																	<li class="icon_medium">
-																		<a href="#">
-																			<i
- 																				class="flaticon-connections"
-																			></i>
-																		</a>
-																	</li>
+																	// <li class="icon_medium">
+																	// 	<a href="#">
+																	// 		<i
+																	// 			class="flaticon-like"
+																	// 		></i>
+																	// 	</a>
+																	// </li>
+																	// <li class="icon_medium">
+																	// 	<a href="#">
+																	// 		<i
+																	// 			class="flaticon-connections"
+																	// 		></i>
+																	// 	</a>
+																	// </li>
 																</ul>
 															</div>
 														</div>
@@ -271,9 +271,9 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 							<div class="row">
 								<div class="col-xl-3 col-lg-4 col-sm-6">
 									<div
- 										class="offer_item_2 mb_30 text-center wow fadeInLeft"
- 										data-wow-delay="200ms"
- 										data-wow-duration="1000ms"
+										class="offer_item_2 mb_30 text-center wow fadeInLeft"
+										data-wow-delay="200ms"
+										data-wow-duration="1000ms"
 									>
 										<div class="icon_large icon mb-2"><i class="flaticon-home-1"></i> </div>
 										<h5 class="title py-3"><a href="#">Inchirieri</a></h5>
@@ -282,9 +282,9 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 								</div>
 								<div class="col-xl-3 col-lg-4 col-sm-6">
 									<div
- 										class="offer_item_2 mb_30 text-center wow fadeInLeft"
- 										data-wow-delay="100ms"
- 										data-wow-duration="1000ms"
+										class="offer_item_2 mb_30 text-center wow fadeInLeft"
+										data-wow-delay="100ms"
+										data-wow-duration="1000ms"
 									>
 										<div class="icon_large icon mb-2"><i class="flaticon-pencil-and-paper"></i> </div>
 										<h5 class="title py-3"><a href="#">Garantarea plății</a></h5>
@@ -293,9 +293,9 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 								</div>
 								<div class="col-xl-3 col-lg-4 col-sm-6">
 									<div
- 										class="offer_item_2 mb_30 text-center wow fadeInRight"
- 										data-wow-delay="100ms"
- 										data-wow-duration="1000ms"
+										class="offer_item_2 mb_30 text-center wow fadeInRight"
+										data-wow-delay="100ms"
+										data-wow-duration="1000ms"
 									>
 										<div class="icon_large icon mb-2"><i class="flaticon-home"></i> </div>
 										<h5 class="title py-3"><a href="#">Facilitare intermediere</a></h5>
@@ -304,9 +304,9 @@ templ Home(contents types.BasicIncludes, props types.HomeViewProps) {
 								</div>
 								<div class="col-xl-3 col-lg-4 col-sm-6">
 									<div
- 										class="offer_item_2 mb_30 text-center wow fadeInRight"
- 										data-wow-delay="200ms"
- 										data-wow-duration="1000ms"
+										class="offer_item_2 mb_30 text-center wow fadeInRight"
+										data-wow-delay="200ms"
+										data-wow-duration="1000ms"
 									>
 										<div class="icon_large icon mb-2"><i class="flaticon-connections"></i> </div>
 										<h5 class="title py-3"><a href="#">Best Deal</a></h5>

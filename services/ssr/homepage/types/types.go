@@ -19,6 +19,8 @@ type ProcessedFeaturedProperty struct {
 	Title           string
 	TransactionType string
 	PropertyType    string
+	PropertySurface string
+	PropertyAddress string
 	Price           int64
 	DisplayPrice    string
 	ThumbnailPath   string

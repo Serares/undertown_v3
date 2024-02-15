@@ -175,8 +175,11 @@ SELECT id,
     title,
     thumbnail,
     price,
+    property_type,
     property_transaction,
-    property_type
+    property_address,
+    property_surface,
+    images
 FROM properties
 WHERE is_featured = 1
     AND is_processing = 0
@@ -190,8 +193,11 @@ type ListFeaturedPropertiesRow struct {
 	Title               string
 	Thumbnail           string
 	Price               int64
-	PropertyTransaction string
 	PropertyType        string
+	PropertyTransaction string
+	PropertyAddress     string
+	PropertySurface     int64
+	Images              string
 }
 
 func (q *Queries) ListFeaturedProperties(ctx context.Context) ([]ListFeaturedPropertiesRow, error) {
@@ -210,8 +216,11 @@ func (q *Queries) ListFeaturedProperties(ctx context.Context) ([]ListFeaturedPro
 			&i.Title,
 			&i.Thumbnail,
 			&i.Price,
-			&i.PropertyTransaction,
 			&i.PropertyType,
+			&i.PropertyTransaction,
+			&i.PropertyAddress,
+			&i.PropertySurface,
+			&i.Images,
 		); err != nil {
 			return nil, err
 		}
