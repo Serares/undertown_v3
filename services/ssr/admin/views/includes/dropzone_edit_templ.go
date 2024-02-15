@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 
 func DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DropzoneEdit_6185`,
-		Function: `function __templ_DropzoneEdit_6185(imagesPaths, url, deleteImagesFormKey){Dropzone.options.uploadForm = {
+		Name: `__templ_DropzoneEdit_9dfc`,
+		Function: `function __templ_DropzoneEdit_9dfc(imagesPaths, url, deleteImagesFormKey){Dropzone.options.uploadForm = {
     autoProcessQueue: false,
     addRemoveLinks: true,
     uploadMultiple: true,
@@ -56,7 +56,10 @@ func DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string) 
                 myDropzone.emit("errormultiple", [], response)
                 return
               }
-              myDropzone.emit("successmultiple", [], response)
+              return response.text()
+            })
+            .then(data=>{
+              myDropzone.emit("successmultiple", [], data)
             })
             .catch(err=> {
               console.log("error sending thew AJAX request")
@@ -77,10 +80,8 @@ func DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string) 
           }
           // return response.json();
           document.documentElement.innerHTML = response
-          if (response.ok != undefined && response.ok) {
-                $("#myModal .modal-body").html("Success editing the property")
-                $("#myModal").modal("show")
-          }
+          $("#myModal .modal-body").html("Success editing the property")
+          $("#myModal").modal("show")
           // dispatch a event that the page has loaded success
           var submitEvent = new CustomEvent('submitresponse', {
                   detail: { key: 'loadsuccess' }
@@ -111,7 +112,7 @@ func DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string) 
     },
   };
 }`,
-		Call:       templ.SafeScript(`__templ_DropzoneEdit_6185`, imagesPaths, url, deleteImagesFormKey),
-		CallInline: templ.SafeScriptInline(`__templ_DropzoneEdit_6185`, imagesPaths, url, deleteImagesFormKey),
+		Call:       templ.SafeScript(`__templ_DropzoneEdit_9dfc`, imagesPaths, url, deleteImagesFormKey),
+		CallInline: templ.SafeScriptInline(`__templ_DropzoneEdit_9dfc`, imagesPaths, url, deleteImagesFormKey),
 	}
 }

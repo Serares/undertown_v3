@@ -26,7 +26,9 @@ func main() {
 	// the route is handled by cloudfront
 	// m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	m.Handle("/chirii/", propertiesHandler)
+	m.Handle("/chirii", propertiesHandler)
 	m.Handle("/vanzari/", propertiesHandler)
+	m.Handle("/vanzari", propertiesHandler)
 	m.Handle("/", defaultHandler)
 
 	algnhsa.ListenAndServe(m, nil)

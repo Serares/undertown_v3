@@ -43,6 +43,8 @@ func NewPUService(
 	}
 }
 
+// 💩 TODO the logic to delete images is flawed
+// Review the logic
 func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId string) error {
 	sqsDeleteImagesQueue := os.Getenv(env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL)
 	var requestProperty utils.RequestProperty
