@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,21 +12,32 @@ import (
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
+	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
 type EditService struct {
-	Log    *slog.Logger
-	Client ISSRAdminClient
+	Log       *slog.Logger
+	Client    ISSRAdminClient
+	SQSClient *sqs.Client
+	S3Client  *s3.Client
 }
 
-func NewEditService(log *slog.Logger, client ISSRAdminClient) *EditService {
+func NewEditService(
+	log *slog.Logger,
+	client ISSRAdminClient,
+	sqsClient *sqs.Client,
+	S3Client *s3.Client,
+) *EditService {
 	return &EditService{
-		Log:    log.WithGroup("Edit Service"),
-		Client: client,
+		Log:       log.WithGroup("Edit Service"),
+		Client:    client,
+		SQSClient: sqsClient,
+		S3Client:  S3Client,
 	}
 }
 
@@ -34,6 +46,10 @@ func NewEditService(log *slog.Logger, client ISSRAdminClient) *EditService {
 // }
 func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []string, utils.PropertyFeatures, error) {
 	getPropertyUrl := os.Getenv("GET_PROPERTY_URL")
+	if es.SQSClient == nil {
+		es.Log.Error("sqs client is not initialized")
+		return lite.Property{}, nil, utils.PropertyFeatures{}, fmt.Errorf("error initializing the sqs client")
+	}
 	// have to add the human readable id to the url
 	// ❗TODO
 	// this might need some validations
@@ -65,9 +81,16 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 }
 
 func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lite.Property, utils.PropertyFeatures, error) {
-	piuQueuUrl := os.Getenv("PIU_QUEUE_URL")
-
-	jsonString, _, err := adminUtils.ParseMultipartToJson(r)
+	piuQueuUrl := os.Getenv(env.SQS_PIU_QUEUE_URL)
+	err := r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+	jsonString, err := adminUtils.ParseMultipartFieldsToJson(
+		r,
+		humanReadableId,
+		es.S3Client,
+	)
 	if err != nil {
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log/slog"
@@ -16,6 +17,9 @@ import (
 	"github.com/Serares/ssr/admin/handlers"
 	"github.com/Serares/ssr/admin/middleware"
 	"github.com/Serares/ssr/admin/service"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/joho/godotenv"
 )
 
@@ -39,11 +43,31 @@ func setupAPI(t *testing.T) (string, func()) {
 	multipartWriter := multipart.NewWriter(&requestBody)
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	client := service.NewAdminClient(log)
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Error(
+			"error trying to load the lambda context",
+			"error", err,
+		)
+	}
 
+	sqsClient := sqs.NewFromConfig(cfg)
+	s3Client := s3.NewFromConfig(cfg)
 	loginService := service.NewLoginService(log, client)
-	submitService := service.NewSubmitService(log, client)
+	// TODO use the sqs client for debugging locally
+	submitService := service.NewSubmitService(
+		log,
+		client,
+		sqsClient,
+		s3Client,
+	)
 	listingService := service.NewListingService(log, client)
-	editService := service.NewEditService(log, client)
+	editService := service.NewEditService(
+		log,
+		client,
+		sqsClient,
+		s3Client,
+	)
 	deleteService := service.NewDeleteService(log, client)
 
 	m := http.NewServeMux()

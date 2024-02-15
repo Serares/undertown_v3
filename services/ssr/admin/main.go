@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -15,6 +16,9 @@ import (
 	"github.com/Serares/ssr/admin/views"
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	"github.com/a-h/templ"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/joho/godotenv"
 )
 
@@ -24,16 +28,40 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	port := os.Getenv("PORT")
+
 	if port == "" {
 		port = "4031"
 	}
+
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	client := service.NewAdminClient(log)
 
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+
+	if err != nil {
+		log.Error(
+			"error trying to load the lambda context",
+			"error", err,
+		)
+	}
+
+	sqsClient := sqs.NewFromConfig(cfg)
+	s3Client := s3.NewFromConfig(cfg)
+
 	loginService := service.NewLoginService(log, client)
-	submitService := service.NewSubmitService(log, client)
+	submitService := service.NewSubmitService(
+		log,
+		client,
+		sqsClient,
+		s3Client,
+	)
 	listingService := service.NewListingService(log, client)
-	editService := service.NewEditService(log, client)
+	editService := service.NewEditService(
+		log,
+		client,
+		sqsClient,
+		s3Client,
+	)
 	deleteService := service.NewDeleteService(log, client)
 
 	m := http.NewServeMux()
@@ -64,6 +92,7 @@ func main() {
 		ReadTimeout:  time.Second * 30,
 		WriteTimeout: time.Second * 30,
 	}
+
 	fmt.Printf("Listening on %v\n", server.Addr)
 	server.ListenAndServe()
 }

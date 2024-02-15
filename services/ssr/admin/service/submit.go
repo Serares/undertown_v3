@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 
 	adminUtils "github.com/Serares/ssr/admin/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
@@ -11,20 +12,29 @@ import (
 	"github.com/Serares/undertown_v3/utils/constants"
 	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
 type SubmitService struct {
-	Log    *slog.Logger
-	Client ISSRAdminClient
+	Log       *slog.Logger
+	Client    ISSRAdminClient
+	SQSClient *sqs.Client
+	S3Client  *s3.Client
 }
 
-func NewSubmitService(log *slog.Logger, client ISSRAdminClient) *SubmitService {
+func NewSubmitService(
+	log *slog.Logger,
+	client ISSRAdminClient,
+	sqsClient *sqs.Client,
+	s3Client *s3.Client,
+) *SubmitService {
 	return &SubmitService{
-		Log:    log.WithGroup("Submit Service"),
-		Client: client,
+		Log:       log.WithGroup("Submit Service"),
+		Client:    client,
+		SQSClient: sqsClient,
+		S3Client:  s3Client,
 	}
 }
 
@@ -33,19 +43,19 @@ type PropertyFormField struct {
 }
 
 func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property, utils.PropertyFeatures, error) {
-	piuQueuUrl := os.Getenv(env.PIU_QUEUE_URL)
+	piuQueuUrl := os.Getenv(env.SQS_PIU_QUEUE_URL)
 	jwtSecret := os.Getenv(env.JWT_SECRET)
 	var err error
-	cfg, err := config.LoadDefaultConfig(r.Context())
-	if err != nil {
-		s.Log.Error(
-			"error trying to load the lambda context",
-			"error", err,
-		)
+
+	if s.SQSClient == nil {
+		s.Log.Error("sqs client is not initialized")
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
 
-	sqsClient := sqs.NewFromConfig(cfg)
+	if s.S3Client == nil {
+		s.Log.Error("s3 client is not initialized")
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
 
 	claims, err := utils.ParseJwtWithClaims(authToken, jwtSecret)
 	if err != nil {
@@ -55,7 +65,27 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
 
-	jsonString, humanReadableId, err := adminUtils.ParseMultipartToJson(r)
+	err = r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+
+	propertyTransactionFormValue := r.PostForm.Get(constants.TransactionTypeFormInputKey)
+	propertyTransactionToInt, err := strconv.Atoi(propertyTransactionFormValue)
+	if err != nil {
+		return lite.Property{}, utils.PropertyFeatures{}, err
+	}
+
+	transactionType := utils.TransactionType(propertyTransactionToInt)
+
+	humanReadableId := utils.HumanReadableId(
+		transactionType,
+	)
+	jsonString, err := adminUtils.ParseMultipartFieldsToJson(
+		r,
+		humanReadableId,
+		s.S3Client,
+	)
 	if err != nil {
 		s.Log.Error("error trying to parse the multipart/form",
 			"error", err,
@@ -74,7 +104,7 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 		},
 	}
 
-	_, err = sqsClient.SendMessage(
+	_, err = s.SQSClient.SendMessage(
 		r.Context(),
 		&sqs.SendMessageInput{
 			QueueUrl:          &piuQueuUrl,
