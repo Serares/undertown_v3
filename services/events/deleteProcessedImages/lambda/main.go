@@ -7,6 +7,7 @@ import (
 	"os"
 
 	rootUtils "github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -15,9 +16,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) {
+func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	PROCESSED_IMAGES_BUCKET := os.Getenv(env.IMAGES_BUCKET)
+	PROCESSED_IMAGES_BUCKET := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		log.Error(
@@ -38,20 +39,27 @@ func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) {
 				"error trying to unmarshal the sqs body",
 				"error", err,
 			)
-			return
+			return err
 		}
 
 		for _, imageToDelete := range deleteImages.Images {
-			client.DeleteObject(
+			processedImageKey := constants.S3_PROCESSED_IMAGES_PREFIX + "/" + imageToDelete
+			_, err := client.DeleteObject(
 				ctx,
 				&s3.DeleteObjectInput{
 					Bucket: aws.String(PROCESSED_IMAGES_BUCKET),
-					Key:    aws.String("images/" + imageToDelete),
+					Key:    aws.String(processedImageKey),
 				},
 			)
+			if err != nil {
+				log.Error("error trying to delete the key:",
+					"key:", imageToDelete,
+				)
+				return err
+			}
 		}
 	}
-
+	return nil
 }
 
 func main() {

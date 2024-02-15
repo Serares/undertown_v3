@@ -16,10 +16,10 @@ import (
 
 type AddPropertyHandler struct {
 	Log           *slog.Logger
-	SubmitService service.Submit
+	SubmitService service.PUService
 }
 
-func New(log *slog.Logger, ss service.Submit) *AddPropertyHandler {
+func New(log *slog.Logger, ss service.PUService) *AddPropertyHandler {
 	return &AddPropertyHandler{
 		Log:           log,
 		SubmitService: ss,
