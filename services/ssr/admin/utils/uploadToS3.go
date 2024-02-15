@@ -4,6 +4,7 @@ import (
 	"context"
 	"mime/multipart"
 	"os"
+	"sync"
 
 	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,7 +16,10 @@ func UploadFilesToS3(
 	image multipart.File,
 	s3Client *s3.Client,
 	imageName string,
-) error {
+	wg *sync.WaitGroup,
+	errChan chan<- error,
+) {
+	defer wg.Done()
 	bucketName := os.Getenv(env.RAW_IMAGES_BUCKET)
 
 	_, err := s3Client.PutObject(
@@ -26,5 +30,8 @@ func UploadFilesToS3(
 			Body:   image,
 		},
 	)
-	return err
+	if err != nil {
+		errChan <- err
+		return
+	}
 }

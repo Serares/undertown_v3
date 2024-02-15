@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 
 	rootUtils "github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
@@ -48,13 +49,16 @@ func ParseMultipartFieldsToJson(
 	// Get the files from the multipart form and persist them to S3
 	// Add the file names to the json string
 
+	var wg sync.WaitGroup
 	// ❗TODO
 	// find a different way of getting the property_transaction from the form
 	var fileParsingErrors = make([]error, 0)
+	var s3UploadingErrors = make([]error, 0)
+	errChan := make(chan error, len(r.MultipartForm.File))
 
 	for _, fileHeaders := range r.MultipartForm.File {
 		for _, fileHeader := range fileHeaders {
-			imageName := rootUtils.ReplaceWhiteSpaceWithUnderscore(
+			bucketKey := rootUtils.ReplaceWhiteSpaceWithUnderscore(
 				fmt.Sprintf(
 					"%s/%s_%s",
 					humanReadableId,
@@ -68,21 +72,30 @@ func ParseMultipartFieldsToJson(
 				continue
 			}
 			defer file.Close()
-			err = UploadFilesToS3(
+			wg.Add(1)
+			go UploadFilesToS3(
 				r.Context(),
 				file,
 				s3Client,
-				imageName,
+				bucketKey,
+				&wg,
+				errChan,
 			)
-
-			if err != nil {
-				fileParsingErrors = append(fileParsingErrors, err)
-				continue
-			}
-			imagesNamesList = append(imagesNamesList, imageName)
+			imagesNamesList = append(imagesNamesList, bucketKey)
 		}
 	}
 
+	wg.Wait()
+	close(errChan)
+	for s3Error := range errChan {
+		if s3Error != nil {
+			s3UploadingErrors = append(s3UploadingErrors, s3Error)
+		}
+	}
+
+	if len(s3UploadingErrors) > 0 {
+		return nil, errors.Join(s3UploadingErrors...)
+	}
 	if len(fileParsingErrors) > 0 {
 		return nil, errors.Join(fileParsingErrors...)
 	}
