@@ -99,6 +99,20 @@ func ParseMultipartFieldsToJson(
 	if len(fileParsingErrors) > 0 {
 		return nil, errors.Join(fileParsingErrors...)
 	}
+	// 💩 looks like a shitty pattern
+	// but this is the place that's handling S3 uploading and images names creation
+	if deletedImagesSlice, ok := jsonStructure[constants.DeleteImagesFormKey].([]string); ok {
+		// append the human readable ID to the images that will be deleted
+		for i, delImgName := range deletedImagesSlice {
+			deletedImagesSlice[i] = humanReadableId + "/" + delImgName
+		}
+	}
+	// 💩 this is poopoo
+	// because if there is only one deleted_image the multipart/form will not send the values as a slice
+	if deletedImage, ok := jsonStructure[constants.DeleteImagesFormKey].(string); ok {
+		deletdImageHrId := humanReadableId + "/" + deletedImage
+		jsonStructure[constants.DeleteImagesFormKey] = []string{deletdImageHrId}
+	}
 
 	jsonStructure[constants.ImagesFormKey] = imagesNamesList
 

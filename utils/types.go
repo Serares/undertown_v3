@@ -46,7 +46,7 @@ type RequestProperty struct {
 	PropertyTransaction int64            `json:"property_transaction"` // this is sent as 0 and 1 see repository/types/PropertyTransaction
 	PropertySurface     int64            `json:"property_surface"`
 	ImageNames          []string         `json:"images"`
-	DeletedImages       []string         `json:"deleted_images"`
+	DeletedImages       []string         `json:"deleted_images"` // deleted_images should be prefixed by the hrID handled by the adminSRR
 	Features            PropertyFeatures `json:"-"`
 	// Features            map[string]interface{} `json:"-"` // This was used before to unmarshal all the fields that come from SSR and are not specifically placed
 }
