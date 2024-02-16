@@ -43,6 +43,8 @@ func NewPUService(
 	}
 }
 
+// 💩 TODO the logic to delete images is flawed
+// Review the logic
 func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId string) error {
 	sqsDeleteImagesQueue := os.Getenv(env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL)
 	var requestProperty utils.RequestProperty
@@ -70,20 +72,22 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 
 	var finalImages []string = make([]string, 0)
 	finalImages = append(finalImages, strings.Split(liteProperty.Images, ";")...)
+	// if there are no new images added the ImageNames should be 0
 	if len(requestProperty.ImageNames) > 0 {
 		finalImages = append(finalImages, utils.AppendMultipleFileExtension(requestProperty.ImageNames, "webp")...)
 	}
 	var filteredImages = make([]string, 0)
 	removeMap := make(map[string]bool, 0)
-	for _, img := range utils.AppendMultipleFileExtension(requestProperty.DeletedImages, "webp") {
+	for _, img := range requestProperty.DeletedImages {
 		removeMap[img] = true
 	}
 
 	for _, img := range finalImages {
-		if !removeMap[img] {
+		if !removeMap[img] { // if one of the final images exists with a true value in removeMap it's not included in filteredImages
 			filteredImages = append(filteredImages, img)
 		}
 	}
+
 	if requestProperty.DeletedImages != nil && len(requestProperty.DeletedImages) > 0 {
 
 		sqsDeleteImagesObject := utils.SQSDeleteImages{

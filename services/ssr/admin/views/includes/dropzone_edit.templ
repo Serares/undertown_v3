@@ -47,7 +47,10 @@ script DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string
                 myDropzone.emit("errormultiple", [], response)
                 return
               }
-              myDropzone.emit("successmultiple", [], response)
+              return response.text()
+            })
+            .then(data=>{
+              myDropzone.emit("successmultiple", [], data)
             })
             .catch(err=> {
               console.log("error sending thew AJAX request")
@@ -68,10 +71,8 @@ script DropzoneEdit(imagesPaths []string, url string, deleteImagesFormKey string
           }
           // return response.json();
           document.documentElement.innerHTML = response
-          if (response.ok != undefined && response.ok) {
-                $("#myModal .modal-body").html("Success editing the property")
-                $("#myModal").modal("show")
-          }
+          $("#myModal .modal-body").html("Success editing the property")
+          $("#myModal").modal("show")
           // dispatch a event that the page has loaded success
           var submitEvent = new CustomEvent('submitresponse', {
                   detail: { key: 'loadsuccess' }

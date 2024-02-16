@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -9,16 +10,40 @@ import (
 	"github.com/Serares/ssr/admin/middleware"
 	"github.com/Serares/ssr/admin/service"
 	"github.com/akrylysov/algnhsa"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	client := service.NewAdminClient(log)
 
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Error(
+			"error trying to load the lambda context",
+			"error", err,
+		)
+	}
+
+	sqsClient := sqs.NewFromConfig(cfg)
+	s3Client := s3.NewFromConfig(cfg)
+
 	loginService := service.NewLoginService(log, client)
-	submitService := service.NewSubmitService(log, client)
+	submitService := service.NewSubmitService(
+		log,
+		client,
+		sqsClient,
+		s3Client,
+	)
 	listingService := service.NewListingService(log, client)
-	editService := service.NewEditService(log, client)
+	editService := service.NewEditService(
+		log,
+		client,
+		sqsClient,
+		s3Client,
+	)
 	deleteService := service.NewDeleteService(log, client)
 
 	m := http.NewServeMux()

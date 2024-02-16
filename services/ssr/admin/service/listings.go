@@ -31,7 +31,11 @@ func (ls *ListingsService) List(authToken string) ([]types.ListingProperty, erro
 	}
 	listingProperties := make([]types.ListingProperty, 0)
 	for _, property := range properties {
-		editUrl, err := utils.CreatePropertyPath(types.EditPath, property.Title, property.Humanreadableid)
+		editUrl, err := utils.CreatePropertyPath(
+			types.EditPath,
+			property.Title,
+			property.Humanreadableid,
+		)
 		// add property human readable id as query string
 		if err != nil {
 			ls.Log.Error("error creating the edit url for proeprty:", "hrID", property.Humanreadableid)

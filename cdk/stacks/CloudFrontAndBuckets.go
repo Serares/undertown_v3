@@ -138,6 +138,7 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 		CachePolicy:         propertiesCachePolicy,
 		OriginRequestPolicy: homepageOriginRequestPolicy,
 	})
+
 	// // Export the domain.
 	awscdk.NewCfnOutput(stack, jsii.String("cloudFrontDomain"), &awscdk.CfnOutputProps{
 		ExportName: jsii.String("cloudfrontDomain"),
@@ -153,14 +154,14 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	cf.AddBehavior(jsii.String("/login"), loginOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:         adminCachePolicy,
+		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	cf.AddBehavior(jsii.String("/login/"), loginOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:         adminCachePolicy,
+		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
@@ -171,14 +172,14 @@ func CloudFrontAndBuckets(scope constructs.Construct, id string, props *BucketPr
 	cf.AddBehavior(jsii.String("/submit"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:         adminCachePolicy,
+		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
 	cf.AddBehavior(jsii.String("/submit/"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
-		CachePolicy:         adminCachePolicy,
+		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 

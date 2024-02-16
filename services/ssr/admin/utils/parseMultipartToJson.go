@@ -2,25 +2,22 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 
-	"github.com/Serares/undertown_v3/utils"
+	rootUtils "github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// ❗TODO
-//
-//	Split the S3 upload logic into a separate function
-func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
-	err := r.ParseMultipartForm(32 << 20)
-	if err != nil {
-		return nil, "", err
-	}
-
+func ParseMultipartFieldsToJson(
+	r *http.Request,
+	humanReadableId string,
+	s3Client *s3.Client,
+) ([]byte, error) {
 	var jsonStructure map[string]interface{} = make(map[string]interface{})
 	for key, values := range r.PostForm {
 		if len(values) > 1 {
@@ -48,60 +45,73 @@ func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
 	}
 
 	var imagesNamesList = make([]string, 0)
-	cfg, err := config.LoadDefaultConfig(r.Context())
-	if err != nil {
-		return nil, "", err
-	}
 
-	s3Client := s3.NewFromConfig(cfg)
 	// Get the files from the multipart form and persist them to S3
 	// Add the file names to the json string
 
+	var wg sync.WaitGroup
 	// ❗TODO
 	// find a different way of getting the property_transaction from the form
-	propertyTransactionFormValue := r.PostForm.Get(constants.TransactionTypeFormInputKey)
-	propertyTransactionToInt, err := strconv.Atoi(propertyTransactionFormValue)
-	if err != nil {
-		return nil, "", err
-	}
-
-	transactionType := utils.TransactionType(propertyTransactionToInt)
-
-	humanReadableId := utils.HumanReadableId(
-		transactionType,
-	)
+	var fileParsingErrors = make([]error, 0)
+	var s3UploadingErrors = make([]error, 0)
+	errChan := make(chan error, len(r.MultipartForm.File))
 
 	for _, fileHeaders := range r.MultipartForm.File {
 		for _, fileHeader := range fileHeaders {
-			imageName := utils.ReplaceWhiteSpaceWithUnderscore(
+			bucketKey := rootUtils.ReplaceWhiteSpaceWithUnderscore(
 				fmt.Sprintf(
 					"%s/%s_%s",
 					humanReadableId,
-					utils.GenerateStringTimestamp(),
+					rootUtils.GenerateStringTimestamp(),
 					fileHeader.Filename,
 				),
 			)
 			file, err := fileHeader.Open()
-
 			if err != nil {
-				return nil, "", fmt.Errorf("error reading the file from the form %v", err)
+				fileParsingErrors = append(fileParsingErrors, err)
+				continue
 			}
-
 			defer file.Close()
-			imagesNamesList = append(imagesNamesList, imageName)
-			// ❗
-			// TODO run this in goroutines after checking it works
-			err = UploadFilesToS3(
+			wg.Add(1)
+			go UploadFilesToS3(
 				r.Context(),
-				*fileHeader,
+				file,
 				s3Client,
-				imageName,
+				bucketKey,
+				&wg,
+				errChan,
 			)
-
-			if err != nil {
-				return nil, "", fmt.Errorf("error uploading the file '%s' to s3 %v", imageName, err)
-			}
+			imagesNamesList = append(imagesNamesList, bucketKey)
 		}
+	}
+
+	wg.Wait()
+	close(errChan)
+	for s3Error := range errChan {
+		if s3Error != nil {
+			s3UploadingErrors = append(s3UploadingErrors, s3Error)
+		}
+	}
+
+	if len(s3UploadingErrors) > 0 {
+		return nil, errors.Join(s3UploadingErrors...)
+	}
+	if len(fileParsingErrors) > 0 {
+		return nil, errors.Join(fileParsingErrors...)
+	}
+	// 💩 looks like a shitty pattern
+	// but this is the place that's handling S3 uploading and images names creation
+	if deletedImagesSlice, ok := jsonStructure[constants.DeleteImagesFormKey].([]string); ok {
+		// append the human readable ID to the images that will be deleted
+		for i, delImgName := range deletedImagesSlice {
+			deletedImagesSlice[i] = humanReadableId + "/" + delImgName
+		}
+	}
+	// 💩 this is poopoo
+	// because if there is only one deleted_image the multipart/form will not send the values as a slice
+	if deletedImage, ok := jsonStructure[constants.DeleteImagesFormKey].(string); ok {
+		deletdImageHrId := humanReadableId + "/" + deletedImage
+		jsonStructure[constants.DeleteImagesFormKey] = []string{deletdImageHrId}
 	}
 
 	jsonStructure[constants.ImagesFormKey] = imagesNamesList
@@ -109,8 +119,8 @@ func ParseMultipartToJson(r *http.Request) ([]byte, string, error) {
 	// json marshal
 	jsonString, err := json.Marshal(jsonStructure)
 	if err != nil {
-		return nil, "", fmt.Errorf("error marshaling the json structure %v", err)
+		return nil, fmt.Errorf("error marshaling the json structure %v", err)
 	}
 
-	return jsonString, humanReadableId, err
+	return jsonString, err
 }

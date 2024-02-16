@@ -59,7 +59,11 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 				}
 			}
 		} else if humanReadableId, ok := message.MessageAttributes[constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE]; ok {
-			err := ss.Update(ctx, message.Body, *humanReadableId.StringValue)
+			err := ss.Update(
+				ctx,
+				message.Body,
+				*humanReadableId.StringValue,
+			)
 			if err != nil {
 				log.Error(
 					"error trying to update the property from the sqs message",

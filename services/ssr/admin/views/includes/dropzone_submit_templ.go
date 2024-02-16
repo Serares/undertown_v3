@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 
 func DropzoneSubmit() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DropzoneSubmit_6222`,
-		Function: `function __templ_DropzoneSubmit_6222(){Dropzone.options.uploadForm = {
+		Name: `__templ_DropzoneSubmit_402d`,
+		Function: `function __templ_DropzoneSubmit_402d(){Dropzone.options.uploadForm = {
     autoProcessQueue: false,
     addRemoveLinks: true,
     uploadMultiple: true,
@@ -43,6 +43,8 @@ func DropzoneSubmit() templ.ComponentScript {
           }
           // return response.json();
           document.documentElement.innerHTML = response;
+          $("#myModal .modal-body").html("Success editing the property")
+          $("#myModal").modal("show")
           if (response.ok !== undefined && !response.ok) {
               $("#myModal .modal-body").html("Failed to add the property")
               $("#myModal").modal("show")
@@ -65,7 +67,7 @@ func DropzoneSubmit() templ.ComponentScript {
     },
   };
 }`,
-		Call:       templ.SafeScript(`__templ_DropzoneSubmit_6222`),
-		CallInline: templ.SafeScriptInline(`__templ_DropzoneSubmit_6222`),
+		Call:       templ.SafeScript(`__templ_DropzoneSubmit_402d`),
+		CallInline: templ.SafeScriptInline(`__templ_DropzoneSubmit_402d`),
 	}
 }
