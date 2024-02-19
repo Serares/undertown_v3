@@ -12,19 +12,19 @@ import (
 	"github.com/Serares/undertown_v3/utils/constants"
 )
 
-type ContactHandler struct {
+type AboutHandler struct {
 	Log *slog.Logger
 }
 
-func NewContactHandler(log *slog.Logger) *ContactHandler {
-	return &ContactHandler{
+func NewAboutHandler(log *slog.Logger) *AboutHandler {
+	return &AboutHandler{
 		Log: log,
 	}
 }
 
-func (ah *ContactHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ah *AboutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		viewContactPage(
+		viewAboutPage(
 			w,
 			r,
 		)
@@ -38,19 +38,19 @@ func (ah *ContactHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func viewContactPage(w http.ResponseWriter, r *http.Request) {
-	views.Contact(
+func viewAboutPage(w http.ResponseWriter, r *http.Request) {
+	views.About(
 		types.BasicIncludes{
 			Header: components.Header("UNDERTOWN"),
 			BannerSection: components.BannerSection(
 				includesTypes.BannerSectionProps{
-					Title: "CONTACT",
+					Title: "ABOUT",
 				},
 			),
 			Preload: components.Preload(),
 			Navbar: components.Navbar(
 				includesTypes.NavbarProps{
-					Path:    constants.CONTACT_PATH,
+					Path:    constants.ABOUT_PATH,
 					IsAdmin: false,
 				},
 			),

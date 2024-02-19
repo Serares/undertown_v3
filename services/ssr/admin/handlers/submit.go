@@ -14,6 +14,7 @@ import (
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
 	"github.com/Serares/undertown_v3/utils"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type AdminSubmit struct {
@@ -85,12 +86,12 @@ func viewSubmit(w http.ResponseWriter, r *http.Request, props types.SubmitProps)
 	views.Submit(types.BasicIncludes{
 		Header: components.Header("Submit"),
 		BannerSection: components.BannerSection(includesTypes.BannerSectionProps{
-			Title: "Submit",
+			Title: "ADMIN Add Property",
 		},
 		),
 		Preload: components.Preload(),
 		Navbar: components.Navbar(includesTypes.NavbarProps{
-			Path:    "/",
+			Path:    constants.SUBMIT_PATH,
 			IsAdmin: true,
 		}),
 		Footer:  components.Footer(),

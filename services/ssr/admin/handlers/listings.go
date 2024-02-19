@@ -10,6 +10,7 @@ import (
 	"github.com/Serares/ssr/admin/views"
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type AdminListings struct {
@@ -52,11 +53,14 @@ func viewListings(w http.ResponseWriter, r *http.Request, props types.ListingPro
 	views.Listings(
 		types.BasicIncludes{
 			Header:        components.Header("List"),
-			BannerSection: components.BannerSection(includesTypes.BannerSectionProps{Title: "List"}),
+			BannerSection: components.BannerSection(includesTypes.BannerSectionProps{Title: "ADMIN List"}),
 			Preload:       components.Preload(),
-			Navbar:        components.Navbar(includesTypes.NavbarProps{Path: "/listings", IsAdmin: true}),
-			Footer:        components.Footer(),
-			Scripts:       components.Scripts(),
+			Navbar: components.Navbar(includesTypes.NavbarProps{
+				Path:    constants.LIST_PATH,
+				IsAdmin: true},
+			),
+			Footer:  components.Footer(),
+			Scripts: components.Scripts(),
 		},
 		props,
 	).Render(r.Context(), w)

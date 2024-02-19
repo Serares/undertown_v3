@@ -37,13 +37,18 @@ func NewPropertiesHandler(
 	}
 }
 
+// 🚀
+// This handler is used for both single property and properties
 func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	q := r.URL.Query()
+	// ⚠️ This might cause some shitty bugs
+	uiTransactionType := strings.Split(r.URL.Path, "/")[1]
+	bannerTitle := strings.ToUpper(uiTransactionType)
+	pagePath := uiTransactionType
+
 	if _, ok := q[constants.QUERY_PARAMETER_HUMANREADABLEID]; ok {
 		if r.Method == http.MethodGet {
 			processedProperty, err := ph.SinglePropertyService.Get(q[constants.QUERY_PARAMETER_HUMANREADABLEID][0])
-			path := r.URL.Path
 			if err != nil {
 				ph.Log.Error("error trying to render the Single property", "error", err)
 				ViewNotFound(w, r)
@@ -54,7 +59,7 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					Property: processedProperty,
 				},
 				includesTypes.NavbarProps{
-					Path:    path,
+					Path:    pagePath,
 					IsAdmin: false,
 				},
 			)
@@ -64,9 +69,7 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		// get the transction type from the url
-		uiTransactionType := strings.ReplaceAll(r.URL.Path, "/", "")
-		bannerTitle := strings.ToUpper(uiTransactionType)
-		pagePath := r.URL.Path
+
 		// get query strings
 		sortProps := ph.getSortPropsFromQueryStrings(r.URL.Query())
 		properties, err := ph.PropertiesService.ListProperties(sortProps, uiTransactionType)
@@ -114,7 +117,7 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // TODO test this function
 func (ph *PropertiesHandler) getSortPropsFromQueryStrings(queryStrings url.Values) service.SortProps {
 	var sortProps service.SortProps
-	sortOrder := queryStrings.Get("sort_order")
+	sortOrder := queryStrings.Get(constants.QUERY_PARAMETER_SORT_ORDER)
 	if sortOrder != "" {
 		values := strings.Split(sortOrder, "/")
 		switch values[0] {
@@ -164,8 +167,12 @@ func viewProperties(
 	}, props).Render(r.Context(), w)
 }
 
-func viewSingleProperty(w http.ResponseWriter, r *http.Request, props types.SinglePropertyViewProps, navbarProps includesTypes.NavbarProps) {
-
+func viewSingleProperty(
+	w http.ResponseWriter,
+	r *http.Request,
+	props types.SinglePropertyViewProps,
+	navbarProps includesTypes.NavbarProps,
+) {
 	views.Property(
 		types.BasicIncludes{
 			Header: components.Header("UNDERTOWN"),

@@ -8,6 +8,7 @@ import (
 	"github.com/Serares/ssr/homepage/views"
 	"github.com/Serares/undertown_v3/ssr/includes/components"
 	includesTypes "github.com/Serares/undertown_v3/ssr/includes/types"
+	"github.com/Serares/undertown_v3/utils/constants"
 )
 
 type IHomeService interface {
@@ -45,7 +46,7 @@ func (hh *DefaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						FeaturedProperties: properties,
 					},
 					includesTypes.NavbarProps{
-						Path: "/home",
+						Path: constants.HOMEPAGE_PATH,
 					})
 				return
 			}
@@ -55,15 +56,13 @@ func (hh *DefaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					FeaturedProperties: properties,
 				},
 				includesTypes.NavbarProps{
-					Path: "/home",
+					Path: constants.HOMEPAGE_PATH,
 				})
 			return
 		}
 	}
 	ViewNotFound(w, r)
 }
-
-// TODO handle paths that are unknown
 
 // TODO should this function be defined like this?
 func viewHome(
