@@ -61,9 +61,8 @@ func main() {
 	m.Handle("/submit", middleware.NewMiddleware(submitHandler, middleware.WithSecure(false)))
 	m.Handle("/edit", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
 	m.Handle("/edit/", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
-	m.Handle("/list", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
-	m.Handle("/list/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
 	m.Handle("/delete", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
 	m.Handle("/delete/", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
+	m.Handle("/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
 	algnhsa.ListenAndServe(m, nil)
 }

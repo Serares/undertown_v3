@@ -18,17 +18,17 @@ import (
 type PersistUpdatePropertyLambdaProps struct {
 	awscdk.StackProps
 	Env                        string
-	PIUQueue                   awssqs.Queue
+	PUQueue                    awssqs.Queue
 	DeleteProcessedImagesQueue awssqs.Queue
 }
 
 func PersistUpdatePropertyLambda(scope constructs.Construct, id string, props *PersistUpdatePropertyLambdaProps) awscdk.Stack {
 	stack := awscdk.NewStack(scope, &id, &props.StackProps)
 	var deleteProcessedImagesQueueUrl string
-	var piuQueueUrl string
+	var PUQueueUrl string
 
-	if props.PIUQueue.QueueUrl() != nil {
-		piuQueueUrl = *props.PIUQueue.QueueUrl()
+	if props.PUQueue.QueueUrl() != nil {
+		PUQueueUrl = *props.PUQueue.QueueUrl()
 	}
 
 	if props.DeleteProcessedImagesQueue.QueueUrl() != nil {
@@ -41,11 +41,11 @@ func PersistUpdatePropertyLambda(scope constructs.Construct, id string, props *P
 		// don't store them in plain text
 		// store them as an encrypted string?
 		// how to decrypt them
-		env.DB_HOST:           jsii.String(os.Getenv(env.DB_HOST)),
-		env.DB_NAME:           jsii.String(os.Getenv(env.DB_NAME)),
-		env.DB_PROTOCOL:       jsii.String(os.Getenv(env.DB_PROTOCOL)),
-		env.TURSO_DB_TOKEN:    jsii.String(os.Getenv(env.TURSO_DB_TOKEN)),
-		env.SQS_PIU_QUEUE_URL: jsii.String(piuQueueUrl),
+		env.DB_HOST:          jsii.String(os.Getenv(env.DB_HOST)),
+		env.DB_NAME:          jsii.String(os.Getenv(env.DB_NAME)),
+		env.DB_PROTOCOL:      jsii.String(os.Getenv(env.DB_PROTOCOL)),
+		env.TURSO_DB_TOKEN:   jsii.String(os.Getenv(env.TURSO_DB_TOKEN)),
+		env.SQS_PU_QUEUE_URL: jsii.String(PUQueueUrl),
 		env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL: jsii.String(deleteProcessedImagesQueueUrl), // used to dispatch the names of images that needs to be deleted
 	}
 
@@ -69,12 +69,12 @@ func PersistUpdatePropertyLambda(scope constructs.Construct, id string, props *P
 	// add the event source mapping to the PersistUpdateProperty lambda
 	persistUpdateProperty.AddEventSource(
 		awslambdaeventsources.NewSqsEventSource(
-			props.PIUQueue,
+			props.PUQueue,
 			&awslambdaeventsources.SqsEventSourceProps{},
 		),
 	)
-	// grant piuqueue access to addPropertyLambda
-	props.PIUQueue.GrantConsumeMessages(persistUpdateProperty)
+	// grant PUqueue access to addPropertyLambda
+	props.PUQueue.GrantConsumeMessages(persistUpdateProperty)
 
 	// ❗
 	// dispatch delete permissions

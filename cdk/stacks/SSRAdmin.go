@@ -16,7 +16,7 @@ import (
 )
 
 type SSRAdminStackProps struct {
-	PIUQueue        awssqs.Queue
+	PUQueue         awssqs.Queue
 	RawImagesBucket awss3.Bucket
 	awscdk.StackProps
 	Env string
@@ -37,14 +37,14 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 	loginUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", LoginEndpoint.String(), props.Env))
 	deletePropertyUrl := awscdk.Fn_ImportValue(jsii.Sprintf("%s-%s", DeleteProperty.String(), props.Env))
 
-	var piuQueueUrl string
+	var PUQueueUrl string
 	var rawImagesBucketName string
 	if props.RawImagesBucket.BucketName() != nil {
 		rawImagesBucketName = *props.RawImagesBucket.BucketName()
 	}
 
-	if props.PIUQueue.QueueUrl() != nil {
-		piuQueueUrl = *props.PIUQueue.QueueUrl()
+	if props.PUQueue.QueueUrl() != nil {
+		PUQueueUrl = *props.PUQueue.QueueUrl()
 	}
 
 	s3BucketAccessRole := utils.CreateLambdaBasicRole(stack, "s3fullaccesslambdarole", props.Env)
@@ -56,7 +56,7 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 		env.GET_PROPERTY_URL:    getPropertyUrl,
 		env.LOGIN_URL:           loginUrl,
 		env.DELETE_PROPERTY_URL: deletePropertyUrl,
-		env.SQS_PIU_QUEUE_URL:   jsii.String(piuQueueUrl),
+		env.SQS_PU_QUEUE_URL:    jsii.String(PUQueueUrl),
 		env.RAW_IMAGES_BUCKET:   jsii.String(rawImagesBucketName),
 		env.JWT_SECRET:          jsii.String(os.Getenv(env.JWT_SECRET)), // this is needed to decode the cookie and add the user id into the sqs message
 	}
@@ -81,7 +81,7 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 		Value:      lambdaURL.Url(),
 	})
 
-	props.PIUQueue.GrantSendMessages(adminSSRLambda)
+	props.PUQueue.GrantSendMessages(adminSSRLambda)
 
 	return SSRAdminStackReturn{
 		LambdaUrl: lambdaURL,
