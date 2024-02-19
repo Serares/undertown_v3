@@ -58,86 +58,63 @@ func AdminDistribution(scope constructs.Construct, id string, props *AdminProps)
 		PriceClass: awscloudfront.PriceClass_PRICE_CLASS_100,
 	})
 
-	// ❗
-	// TODO try to create the origins and behavoiurs in a loop
-	// Add ADMIN routes
-	loginOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-
-	adminDistribution.AddBehavior(jsii.String("/login"), loginOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/login"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	adminDistribution.AddBehavior(jsii.String("/login/"), loginOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/login/"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	submitPropertyOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-
-	adminDistribution.AddBehavior(jsii.String("/submit"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/submit"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	adminDistribution.AddBehavior(jsii.String("/submit/"), submitPropertyOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/submit/"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	editOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-
-	adminDistribution.AddBehavior(jsii.String("/edit"), editOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/edit"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         adminCachePolicy,
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	adminDistribution.AddBehavior(jsii.String("/edit/*"), editOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/edit/*"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         adminCachePolicy,
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	deleteOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-
-	adminDistribution.AddBehavior(jsii.String("/delete"), deleteOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/delete"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         adminCachePolicy,
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	adminDistribution.AddBehavior(jsii.String("/delete/*"), deleteOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/delete/*"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         adminCachePolicy,
 		OriginRequestPolicy: adminOriginRequestPolicy,
 	})
 
-	listOrigin := awscloudfrontorigins.NewHttpOrigin(adminLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-
-	adminDistribution.AddBehavior(jsii.String("/"), listOrigin, &awscloudfront.AddBehaviorOptions{
+	adminDistribution.AddBehavior(jsii.String("/"), admninOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         adminCachePolicy,

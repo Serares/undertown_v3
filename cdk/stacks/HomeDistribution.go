@@ -22,6 +22,7 @@ func HomeDistribution(scope constructs.Construct, id string, props *HomeProps) a
 	homepageOriginRequestPolicy := awscloudfront.NewOriginRequestPolicy(stack, jsii.String("homepage-origin-request-policy"), &awscloudfront.OriginRequestPolicyProps{
 		QueryStringBehavior: awscloudfront.OriginRequestQueryStringBehavior_AllowList(
 			jsii.String(constants.QUERY_PARAMETER_HUMANREADABLEID),
+			jsii.String(constants.QUERY_PARAMETER_SORT_ORDER),
 		),
 	})
 
@@ -61,24 +62,31 @@ func HomeDistribution(scope constructs.Construct, id string, props *HomeProps) a
 		PriceClass: awscloudfront.PriceClass_PRICE_CLASS_100,
 	})
 
-	// Add /properties origins chirii|vanzari
-	chiriiOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-	homeDistribution.AddBehavior(jsii.String("/chirii"), chiriiOrigin, &awscloudfront.AddBehaviorOptions{
+	homeDistribution.AddBehavior(jsii.String("/chirii"), homeOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         propertiesCachePolicy,
 		OriginRequestPolicy: homepageOriginRequestPolicy,
 	})
-	vanzariOrigin := awscloudfrontorigins.NewHttpOrigin(homeLambdaUrl, &awscloudfrontorigins.HttpOriginProps{
-		ProtocolPolicy: awscloudfront.OriginProtocolPolicy_HTTPS_ONLY,
-	})
-	homeDistribution.AddBehavior(jsii.String("/vanzari"), vanzariOrigin, &awscloudfront.AddBehaviorOptions{
+	homeDistribution.AddBehavior(jsii.String("/vanzari"), homeOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         propertiesCachePolicy,
 		OriginRequestPolicy: homepageOriginRequestPolicy,
+	})
+
+	homeDistribution.AddBehavior(jsii.String("/about"), homeOrigin, &awscloudfront.AddBehaviorOptions{
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
+		OriginRequestPolicy: awscloudfront.OriginRequestPolicy_ALL_VIEWER(),
+	})
+
+	homeDistribution.AddBehavior(jsii.String("/contact"), homeOrigin, &awscloudfront.AddBehaviorOptions{
+		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
+		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
+		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
+		OriginRequestPolicy: awscloudfront.OriginRequestPolicy_ALL_VIEWER(),
 	})
 
 	// // Export the domain.
