@@ -40,9 +40,9 @@ func NewPropertiesHandler(
 func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	q := r.URL.Query()
-	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
+	if _, ok := q[constants.QUERY_PARAMETER_HUMANREADABLEID]; ok {
 		if r.Method == http.MethodGet {
-			processedProperty, err := ph.SinglePropertyService.Get(q[constants.HumanReadableIdQueryKey][0])
+			processedProperty, err := ph.SinglePropertyService.Get(q[constants.QUERY_PARAMETER_HUMANREADABLEID][0])
 			path := r.URL.Path
 			if err != nil {
 				ph.Log.Error("error trying to render the Single property", "error", err)
@@ -64,12 +64,12 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		// get the transction type from the url
-		translatedTransactionType := strings.ReplaceAll(r.URL.Path, "/", "")
-		bannerTitle := strings.ToUpper(translatedTransactionType)
+		uiTransactionType := strings.ReplaceAll(r.URL.Path, "/", "")
+		bannerTitle := strings.ToUpper(uiTransactionType)
 		pagePath := r.URL.Path
 		// get query strings
 		sortProps := ph.getSortPropsFromQueryStrings(r.URL.Query())
-		properties, err := ph.PropertiesService.ListProperties(sortProps, translatedTransactionType)
+		properties, err := ph.PropertiesService.ListProperties(sortProps, uiTransactionType)
 		if err != nil {
 			ph.Log.Error("error getting properties", "error", err, "urlpath", r.URL.Path)
 			viewProperties(
@@ -109,7 +109,6 @@ func (ph *PropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	message := "Method not supported"
 	ph.Log.Error(message)
 	http.Error(w, message, http.StatusMethodNotAllowed)
-	return
 }
 
 // TODO test this function

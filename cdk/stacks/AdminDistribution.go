@@ -24,7 +24,7 @@ func AdminDistribution(scope constructs.Construct, id string, props *AdminProps)
 			jsii.String(constants.CookieTokenKey),
 		),
 		QueryStringBehavior: awscloudfront.OriginRequestQueryStringBehavior_AllowList(
-			jsii.String(constants.HumanReadableIdQueryKey),
+			jsii.String(constants.QUERY_PARAMETER_HUMANREADABLEID),
 		),
 	})
 

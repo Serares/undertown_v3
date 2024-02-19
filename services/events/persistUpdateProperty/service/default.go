@@ -132,7 +132,7 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 		Images:              strings.Join(filteredImages, ";"),
 		Thumbnail:           filteredImages[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
-		PropertyTransaction: utils.TransactionType(requestProperty.PropertyTransaction).String(),
+		PropertyTransaction: requestProperty.PropertyTransaction,
 		PropertyDescription: requestProperty.PropertyDescription,
 		PropertyType:        requestProperty.PropertyType,
 		PropertyAddress:     requestProperty.PropertyAddress,
@@ -186,7 +186,7 @@ func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId, humanR
 		IsProcessing:        0, // It's always going to be 0 until S3 images are processed
 		Thumbnail:           thumbnail,
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
-		PropertyTransaction: utils.TransactionType(requestProperty.PropertyTransaction).String(),
+		PropertyTransaction: requestProperty.PropertyTransaction,
 		PropertyDescription: requestProperty.PropertyDescription,
 		PropertyType:        requestProperty.PropertyType,
 		PropertyAddress:     requestProperty.PropertyAddress,

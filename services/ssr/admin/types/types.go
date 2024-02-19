@@ -116,11 +116,11 @@ var PropertyTypes = []SelectInputs{
 
 var PropertyTransactions = []SelectInputs{
 	{
-		Value:       "0",
+		Value:       "SELL",
 		DisplayName: "Vanzare",
 	},
 	{
-		Value:       "1",
+		Value:       "RENT",
 		DisplayName: "Chirie",
 	},
 }

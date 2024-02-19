@@ -13,26 +13,26 @@ templ Navbar(props types.NavbarProps) {
 					<div class="col-md-12 col-sm-12">
 						<nav class="navbar navbar-expand-lg navbar-light w-100">
 							<a
- 								class="navbar-brand"
- 								href="/"
+								class="navbar-brand"
+								href="/"
 							>
 								<img
- 									class="nav-logo"
- 									src="/assets/img/ut-navlogo-transp.png"
- 									alt="logo"
+									class="nav-logo"
+									src="/assets/img/ut-navlogo-transp.png"
+									alt="logo"
 								/>
 							</a>
 							<button
- 								class="navbar-toggler"
- 								type="button"
- 								data-toggle="collapse"
- 								data-target="#navbarSupportedContent"
- 								aria-controls="navbarSupportedContent"
- 								aria-expanded="false"
- 								aria-label="Toggle navigation"
+								class="navbar-toggler"
+								type="button"
+								data-toggle="collapse"
+								data-target="#navbarSupportedContent"
+								aria-controls="navbarSupportedContent"
+								aria-expanded="false"
+								aria-label="Toggle navigation"
 							>
 								<span
- 									class="navbar-toggler-icon"
+									class="navbar-toggler-icon"
 								></span>
 							</button>
 							if props.IsAdmin {
@@ -40,20 +40,20 @@ templ Navbar(props types.NavbarProps) {
 									<ul class="navbar-nav ml-5">
 										<li class="nav-item">
 											<a
- 												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "list")) }
- 												href="/list"
+												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "list")) }
+												href="/list"
 											>Proprietati</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, "submit")) }
- 												href="/submit/"
+												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, "submit")) }
+												href="/submit/"
 											>Adauga proprietate</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" }
- 												href="http://www.undertown.ro"
+												class={ "nav-link" }
+												href="http://www.undertown.ro"
 											>Pagina principala</a>
 										</li>
 									</ul>
@@ -64,32 +64,32 @@ templ Navbar(props types.NavbarProps) {
 									<ul class="navbar-nav ml-5">
 										<li class="nav-item">
 											<a
- 												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "home")) }
- 												href="/"
+												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "home")) }
+												href="/"
 											>Acasa</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionRent)) }
- 												href="/chirii/"
+												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TRANSACTION_TYPE_UI_RENT)) }
+												href="/chirii/"
 											>Chirii</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionSell)) }
- 												href="/vanzari/"
+												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TRANSACTION_TYPE_UI_SELL)) }
+												href="/vanzari/"
 											>Vanzari</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", props.Path == "/about/") }
- 												href="/about/"
+												class={ "nav-link" ,templ.KV("active", props.Path == "/about/") }
+												href="/about/"
 											>Despre noi</a>
 										</li>
 										<li class="nav-item">
 											<a
- 												class={ "nav-link" ,templ.KV("active", props.Path == "/contact/") }
- 												href="/contact/"
+												class={ "nav-link" ,templ.KV("active", props.Path == "/contact/") }
+												href="/contact/"
 											>Contact</a>
 										</li>
 									</ul>

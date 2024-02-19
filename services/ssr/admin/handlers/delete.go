@@ -30,8 +30,8 @@ func NewDeleteHandler(log *slog.Logger, service IDeleteService) *DeleteHandler {
 func (dh *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := middleware.ID(r)
 	q := r.URL.Query()
-	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
-		humanReadableId := q[constants.HumanReadableIdQueryKey][0]
+	if _, ok := q[constants.QUERY_PARAMETER_HUMANREADABLEID]; ok {
+		humanReadableId := q[constants.QUERY_PARAMETER_HUMANREADABLEID][0]
 		// ❗the delete method is actually sent by a js script not by the form submission
 		if r.Method == http.MethodDelete {
 			err := dh.Service.Delete(humanReadableId, "", token)

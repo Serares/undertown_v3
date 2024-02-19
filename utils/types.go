@@ -23,7 +23,7 @@ func (t TransactionType) ToInt(stringType string) TransactionType {
 	case "RENT":
 		return Rent
 	default:
-		return Sell
+		return Default
 	}
 }
 
@@ -43,7 +43,7 @@ type RequestProperty struct {
 	PropertyType        string           `json:"property_type"`
 	PropertyDescription string           `json:"property_description"`
 	PropertyAddress     string           `json:"property_address"`
-	PropertyTransaction int64            `json:"property_transaction"` // this is sent as 0 and 1 see repository/types/PropertyTransaction
+	PropertyTransaction string           `json:"property_transaction"` // THIS HAS TO BE SELL || RENT or else the db insertion will fail see 002_properties.sql
 	PropertySurface     int64            `json:"property_surface"`
 	ImageNames          []string         `json:"images"`
 	DeletedImages       []string         `json:"deleted_images"` // deleted_images should be prefixed by the hrID handled by the adminSRR

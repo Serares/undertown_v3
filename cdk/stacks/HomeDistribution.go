@@ -21,7 +21,7 @@ func HomeDistribution(scope constructs.Construct, id string, props *HomeProps) a
 
 	homepageOriginRequestPolicy := awscloudfront.NewOriginRequestPolicy(stack, jsii.String("homepage-origin-request-policy"), &awscloudfront.OriginRequestPolicyProps{
 		QueryStringBehavior: awscloudfront.OriginRequestQueryStringBehavior_AllowList(
-			jsii.String(constants.HumanReadableIdQueryKey),
+			jsii.String(constants.QUERY_PARAMETER_HUMANREADABLEID),
 		),
 	})
 

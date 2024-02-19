@@ -110,7 +110,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionRent))}
+			var templ_7745c5c3_Var6 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, constants.TRANSACTION_TYPE_UI_RENT))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -127,7 +127,7 @@ func Navbar(props types.NavbarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, constants.TranslatedTransactionSell))}
+			var templ_7745c5c3_Var7 = []any{"nav-link", templ.KV("active", strings.Contains(props.Path, constants.TRANSACTION_TYPE_UI_SELL))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

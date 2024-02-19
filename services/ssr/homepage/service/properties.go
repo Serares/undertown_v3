@@ -43,15 +43,22 @@ func NewPropertiesService(log *slog.Logger, client ISSRClient) *PropertiesServic
 	}
 }
 
-func (ps *PropertiesService) ListProperties(props SortProps, transaltedTransactionType string) ([]types.ProcessedListProperty, error) {
+func (ps *PropertiesService) ListProperties(props SortProps, uiTransactionType string) ([]types.ProcessedListProperty, error) {
 	getPropertiesUrl := os.Getenv("GET_PROPERTIES_URL")
 	var processedFeatProperties []types.ProcessedListProperty
 
-	constructedUrl, err := ps.constructGetUrl(transaltedTransactionType, getPropertiesUrl)
+	dbTransactionType, err := rootUtils.TransactionTypeUIToDB(uiTransactionType)
 	if err != nil {
 		return []types.ProcessedListProperty{}, err
 	}
-	properties, err := ps.Client.GetPropertiesByTransactionType(constructedUrl)
+
+	url, err := rootUtils.AddParamToUrl(getPropertiesUrl, constants.QUERY_PARAMETER_TRANSACTION_TYPE, dbTransactionType)
+
+	if err != nil {
+		return []types.ProcessedListProperty{}, err
+	}
+
+	properties, err := ps.Client.GetPropertiesByTransactionType(url)
 	if err != nil {
 		return []types.ProcessedListProperty{}, err
 	}
@@ -103,17 +110,6 @@ func (ps *PropertiesService) ListProperties(props SortProps, transaltedTransacti
 		})
 	}
 	return processedFeatProperties, nil
-}
-
-// ❗
-// if there are more transaction types than two this had to be solved with a switch statement
-func (ps *PropertiesService) constructGetUrl(translatedTransactionType, getUrl string) (string, error) {
-	if strings.EqualFold(translatedTransactionType, constants.TranslatedTransactionRent) {
-		return rootUtils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionRent)
-	} else {
-		return rootUtils.AddParamToUrl(getUrl, constants.TransactionTypeQueryKey, constants.TranslatedTransactionSell)
-
-	}
 }
 
 // TODO sorting on the SSR is a bad pattern,

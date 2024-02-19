@@ -36,9 +36,9 @@ func (gp GetPropertyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		q := r.URL.Query()
 		// ❗the propertyId here is the humanReadableId
-		if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
-			theId := q[constants.HumanReadableIdQueryKey][0]
-			gp.Log.Info("the query param", "params", q[constants.HumanReadableIdQueryKey][0])
+		if _, ok := q[constants.QUERY_PARAMETER_HUMANREADABLEID]; ok {
+			theId := q[constants.QUERY_PARAMETER_HUMANREADABLEID][0]
+			gp.Log.Info("the query param", "params", q[constants.QUERY_PARAMETER_HUMANREADABLEID][0])
 			property, err := gp.propertyService.GetPropertyByHumanReadableId(r.Context(), theId)
 			if err != nil {
 				gp.Log.Error("error tyrying to query the property by id", "id", theId, "error", err)

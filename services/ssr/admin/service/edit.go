@@ -53,7 +53,7 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 	// have to add the human readable id to the url
 	// ❗TODO
 	// this might need some validations
-	getPropertyBackendUrl, err := utils.AddParamToUrl(getPropertyUrl, constants.HumanReadableIdQueryKey, humanReadableId)
+	getPropertyBackendUrl, err := utils.AddParamToUrl(getPropertyUrl, constants.QUERY_PARAMETER_HUMANREADABLEID, humanReadableId)
 	if err != nil {
 		es.Log.Error("error trying to create the backend delete url", "error", err)
 	}

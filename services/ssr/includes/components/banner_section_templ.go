@@ -32,7 +32,7 @@ func BannerSection(props types.BannerSectionProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `services/ssr/includes/components/banner_section.templ`, Line: 10, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/banner_section.templ`, Line: 10, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

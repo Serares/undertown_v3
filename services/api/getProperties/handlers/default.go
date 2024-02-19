@@ -66,9 +66,9 @@ func (gh GetPropertiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		}
 
 		// TODO should you support both featured and propertyType filters?
-		if _, ok := q[constants.TransactionTypeQueryKey]; ok {
-			if q[constants.TransactionTypeQueryKey][0] != "" {
-				var transactionType string = q[constants.TransactionTypeQueryKey][0]
+		if _, ok := q[constants.QUERY_PARAMETER_TRANSACTION_TYPE]; ok {
+			if q[constants.QUERY_PARAMETER_TRANSACTION_TYPE][0] != "" {
+				var transactionType string = q[constants.QUERY_PARAMETER_TRANSACTION_TYPE][0]
 				properties, err := gh.GetPropertiesService.ListPropertiesByTransactionType(r.Context(), transactionType)
 				if err != nil {
 					gh.Log.Error("error trying to get featured properties", "error", err)

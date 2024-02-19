@@ -26,7 +26,7 @@ func NewPropertyService(log *slog.Logger, client ISSRClient) *PropertyService {
 
 func (s *PropertyService) Get(humanReadableId string) (types.ProcessedSingleProperty, error) {
 	getPropertyUrl := os.Getenv("GET_PROPERTY_URL")
-	url, err := utils.AddParamToUrl(getPropertyUrl, constants.HumanReadableIdQueryKey, humanReadableId)
+	url, err := utils.AddParamToUrl(getPropertyUrl, constants.QUERY_PARAMETER_HUMANREADABLEID, humanReadableId)
 	if err != nil {
 		return types.ProcessedSingleProperty{}, fmt.Errorf("error trying to create the get property url %v", err)
 	}
