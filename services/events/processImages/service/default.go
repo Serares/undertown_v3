@@ -22,10 +22,10 @@ var LocalAssetsRelativePath = "../../ssr/assets/uploads"
 
 type ProcessImagesService struct {
 	Log      *slog.Logger
-	S3Client s3.Client
+	S3Client *s3.Client
 }
 
-func New(log *slog.Logger, client s3.Client) ProcessImagesService {
+func New(log *slog.Logger, client *s3.Client) ProcessImagesService {
 	return ProcessImagesService{
 		Log:      log.WithGroup("Process Images Service"),
 		S3Client: client,

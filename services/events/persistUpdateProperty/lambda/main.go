@@ -14,22 +14,28 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
-// listening for PIU_QUEUE
-// sending SQS_
-func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
+var sqsClient *sqs.Client
+var log *slog.Logger
 
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+// 🚀
+// the init function is supposed to be automatically called before the main() function
+func init() {
+	log = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	cfg, err := config.LoadDefaultConfig(context.TODO())
-
 	if err != nil {
 		log.Error(
 			"error trying to load the lambda context",
 			"error", err,
 		)
-		return err
 	}
-	sqsClient := sqs.NewFromConfig(cfg)
+	sqsClient = sqs.NewFromConfig(cfg)
+}
 
+// listening for PU_QUEUE
+// sending SQS_
+func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
+	// TODO initialize the repository outside of the handler for better performance
+	// does it makes sense for the sqs client can be initialized outside also?
 	dbRepo, err := repository.NewPropertiesRepo()
 	ss := service.NewPUService(log, dbRepo, sqsClient)
 

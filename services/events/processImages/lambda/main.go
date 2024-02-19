@@ -8,24 +8,27 @@ import (
 	"github.com/Serares/undertown_v3/services/events/processImages/service"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func handler(ctx context.Context, s3Event events.S3Event) {
-	log := slog.New(
-		slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}),
-	)
+var s3client *s3.Client
+var log *slog.Logger
 
-	s3Client, err := service.NewS3Client(
-		ctx,
-	)
-
+func init() {
+	log = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Error("error trying to initialize the s3 client with config",
+		log.Error(
+			"error trying to load the default config",
 			"error", err,
 		)
 	}
+	s3client = s3.NewFromConfig(cfg)
+}
 
-	service := service.New(log, s3Client)
+func handler(ctx context.Context, s3Event events.S3Event) {
+	service := service.New(log, s3client)
 
 	for _, record := range s3Event.Records {
 		log.Info("Got the s3 event",
