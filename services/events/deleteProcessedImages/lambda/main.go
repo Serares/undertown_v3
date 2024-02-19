@@ -16,17 +16,23 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	PROCESSED_IMAGES_BUCKET := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
-	cfg, err := config.LoadDefaultConfig(ctx)
+var s3client *s3.Client
+var log *slog.Logger
+
+func init() {
+	log = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Error(
 			"error trying to load the default config",
 			"error", err,
 		)
 	}
-	client := s3.NewFromConfig(cfg)
+	s3client = s3.NewFromConfig(cfg)
+}
+
+func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
+	PROCESSED_IMAGES_BUCKET := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
 
 	for _, message := range sqsDeleteImagesEvent.Records {
 		// TODO is it better to send an array of strings
@@ -44,7 +50,7 @@ func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
 
 		for _, imageToDelete := range deleteImages.Images {
 			processedImageKey := constants.S3_PROCESSED_IMAGES_PREFIX + "/" + imageToDelete
-			_, err := client.DeleteObject(
+			_, err := s3client.DeleteObject(
 				ctx,
 				&s3.DeleteObjectInput{
 					Bucket: aws.String(PROCESSED_IMAGES_BUCKET),
