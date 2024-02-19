@@ -15,6 +15,6 @@ const (
 	DB_NAME                               = "DB_NAME"
 	DB_PROTOCOL                           = "DB_PROTOCOL"
 	TURSO_DB_TOKEN                        = "TURSO_DB_TOKEN"
-	SQS_PIU_QUEUE_URL                     = "SQS_PIU_QUEUE_URL"
+	SQS_PU_QUEUE_URL                      = "SQS_PU_QUEUE_URL"
 	SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL = "SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL"
 )

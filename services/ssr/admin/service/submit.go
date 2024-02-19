@@ -43,7 +43,7 @@ type PropertyFormField struct {
 }
 
 func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property, utils.PropertyFeatures, error) {
-	piuQueuUrl := os.Getenv(env.SQS_PIU_QUEUE_URL)
+	PUQueuUrl := os.Getenv(env.SQS_PU_QUEUE_URL)
 	jwtSecret := os.Getenv(env.JWT_SECRET)
 	var err error
 
@@ -107,7 +107,7 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 	_, err = s.SQSClient.SendMessage(
 		r.Context(),
 		&sqs.SendMessageInput{
-			QueueUrl:          &piuQueuUrl,
+			QueueUrl:          &PUQueuUrl,
 			MessageBody:       aws.String(string(jsonString)),
 			MessageAttributes: messageAttributes,
 		},

@@ -81,7 +81,7 @@ func (es *EditService) Get(humanReadableId, authToken string) (lite.Property, []
 }
 
 func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lite.Property, utils.PropertyFeatures, error) {
-	piuQueuUrl := os.Getenv(env.SQS_PIU_QUEUE_URL)
+	PUQueuUrl := os.Getenv(env.SQS_PU_QUEUE_URL)
 	err := r.ParseMultipartForm(32 << 20)
 	if err != nil {
 		return lite.Property{}, utils.PropertyFeatures{}, err
@@ -114,7 +114,7 @@ func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lit
 	_, err = sqsClient.SendMessage(
 		r.Context(),
 		&sqs.SendMessageInput{
-			QueueUrl:          &piuQueuUrl,
+			QueueUrl:          &PUQueuUrl,
 			MessageBody:       aws.String(string(jsonString)),
 			MessageAttributes: messageAttributes,
 		},

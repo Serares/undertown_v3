@@ -23,10 +23,10 @@ func main() {
 	app := awscdk.NewApp(nil)
 	// TODO
 	// try to tidy up the queues and event listening lambdas
-	piuqueue := stacks.PIUQueue(
+	PUqueue := stacks.PUQueue(
 		app,
-		fmt.Sprintf("PIUQeue-%s", theEnv),
-		stacks.PIUQueueProps{
+		fmt.Sprintf("PUQeue-%s", theEnv),
+		stacks.PUQueueProps{
 			StackProps: awscdk.StackProps{
 				Env: env(),
 			},
@@ -115,7 +115,7 @@ func main() {
 		},
 	)
 
-	// Polls from PIUQueue
+	// Polls from PUQueue
 	// sends messages to DeleteImagesQueue
 	stacks.PersistUpdatePropertyLambda(
 		app,
@@ -125,7 +125,7 @@ func main() {
 				Env: env(),
 			},
 			Env:                        theEnv,
-			PIUQueue:                   piuqueue.Queue,
+			PUQueue:                    PUqueue.Queue,
 			DeleteProcessedImagesQueue: deleteProcessedImagesQueue.Queue,
 		},
 	)
@@ -153,7 +153,7 @@ func main() {
 			Env: theEnv,
 		})
 
-	adminStack := stacks.SSRAdmin(
+	adminSSRLambda := stacks.SSRAdmin(
 		app,
 		fmt.Sprintf("AdminSSR-%s", theEnv),
 		&stacks.SSRAdminStackProps{
@@ -161,7 +161,7 @@ func main() {
 				Env: env(),
 			},
 			Env:             theEnv,
-			PIUQueue:        piuqueue.Queue,
+			PUQueue:         PUqueue.Queue,
 			RawImagesBucket: rawImagesBucketStack.Bucket,
 		})
 
@@ -173,20 +173,43 @@ func main() {
 	)
 
 	ssrStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway getProperty and getProperties paths"))
-	adminStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway crud and login paths"))
+	adminSSRLambda.Stack.AddDependency(apiStack, jsii.String("needs the api gateway crud and login paths"))
 
-	cfStack := stacks.CloudFrontAndBuckets(app, fmt.Sprintf("CloudFrontAndBuckets-%s", theEnv), &stacks.BucketProps{
-		StackProps: awscdk.StackProps{
-			Env: env(),
+	homeDistribution := stacks.HomeDistribution(
+		app,
+		fmt.Sprintf("HomeDistribution-%s", theEnv),
+		&stacks.HomeProps{
+			StackProps: awscdk.StackProps{
+				Env: env(),
+			},
+			HomeLambdaUrl: ssrStack.LambdaUrl,
+			Env:           theEnv,
+		})
+
+	adminDistribution := stacks.AdminDistribution(
+		app,
+		fmt.Sprintf("AdminDistribution-%s", theEnv),
+		&stacks.AdminProps{
+			StackProps: awscdk.StackProps{
+				Env: env(),
+			},
+			AdminLambdaUrl: adminSSRLambda.LambdaUrl,
 		},
-		HomeLambdaUrl:        ssrStack.LambdaUrl,
-		AdminLambdaUrl:       adminStack.LambdaUrl,
-		Env:                  theEnv,
-		AssetsBucketStack:    *assetsBucket,
-		ProcessedImagesStack: *processedImagesBucket,
-	})
+	)
 
-	cfStack.AddDependency(assetsBucket.Stack, jsii.String("needs the bucket to be deployed first"))
+	stacks.SharedDistributionOrigins(
+		app,
+		fmt.Sprintf("SharedOriginsStack-%s", theEnv),
+		stacks.SharedDistribitionProps{
+			StackProps: awscdk.StackProps{
+				Env: env(),
+			},
+			HomeDistribution:     homeDistribution,
+			AdminDistribution:    adminDistribution,
+			AssetsBucketStack:    *assetsBucket,
+			ProcessedImagesStack: *processedImagesBucket,
+		},
+	)
 
 	app.Synth(nil)
 }

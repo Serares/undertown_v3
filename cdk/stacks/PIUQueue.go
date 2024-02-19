@@ -7,20 +7,19 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-type PIUQueueProps struct {
+type PUQueueProps struct {
 	awscdk.StackProps
 	Env string
 }
 
-type PIUQueueReturn struct {
+type PUQueueReturn struct {
 	Queue awssqs.Queue
 }
 
 // 🪪
-// P -> property
-// I -> Insert
+// P -> Persist
 // U -> Update
-func PIUQueue(scope constructs.Construct, id string, props PIUQueueProps) *PIUQueueReturn {
+func PUQueue(scope constructs.Construct, id string, props PUQueueProps) *PUQueueReturn {
 	stack := awscdk.NewStack(scope, &id, &props.StackProps)
 	dlq := awssqs.NewQueue(
 		stack,
@@ -38,7 +37,7 @@ func PIUQueue(scope constructs.Construct, id string, props PIUQueueProps) *PIUQu
 		},
 	)
 
-	return &PIUQueueReturn{
+	return &PUQueueReturn{
 		Queue: queue,
 	}
 }
