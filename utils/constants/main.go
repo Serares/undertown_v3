@@ -2,8 +2,9 @@ package constants
 
 const (
 	QUERY_PARAMETER_HUMANREADABLEID  = "ID"
-	FeaturedQueryKey                 = "featured"
 	QUERY_PARAMETER_TRANSACTION_TYPE = "transactionType"
+	QUERY_PARAMETER_SORT_ORDER       = "sort_order"
+	FeaturedQueryKey                 = "featured"
 	TransactionTypeFormInputKey      = "property_transaction"
 	DeleteImagesFormKey              = "deleted_images"
 	ImagesFormKey                    = "images"

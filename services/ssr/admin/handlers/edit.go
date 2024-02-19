@@ -171,7 +171,7 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 		types.BasicIncludes{
 			Header: components.Header("Edit"),
 			BannerSection: components.BannerSection(includesTypes.BannerSectionProps{
-				Title: "Edit",
+				Title: "ADMIN Edit",
 			},
 			),
 			Preload: components.Preload(),

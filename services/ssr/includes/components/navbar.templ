@@ -1,7 +1,6 @@
 package components
 
 import "github.com/Serares/undertown_v3/ssr/includes/types"
-import "strings"
 import "github.com/Serares/undertown_v3/utils/constants"
 
 templ Navbar(props types.NavbarProps) {
@@ -40,20 +39,20 @@ templ Navbar(props types.NavbarProps) {
 									<ul class="navbar-nav ml-5">
 										<li class="nav-item">
 											<a
-												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "list")) }
+												class={ "nav-link", templ.KV("active", props.Path == constants.LIST_PATH) }
 												href="/list"
 											>Proprietati</a>
 										</li>
 										<li class="nav-item">
 											<a
-												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, "submit")) }
+												class={ "nav-link" ,templ.KV("active", props.Path == constants.SUBMIT_PATH) }
 												href="/submit/"
 											>Adauga proprietate</a>
 										</li>
 										<li class="nav-item">
 											<a
 												class={ "nav-link" }
-												href="http://www.undertown.ro"
+												href="https://www.undertown.ro"
 											>Pagina principala</a>
 										</li>
 									</ul>
@@ -64,32 +63,32 @@ templ Navbar(props types.NavbarProps) {
 									<ul class="navbar-nav ml-5">
 										<li class="nav-item">
 											<a
-												class={ "nav-link", templ.KV("active", strings.Contains(props.Path, "home")) }
+												class={ "nav-link",templ.KV("active", props.Path == constants.HOMEPAGE_PATH) }
 												href="/"
 											>Acasa</a>
 										</li>
 										<li class="nav-item">
 											<a
-												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TRANSACTION_TYPE_UI_RENT)) }
-												href="/chirii/"
+												class={ "nav-link" ,templ.KV("active", props.Path == constants.RENT_PATH) }
+												href="/chirii"
 											>Chirii</a>
 										</li>
 										<li class="nav-item">
 											<a
-												class={ "nav-link" ,templ.KV("active", strings.Contains(props.Path, constants.TRANSACTION_TYPE_UI_SELL)) }
-												href="/vanzari/"
+												class={ "nav-link" ,templ.KV("active", props.Path == constants.SELL_PATH) }
+												href="/vanzari"
 											>Vanzari</a>
 										</li>
 										<li class="nav-item">
 											<a
-												class={ "nav-link" ,templ.KV("active", props.Path == "/about/") }
-												href="/about/"
+												class={ "nav-link" ,templ.KV("active", props.Path == constants.ABOUT_PATH) }
+												href="/about"
 											>Despre noi</a>
 										</li>
 										<li class="nav-item">
 											<a
-												class={ "nav-link" ,templ.KV("active", props.Path == "/contact/") }
-												href="/contact/"
+												class={ "nav-link" ,templ.KV("active", props.Path == constants.CONTACT_PATH) }
+												href="/contact"
 											>Contact</a>
 										</li>
 									</ul>

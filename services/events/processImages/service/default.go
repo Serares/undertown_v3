@@ -42,7 +42,13 @@ func (ss *ProcessImagesService) encodeToWebP(file io.Reader) (*bytes.Buffer, err
 		return nil, fmt.Errorf("error trying to decode the image")
 	}
 
-	err = webp.Encode(&buf, img, &webp.Options{Lossless: true})
+	err = webp.Encode(
+		&buf,
+		img,
+		&webp.Options{
+			Lossless: false,
+			Quality:  75,
+		})
 	if err != nil {
 		ss.Log.Error("error encoding the file",
 			"error", err,
