@@ -124,13 +124,13 @@ func CreateImagePathList(basePath string, imageNames []string) []string {
 // this is used for homepage single property
 func CreateSinglePropertyPath(transactionType, title, humanReadableId string) (string, error) {
 	underscoredTitle := ReplaceWhiteSpaceWithUnderscore(title)
-	translatedTransactionType, err := TranslatePropertyTransactionType(transactionType)
+	translatedTransactionType, err := TransactionTypeDBToUI(transactionType)
 	if err != nil {
 		return "", err
 	}
 	firstPart := fmt.Sprintf("/%s/%s", translatedTransactionType, underscoredTitle)
 
-	url, err := AddParamToUrl(firstPart, constants.HumanReadableIdQueryKey, humanReadableId)
+	url, err := AddParamToUrl(firstPart, constants.QUERY_PARAMETER_HUMANREADABLEID, humanReadableId)
 	if err != nil {
 		return "", err
 	}
@@ -142,7 +142,7 @@ func CreatePropertyPath(baseUrl, title, humanReadableId string) (string, error) 
 	underscoredTitle := ReplaceWhiteSpaceWithUnderscore(title)
 	firstPart := fmt.Sprintf("%s/%s", baseUrl, underscoredTitle)
 
-	url, err := AddParamToUrl(firstPart, constants.HumanReadableIdQueryKey, humanReadableId)
+	url, err := AddParamToUrl(firstPart, constants.QUERY_PARAMETER_HUMANREADABLEID, humanReadableId)
 	if err != nil {
 		return "", err
 	}
@@ -161,16 +161,28 @@ func ReplaceWhiteSpaceWithUnderscore(s string) string {
 
 // Return a translated transaction type
 // See ssr/admin/types/PropertyTransactions
-func TranslatePropertyTransactionType(transactionType string) (string, error) {
-	if transactionType == "" {
+func TransactionTypeDBToUI(dbTransactionType string) (string, error) {
+	if dbTransactionType == "" {
 		return "", fmt.Errorf("transaction type not provided")
 	}
 
-	if strings.EqualFold(transactionType, "SELL") {
-		return constants.TranslatedTransactionSell, nil
+	if strings.EqualFold(dbTransactionType, "SELL") {
+		return constants.TRANSACTION_TYPE_UI_SELL, nil
 	}
 
-	return constants.TranslatedTransactionRent, nil
+	return constants.TRANSACTION_TYPE_UI_RENT, nil
+}
+
+func TransactionTypeUIToDB(uiTransactionType string) (string, error) {
+	if uiTransactionType == "" {
+		return "", fmt.Errorf("transaction type not provided")
+	}
+
+	if strings.EqualFold(uiTransactionType, constants.TRANSACTION_TYPE_UI_SELL) {
+		return Sell.String(), nil
+	}
+
+	return Rent.String(), nil
 }
 
 func GenerateStringTimestamp() string {

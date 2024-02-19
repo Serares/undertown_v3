@@ -39,8 +39,8 @@ func main() {
 	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService, singlePropertyService)
 	defaultHandler := handlers.NewDefaultHandler(log, homeService)
 
-	rentPath := fmt.Sprintf("/%s/", constants.TranslatedTransactionRent)
-	sellPath := fmt.Sprintf("/%s/", constants.TranslatedTransactionSell)
+	rentPath := fmt.Sprintf("/%s/", constants.TRANSACTION_TYPE_UI_RENT)
+	sellPath := fmt.Sprintf("/%s/", constants.TRANSACTION_TYPE_UI_SELL)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))

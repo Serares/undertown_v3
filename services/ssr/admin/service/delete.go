@@ -25,14 +25,14 @@ func (ds *DeleteService) Delete(humanReadableId, id, authToken string) error {
 	var err error
 	var url string
 	if humanReadableId != "" {
-		url, err = utils.AddParamToUrl(deleteUrl, constants.HumanReadableIdQueryKey, humanReadableId)
+		url, err = utils.AddParamToUrl(deleteUrl, constants.QUERY_PARAMETER_HUMANREADABLEID, humanReadableId)
 		if err != nil {
 			return err
 		}
 	}
 
 	if id != "" {
-		url, err = utils.AddParamToUrl(deleteUrl, constants.HumanReadableIdQueryKey, id)
+		url, err = utils.AddParamToUrl(deleteUrl, constants.QUERY_PARAMETER_HUMANREADABLEID, id)
 		if err != nil {
 			return err
 		}

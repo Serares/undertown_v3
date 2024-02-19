@@ -35,7 +35,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := middleware.ID(r)
 	q := r.URL.Query()
 
-	if _, ok := q[constants.HumanReadableIdQueryKey]; ok {
+	if _, ok := q[constants.QUERY_PARAMETER_HUMANREADABLEID]; ok {
 		var urlErrors = make([]error, 2)
 		var deleteUrl string
 		var editUrl string
@@ -43,7 +43,7 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// on reusing the token and the query params
 		// this is too much spaggeti conditions
 		propertyTitle := strings.Split(r.URL.Path, "/")[2]
-		theId := q[constants.HumanReadableIdQueryKey][0]
+		theId := q[constants.QUERY_PARAMETER_HUMANREADABLEID][0]
 		deleteUrl, urlErrors[0] = utils.CreatePropertyPath(types.DeletePath, propertyTitle, theId)
 		editUrl, urlErrors[1] = utils.CreatePropertyPath(types.EditPath, propertyTitle, theId)
 		err := errors.Join(urlErrors...)
@@ -134,8 +134,8 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// fullUrl := r.URL.Path
 			// fullUrl, err = utils.AddParamToUrl(
 			// 	fullUrl,
-			// 	constants.HumanReadableIdQueryKey,
-			// 	q[constants.HumanReadableIdQueryKey][0],
+			// 	constants.QUERY_PARAMETER_HUMANREADABLEID,
+			// 	q[constants.QUERY_PARAMETER_HUMANREADABLEID][0],
 			// )
 			// if err != nil {
 			// 	h.Log.Error("error trying to create the redirect url", "error", err)
