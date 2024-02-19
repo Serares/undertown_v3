@@ -19,6 +19,8 @@ func main() {
 
 	m := http.NewServeMux()
 	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService, singlePropertyService)
+	aboutHandler := handlers.NewAboutHandler(log)
+	contactHandler := handlers.NewContactHandler(log)
 	defaultHandler := handlers.NewDefaultHandler(log, homeService)
 
 	// This is not advised to use in prod
@@ -29,6 +31,8 @@ func main() {
 	m.Handle("/chirii", propertiesHandler)
 	m.Handle("/vanzari/", propertiesHandler)
 	m.Handle("/vanzari", propertiesHandler)
+	m.Handle("/about", aboutHandler)
+	m.Handle("/contact", contactHandler)
 	m.Handle("/", defaultHandler)
 
 	algnhsa.ListenAndServe(m, nil)
