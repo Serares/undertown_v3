@@ -17,7 +17,7 @@ import (
 
 func setupAPI(t *testing.T) (string, func()) {
 	t.Helper()
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
 		t.Error("error loading the .env file")
 	}
@@ -30,12 +30,16 @@ func setupAPI(t *testing.T) (string, func()) {
 
 	m := http.NewServeMux()
 	propertiesHandler := handlers.NewPropertiesHandler(log, *propertiesService, singlePropertyService)
+	aboutHandler := handlers.NewAboutHandler(log)
+	contactHandler := handlers.NewContactHandler(log)
 	defaultHandler := handlers.NewDefaultHandler(log, homeService)
 
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
 	m.Handle("/chirii/", propertiesHandler)
 	m.Handle("/vanzari/", propertiesHandler)
+	m.Handle("/about", aboutHandler)
+	m.Handle("/contact", contactHandler)
 	m.Handle("/", defaultHandler)
 
 	ts := httptest.NewServer(m)
