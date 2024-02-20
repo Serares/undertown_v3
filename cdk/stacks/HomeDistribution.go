@@ -79,14 +79,14 @@ func HomeDistribution(scope constructs.Construct, id string, props *HomeProps) a
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
-		OriginRequestPolicy: awscloudfront.OriginRequestPolicy_ALL_VIEWER(),
+		OriginRequestPolicy: homepageOriginRequestPolicy,
 	})
 
 	homeDistribution.AddBehavior(jsii.String("/contact"), homeOrigin, &awscloudfront.AddBehaviorOptions{
 		AllowedMethods:      awscloudfront.AllowedMethods_ALLOW_ALL(),
 		CachedMethods:       awscloudfront.CachedMethods_CACHE_GET_HEAD_OPTIONS(),
 		CachePolicy:         awscloudfront.CachePolicy_CACHING_OPTIMIZED(),
-		OriginRequestPolicy: awscloudfront.OriginRequestPolicy_ALL_VIEWER(),
+		OriginRequestPolicy: homepageOriginRequestPolicy,
 	})
 
 	// // Export the domain.
