@@ -67,6 +67,7 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 			"JWT_SECRET":         &JwtSecret,
 			"REGISTRATOR_SECRET": &registratorSecret,
 		},
+		Timeout: awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 	// API Authorizer lambda
 	apiAuthorizerLambda := awslambdago.NewGoFunction(stack, jsii.Sprintf("APIAuthorizer-%s", props.Env), &awslambdago.GoFunctionProps{
@@ -78,6 +79,7 @@ func API(scope constructs.Construct, id string, props *APIStackProps) awscdk.Sta
 		Environment: &map[string]*string{
 			"JWT_SECRET": &JwtSecret,
 		},
+		Timeout: awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 	// Define the SPA Authorizer
 	// this authorizer only checks the validity of a jwt

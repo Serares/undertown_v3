@@ -43,6 +43,7 @@ func SSRHomepage(scope constructs.Construct, id string, props *SSRHomepageProps)
 		Entry:        jsii.String("../services/ssr/homepage/lambda"),
 		Bundling:     BundlingOptions,
 		Environment:  &homeSsrEnvVars,
+		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 	// Add a Function URL.
 	lambdaURL := homeLambda.AddFunctionUrl(&awslambda.FunctionUrlOptions{
