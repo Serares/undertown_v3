@@ -71,6 +71,7 @@ func SSRAdmin(scope constructs.Construct, id string, props *SSRAdminStackProps) 
 		Bundling:     BundlingOptions,
 		Environment:  &envVars,
 		Role:         s3BucketAccessRole,
+		Timeout:      awscdk.Duration_Seconds(jsii.Number(30)),
 	})
 	// Add a Function URL.
 	lambdaURL := adminSSRLambda.AddFunctionUrl(&awslambda.FunctionUrlOptions{
