@@ -28,6 +28,22 @@ func RawImagesBucket(scope constructs.Construct, id string) *AssetsBucketStack {
 	// resourcePolicy.AddResources(rawImagesBucket.BucketArn())
 	// resourcePolicy.AddResources(jsii.String(fmt.Sprintf("%v/*", *rawImagesBucket.BucketArn())))
 	// rawImagesBucket.AddToResourcePolicy(resourcePolicy)
+	rawImagesBucket.AddCorsRule(
+		&awss3.CorsRule{
+			AllowedMethods: &[]awss3.HttpMethods{
+				awss3.HttpMethods_PUT,
+			},
+			AllowedOrigins: jsii.Strings(
+				*jsii.String("https://undertown.ro"),
+				*jsii.String("https://cloudfront.net"), // should get rid of all of these after testing is done
+				*jsii.String("http://localhost:4031"),
+				*jsii.String("http://127.0.0.1:4031"),
+			),
+			AllowedHeaders: &[]*string{
+				jsii.String("*"),
+			},
+		},
+	)
 	return &AssetsBucketStack{
 		Stack:  stack,
 		Bucket: rawImagesBucket,

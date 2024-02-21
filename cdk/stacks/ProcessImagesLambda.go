@@ -7,7 +7,9 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslambdaeventsources"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
 	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -17,6 +19,8 @@ type ProcessImagesLambdaProps struct {
 	awscdk.StackProps
 	Env                   string
 	ProcessedImagesBucket awss3.Bucket
+	RawImagesBucket       awss3.Bucket
+	PRIQueue              awssqs.Queue
 }
 
 type ProcessImagesLambdaReturn struct {
@@ -27,13 +31,19 @@ type ProcessImagesLambdaReturn struct {
 func ProcessImagesLambda(scope constructs.Construct, id string, props *ProcessImagesLambdaProps) ProcessImagesLambdaReturn {
 	stack := awscdk.NewStack(scope, &id, &props.StackProps)
 	var processedImagesBucketName string
+	var rawImagesBucket string
 
 	if props.ProcessedImagesBucket != nil {
 		processedImagesBucketName = *props.ProcessedImagesBucket.BucketName()
 	}
 
+	if props.RawImagesBucket != nil {
+		rawImagesBucket = *props.RawImagesBucket.BucketName()
+	}
+
 	processImagesEnv := map[string]*string{
 		env.PROCESSED_IMAGES_BUCKET: jsii.String(processedImagesBucketName),
+		env.RAW_IMAGES_BUCKET:       jsii.String(rawImagesBucket),
 	}
 	s3BucketAccessRole := utils.CreateLambdaBasicRole(stack, "s3fullaccesslambdarole", props.Env)
 	s3BucketAccessRole.AddManagedPolicy(
@@ -56,7 +66,7 @@ func ProcessImagesLambda(scope constructs.Construct, id string, props *ProcessIm
 			},
 			Environment: &processImagesEnv,
 			Role:        s3BucketAccessRole,
-			Timeout:     awscdk.Duration_Seconds(jsii.Number(3 * 60)),
+			Timeout:     awscdk.Duration_Seconds(jsii.Number(30)),
 		},
 	)
 
@@ -84,6 +94,13 @@ func ProcessImagesLambda(scope constructs.Construct, id string, props *ProcessIm
 	// 	awss3notifications.NewLambdaDestination(processImages),
 	// 	&awss3.NotificationKeyFilter{},
 	// )
+
+	processImages.AddEventSource(
+		awslambdaeventsources.NewSqsEventSource(
+			props.PRIQueue,
+			&awslambdaeventsources.SqsEventSourceProps{},
+		),
+	)
 
 	return ProcessImagesLambdaReturn{
 		Lambda: processImages,

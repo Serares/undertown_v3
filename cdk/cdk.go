@@ -6,8 +6,6 @@ import (
 	"os"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
-	"github.com/aws/aws-cdk-go/awscdk/v2/awss3notifications"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/joho/godotenv"
 )
@@ -33,6 +31,18 @@ func main() {
 			Env: theEnv,
 		},
 	)
+
+	PRIQueue := stacks.PRIQueue(
+		app,
+		fmt.Sprintf("PRIQueue-%s", theEnv),
+		stacks.PRIQueueProps{
+			StackProps: awscdk.StackProps{
+				Env: env(),
+			},
+			Env: theEnv,
+		},
+	)
+
 	// ❗
 	// grant send message permissions to persistUpdateProperty and deleteProperty lambdas
 	// grant consume permission to deleteProcessedImagesLambda
@@ -86,9 +96,9 @@ func main() {
 		},
 	)
 
-	// This is only triggered by S3 events
+	// processImagesLambda will poll the PRIQueue
 	// needs access to ImagesBucket
-	processImagesLambda := stacks.ProcessImagesLambda(
+	stacks.ProcessImagesLambda(
 		app,
 		fmt.Sprintf("ProcessImages-%s", theEnv),
 		&stacks.ProcessImagesLambdaProps{
@@ -97,6 +107,8 @@ func main() {
 			},
 			Env:                   theEnv,
 			ProcessedImagesBucket: processedImagesBucket.Bucket,
+			RawImagesBucket:       rawImagesBucketStack.Bucket,
+			PRIQueue:              PRIQueue.Queue,
 		},
 	)
 
@@ -117,6 +129,7 @@ func main() {
 
 	// Polls from PUQueue
 	// sends messages to DeleteImagesQueue
+	// sends messages to PRIQueue
 	stacks.PersistUpdatePropertyLambda(
 		app,
 		fmt.Sprintf("PersistUpdateLambda-%s", theEnv),
@@ -126,6 +139,7 @@ func main() {
 			},
 			Env:                        theEnv,
 			PUQueue:                    PUqueue.Queue,
+			PRIQueue:                   PRIQueue.Queue,
 			DeleteProcessedImagesQueue: deleteProcessedImagesQueue.Queue,
 		},
 	)
@@ -167,10 +181,11 @@ func main() {
 
 	// ❗
 	// Attach the S3 event to the process images lambda
-	rawImagesBucketStack.Bucket.AddEventNotification(
-		awss3.EventType_OBJECT_CREATED_PUT,
-		awss3notifications.NewLambdaDestination(processImagesLambda.Lambda),
-	)
+	// Deprecated
+	// rawImagesBucketStack.Bucket.AddEventNotification(
+	// 	awss3.EventType_OBJECT_CREATED_PUT,
+	// 	awss3notifications.NewLambdaDestination(processImagesLambda.Lambda),
+	// )
 
 	ssrStack.Stack.AddDependency(apiStack, jsii.String("needs the api gateway getProperty and getProperties paths"))
 	adminSSRLambda.Stack.AddDependency(apiStack, jsii.String("needs the api gateway crud and login paths"))
