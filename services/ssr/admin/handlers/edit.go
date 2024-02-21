@@ -163,10 +163,11 @@ func (h *EditHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// TODO maybe I can reuse the submit.templ template
-// but for now just create a new template
 // The reason for the deleteUrl parm is because the types.EditProps is reused with the submit path and submit doesn't really need the delete url
-func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, deleteUrl string) {
+func viewEdit(w http.ResponseWriter, r *http.Request,
+	props types.EditProps,
+	deleteUrl string,
+) {
 	views.Edit(
 		types.BasicIncludes{
 			Header: components.Header("Edit"),
@@ -186,9 +187,14 @@ func viewEdit(w http.ResponseWriter, r *http.Request, props types.EditProps, del
 			HandleDeleteButton: includes.HandleDeleteButton(types.DeleteScriptProps{
 				DeleteUrl: deleteUrl,
 			}),
-			EditDropzoneScript: includes.DropzoneEdit(props.ImagePaths, props.FormAction, constants.DeleteImagesFormKey),
-			Modal:              components.Modal(""),
-			LeafletMap:         includes.LeafletMap(props.PropertyFeatures.Lat, props.PropertyFeatures.Lng),
+			EditDropzoneScript: includes.DropzoneEdit(
+				props.ImagePaths,
+				props.FormAction,
+				constants.DeleteImagesFormKey,
+				constants.FORM_KEY_IMAGES,
+			),
+			Modal:      components.Modal(""),
+			LeafletMap: includes.LeafletMap(props.PropertyFeatures.Lat, props.PropertyFeatures.Lng),
 		},
 		props,
 	).Render(r.Context(), w)

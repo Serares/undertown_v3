@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"strconv"
 
 	adminUtils "github.com/Serares/ssr/admin/utils"
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
@@ -70,22 +69,9 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
 
-	propertyTransactionFormValue := r.PostForm.Get(constants.TransactionTypeFormInputKey)
-	propertyTransactionToInt, err := strconv.Atoi(propertyTransactionFormValue)
-	if err != nil {
-		return lite.Property{}, utils.PropertyFeatures{}, err
-	}
-
-	transactionType := utils.TransactionType(propertyTransactionToInt)
-
-	humanReadableId := utils.HumanReadableId(
-		transactionType,
-	)
-	jsonString, err := adminUtils.ParseMultipartFieldsToJson(
-		r,
-		humanReadableId,
-		s.S3Client,
-	)
+	// ⚠️😒
+	// This pattern is a massive 💩 should move to json
+	jsonString, err := adminUtils.ParseMultipartFieldsToJson(r)
 	if err != nil {
 		s.Log.Error("error trying to parse the multipart/form",
 			"error", err,
@@ -94,10 +80,6 @@ func (s *SubmitService) Submit(r *http.Request, authToken string) (lite.Property
 	}
 
 	messageAttributes := map[string]sqsTypes.MessageAttributeValue{
-		constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE: {
-			DataType:    aws.String("String"),
-			StringValue: aws.String(humanReadableId),
-		},
 		constants.USER_ID: {
 			DataType:    aws.String("String"),
 			StringValue: aws.String(claims.UserId),

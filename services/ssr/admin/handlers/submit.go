@@ -42,36 +42,39 @@ func (h *AdminSubmit) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			h.Log.Error("failed to submit", err)
-			viewSubmit(w, r, types.SubmitProps{
-				Property:            property,
-				PropertyFeatures:    features,
-				PropertyTypes:       types.PropertyTypes,
-				PropertyTransaction: types.PropertyTransactions,
-				SuccessMessage:      "",
-				ErrorMessage:        "Failed to submit the property, try again",
-			},
+			viewSubmit(w, r,
+				types.SubmitProps{
+					Property:            property,
+					PropertyFeatures:    features,
+					PropertyTypes:       types.PropertyTypes,
+					PropertyTransaction: types.PropertyTransactions,
+					SuccessMessage:      "",
+					ErrorMessage:        "Failed to submit the property, try again",
+				},
 			)
 			return
 		}
 
-		viewSubmit(w, r, types.SubmitProps{
-			SuccessMessage:      "Success posting the property",
-			ErrorMessage:        "",
-			PropertyTypes:       types.PropertyTypes,
-			PropertyTransaction: types.PropertyTransactions,
-			PropertyFeatures:    utils.PropertyFeatures{},
-			Property:            lite.Property{},
-		},
+		viewSubmit(w, r,
+			types.SubmitProps{
+				SuccessMessage:      "Success posting the property",
+				ErrorMessage:        "",
+				PropertyTypes:       types.PropertyTypes,
+				PropertyTransaction: types.PropertyTransactions,
+				PropertyFeatures:    utils.PropertyFeatures{},
+				Property:            lite.Property{},
+			},
 		)
 		return
 	}
 	if r.Method == http.MethodGet {
-		viewSubmit(w, r, types.SubmitProps{
-			SuccessMessage:      "",
-			ErrorMessage:        "",
-			PropertyTypes:       types.PropertyTypes,
-			PropertyTransaction: types.PropertyTransactions,
-		},
+		viewSubmit(w, r,
+			types.SubmitProps{
+				SuccessMessage:      "",
+				ErrorMessage:        "",
+				PropertyTypes:       types.PropertyTypes,
+				PropertyTransaction: types.PropertyTransactions,
+			},
 		)
 		return
 	}
@@ -98,9 +101,11 @@ func viewSubmit(w http.ResponseWriter, r *http.Request, props types.SubmitProps)
 		Scripts: components.Scripts(),
 	},
 		types.SubmitIncludes{
-			SubmitDropzoneScript: includes.DropzoneSubmit(),
-			Modal:                components.Modal(""),
-			LeafletMap:           includes.LeafletMap(types.DefaultMapLocation.Lat, types.DefaultMapLocation.Lng),
+			SubmitDropzoneScript: includes.DropzoneSubmit(
+				constants.FORM_KEY_IMAGES,
+			),
+			Modal:      components.Modal(""),
+			LeafletMap: includes.LeafletMap(types.DefaultMapLocation.Lat, types.DefaultMapLocation.Lng),
 		},
 		props,
 	).Render(r.Context(), w)

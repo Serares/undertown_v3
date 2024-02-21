@@ -14,7 +14,6 @@ import (
 	"github.com/Serares/undertown_v3/utils/constants"
 	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
@@ -86,23 +85,10 @@ func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lit
 	if err != nil {
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
-	jsonString, err := adminUtils.ParseMultipartFieldsToJson(
-		r,
-		humanReadableId,
-		es.S3Client,
-	)
+	jsonString, err := adminUtils.ParseMultipartFieldsToJson(r)
 	if err != nil {
 		return lite.Property{}, utils.PropertyFeatures{}, err
 	}
-	cfg, err := config.LoadDefaultConfig(r.Context())
-	if err != nil {
-		es.Log.Error(
-			"error trying to load the lambda context",
-			"error", err,
-		)
-		return lite.Property{}, utils.PropertyFeatures{}, err
-	}
-	sqsClient := sqs.NewFromConfig(cfg)
 
 	messageAttributes := map[string]sqsTypes.MessageAttributeValue{
 		constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE: {
@@ -111,7 +97,7 @@ func (es *EditService) Post(r *http.Request, token, humanReadableId string) (lit
 		},
 	}
 
-	_, err = sqsClient.SendMessage(
+	_, err = es.SQSClient.SendMessage(
 		r.Context(),
 		&sqs.SendMessageInput{
 			QueueUrl:          &PUQueuUrl,
