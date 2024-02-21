@@ -16,6 +16,7 @@ import (
 
 var sqsClient *sqs.Client
 var log *slog.Logger
+var repo *repository.Properties
 
 // 🚀
 // the init function is supposed to be automatically called before the main() function
@@ -29,40 +30,38 @@ func init() {
 		)
 	}
 	sqsClient = sqs.NewFromConfig(cfg)
+	repo, err = repository.NewPropertiesRepo()
+	if err != nil {
+		log.Error(
+			"error trying to initialize the repository",
+			"error", err,
+		)
+	}
 }
 
-// listening for PU_QUEUE
-// sending SQS_
+// ⚠️
+// TODO
+// move to separating the update and the persist to separate lambdas
 func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
-	// TODO initialize the repository outside of the handler for better performance
-	// does it makes sense for the sqs client can be initialized outside also?
-	dbRepo, err := repository.NewPropertiesRepo()
-	ss := service.NewPUService(log, dbRepo, sqsClient)
-
-	if err != nil {
-		log.Error("error trying to connect to db %v", err)
-		return err
-	}
+	ss := service.NewPUService(log, repo, sqsClient)
 
 	for _, message := range sqsEvent.Records {
-		// of the user id is part of sqs metadata
-		// it meas it's a persist message
-		// else it's an update message
+		// ⚠️ TODO
+		// don't use message attributes to infer the message type
+		// define a sqs message type for update and persist
+		// check the type not the attributes
 		if userId, ok := message.MessageAttributes[constants.USER_ID]; ok {
-			if humanReadableId, ok := message.MessageAttributes[constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE]; ok {
-				err := ss.Persist(
-					ctx,
-					message.Body,
-					*userId.StringValue,
-					*humanReadableId.StringValue,
+			err := ss.Persist(
+				ctx,
+				message.Body,
+				*userId.StringValue,
+			)
+			if err != nil {
+				log.Error(
+					"error trying to persist the property from the sqs message",
+					"error", err,
 				)
-				if err != nil {
-					log.Error(
-						"error trying to persist the property from the sqs message",
-						"error", err,
-					)
-					return err
-				}
+				return err
 			}
 		} else if humanReadableId, ok := message.MessageAttributes[constants.HUMAN_READABLE_ID_SQS_ATTRIBUTE]; ok {
 			err := ss.Update(
@@ -79,10 +78,6 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 				return err
 			}
 		}
-		// get the message attributes
-		// the userId
-		// the humanReadableId ❗has to be created on admin ssr because the images sent will contain the hrID
-
 	}
 
 	return nil

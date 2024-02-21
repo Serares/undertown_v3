@@ -3,12 +3,14 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
 	"log/slog"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Serares/undertown_v3/repositories/repository"
@@ -43,10 +45,10 @@ func NewPUService(
 	}
 }
 
-// 💩 TODO the logic to delete images is flawed
-// Review the logic
 func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId string) error {
 	sqsDeleteImagesQueue := os.Getenv(env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL)
+	sqsProcessRawImages := os.Getenv(env.SQS_PROCESS_RAW_IMAGES_QUEUE_URL)
+
 	var requestProperty utils.RequestProperty
 
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty); err != nil {
@@ -70,15 +72,24 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 		return fmt.Errorf("error trying to get the existing property to update")
 	}
 
-	var finalImages []string = make([]string, 0)
+	var finalImages = make([]string, 0)
+	var hydratedImages = make([]string, 0) //
+
 	finalImages = append(finalImages, strings.Split(liteProperty.Images, ";")...)
 	// if there are no new images added the ImageNames should be 0
 	if len(requestProperty.ImageNames) > 0 {
-		finalImages = append(finalImages, utils.AppendMultipleFileExtension(requestProperty.ImageNames, "webp")...)
+		hydratedImages =
+			utils.PrependImagesWithHrId(
+				utils.ReplaceFileExtensionForList(
+					requestProperty.ImageNames, "webp"), humanReadableId)
+
+		finalImages = append(finalImages, hydratedImages...)
 	}
+
+	var prefixedDeletedImages = utils.PrependImagesWithHrId(requestProperty.DeletedImages, humanReadableId)
 	var filteredImages = make([]string, 0)
 	removeMap := make(map[string]bool, 0)
-	for _, img := range requestProperty.DeletedImages {
+	for _, img := range prefixedDeletedImages {
 		removeMap[img] = true
 	}
 
@@ -88,42 +99,82 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 		}
 	}
 
-	if requestProperty.DeletedImages != nil && len(requestProperty.DeletedImages) > 0 {
+	var wgSqs sync.WaitGroup
+	sqsErrors := make([]error, 2)
+	wgSqs.Add(2)
+	go func() {
+		defer wgSqs.Done()
+		if len(prefixedDeletedImages) > 0 {
+			sqsDeleteImagesObject := utils.SQSDeleteImages{
+				Images: prefixedDeletedImages,
+			}
 
-		sqsDeleteImagesObject := utils.SQSDeleteImages{
-			Images: requestProperty.DeletedImages,
-		}
-
-		jsonDeletedImagesList, err := json.Marshal(sqsDeleteImagesObject)
-		ss.Log.Info("images to delete dispatched to sqs queue",
-			"list", requestProperty.DeletedImages,
-			"jsoned", string(jsonDeletedImagesList),
-		)
-
-		if err != nil {
-			ss.Log.Error(
-				"error trying to marshal the sqs delete images",
-				"error", err,
+			jsonDeletedImagesList, err := json.Marshal(sqsDeleteImagesObject)
+			ss.Log.Info("images to delete dispatched to sqs queue",
+				"list", prefixedDeletedImages,
+				"jsoned", string(jsonDeletedImagesList),
 			)
-			return err
-		}
-		_, err = ss.SQSClient.SendMessage(
-			ctx,
-			&sqs.SendMessageInput{
-				QueueUrl:    &sqsDeleteImagesQueue,
-				MessageBody: aws.String(string(jsonDeletedImagesList)),
-			},
-		)
 
-		if err != nil {
-			ss.Log.Error(
-				"error trying to dispatch the sqs delete images message",
-				"error", err,
+			if err != nil {
+				ss.Log.Error(
+					"error trying to marshal the sqs delete images",
+					"error", err,
+				)
+				sqsErrors[0] = err
+				return
+			}
+			_, err = ss.SQSClient.SendMessage(
+				ctx,
+				&sqs.SendMessageInput{
+					QueueUrl:    &sqsDeleteImagesQueue,
+					MessageBody: aws.String(string(jsonDeletedImagesList)),
+				},
 			)
-			return err
+
+			if err != nil {
+				ss.Log.Error(
+					"error trying to dispatch the sqs delete images message",
+					"error", err,
+				)
+				sqsErrors[0] = err
+				return
+			}
 		}
+	}()
+	go func() {
+		defer wgSqs.Done()
+		if len(requestProperty.ImageNames) > 0 {
+			sqsRawImages := utils.SQSProcessRawImages{
+				Images:          requestProperty.ImageNames,
+				HumanReadableId: humanReadableId,
+			}
+
+			jsonRawImages, err := json.Marshal(sqsRawImages)
+			if err != nil {
+				sqsErrors[1] = err
+				return
+			}
+			// send the raw images to be processed
+			_, err = ss.SQSClient.SendMessage(
+				ctx,
+				&sqs.SendMessageInput{
+					QueueUrl:    &sqsProcessRawImages,
+					MessageBody: aws.String(string(jsonRawImages)),
+				},
+			)
+			if err != nil {
+				sqsErrors[1] = err
+				return
+			}
+		}
+	}()
+	wgSqs.Wait()
+
+	// ⚠️TODO find a better way of handling this async errors
+	err = errors.Join(sqsErrors...)
+	if err != nil {
+		return err
 	}
-
 	// TODO handle the case where no new images are uploaded
 	// OR when new images are uploaded and the old ones are not deleted
 	if err := ss.PropertyRepository.UpdateProperty(ctx, lite.UpdatePropertyFieldsParams{
@@ -146,10 +197,10 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 	return nil
 }
 
-func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId, humanReadableId string) error {
+func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId string) error {
 	var propertyId = uuid.New().String()
 	var requestProperty utils.RequestProperty
-	thumbnail := ""
+	sqsProcessRawImagesUrl := os.Getenv(env.SQS_PROCESS_RAW_IMAGES_QUEUE_URL)
 
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty); err != nil {
 		ss.Log.Error("error decoding the json property", "err", err)
@@ -160,31 +211,52 @@ func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId, humanR
 		return fmt.Errorf("error on json unmarshal")
 	}
 
-	// ❗TODO
-	// is it needed to marshal the features again?
 	features, err := json.Marshal(requestProperty.Features)
 	if err != nil {
 		return err
 	}
 
-	if len(requestProperty.ImageNames) > 0 {
-		thumbnail = utils.AppendFileExtension(requestProperty.ImageNames[0], "webp")
+	humanReadableId := utils.HumanReadableId(requestProperty.PropertyType)
+
+	// prefix with the hrID because that's how the processed images are stored in S3
+	images := utils.PrependImagesWithHrId(requestProperty.ImageNames, humanReadableId)
+	s3ImagesPathsProcessed := utils.HydrateImagesNames(utils.ReplaceFileExtensionForList(images, "webp"))
+
+	// dispatch sqs process image sqs message
+	rawImagesSqsMessage := utils.SQSProcessRawImages{
+		Images:          requestProperty.ImageNames,
+		HumanReadableId: humanReadableId,
 	}
 
+	jsonRawImagesSqsMessage, err := json.Marshal(rawImagesSqsMessage)
+	if err != nil {
+		return err
+	}
+
+	_, err = ss.SQSClient.SendMessage(
+		ctx,
+		&sqs.SendMessageInput{
+			QueueUrl:    &sqsProcessRawImagesUrl,
+			MessageBody: aws.String(string(jsonRawImagesSqsMessage)),
+		},
+	)
+	if err != nil {
+		return err
+	}
 	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
 		ID:              propertyId,
 		UserID:          userId,
 		Humanreadableid: humanReadableId,
 		Title:           requestProperty.Title,
 		Images: strings.Join(
-			utils.AppendMultipleFileExtension(requestProperty.ImageNames, "webp"),
+			s3ImagesPathsProcessed,
 			";",
 		),
 		// TODO
 		// Until I can find a way to figure out when all the images for a property have successfully processd
 		// I'll just use the IsProcessing true flag
 		IsProcessing:        0, // It's always going to be 0 until S3 images are processed
-		Thumbnail:           thumbnail,
+		Thumbnail:           s3ImagesPathsProcessed[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: requestProperty.PropertyTransaction,
 		PropertyDescription: requestProperty.PropertyDescription,
