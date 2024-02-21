@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -211,14 +212,40 @@ func ParseJwtWithClaims(token string, secret string) (JWTClaims, error) {
 	return claims, nil
 }
 
-func AppendFileExtension(fileName, extension string) string {
+// ⚠️ it's going to remove the current extension
+func ReplaceFileExtension(fileName, extension string) string {
+	// remove extention if it exists
+	currentExtension := filepath.Ext(fileName)
+	if currentExtension != "" {
+		fileNameWithoutOldExtension := strings.TrimSuffix(fileName, currentExtension)
+		return fileNameWithoutOldExtension + "." + extension
+	}
 	return fileName + "." + extension
 }
 
-func AppendMultipleFileExtension(fileNames []string, extension string) []string {
+func ReplaceFileExtensionForList(fileNames []string, extension string) []string {
 	var fileNamesWithExtension = make([]string, 0)
 	for _, fileName := range fileNames {
-		fileNamesWithExtension = append(fileNamesWithExtension, AppendFileExtension(fileName, extension))
+		fileNamesWithExtension = append(fileNamesWithExtension, ReplaceFileExtension(fileName, extension))
 	}
 	return fileNamesWithExtension
+}
+
+func PrependImagesWithHrId(imagesName []string, hrId string) []string {
+	var imagesPrefixed = make([]string, 0)
+	for _, imageName := range imagesName {
+		imagesPrefixed = append(imagesPrefixed, hrId+"/"+imageName)
+	}
+	return imagesPrefixed
+}
+
+// This is going to just replace whitespace with an underscore
+func HydrateImagesNames(imagesNames []string) []string {
+
+	var hydratedImagesNames = make([]string, 0)
+
+	for _, imageName := range imagesNames {
+		hydratedImagesNames = append(hydratedImagesNames, ReplaceWhiteSpaceWithUnderscore(imageName))
+	}
+	return hydratedImagesNames
 }

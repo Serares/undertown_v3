@@ -7,14 +7,14 @@ import (
 func TestHumanReadableId(t *testing.T) {
 	cases := []struct {
 		name            string
-		transactionType TransactionType
+		transactionType string
 		expectedPrefix  string
 	}{
 		{name: "Sell Type",
-			transactionType: Sell,
+			transactionType: "SELL",
 			expectedPrefix:  "SE"},
 		{name: "Rent Type",
-			transactionType: Rent,
+			transactionType: "RENT",
 			expectedPrefix:  "RE"},
 	}
 	for _, tc := range cases {

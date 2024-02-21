@@ -45,7 +45,7 @@ type RequestProperty struct {
 	PropertyAddress     string           `json:"property_address"`
 	PropertyTransaction string           `json:"property_transaction"` // THIS HAS TO BE SELL || RENT or else the db insertion will fail see 002_properties.sql
 	PropertySurface     int64            `json:"property_surface"`
-	ImageNames          []string         `json:"images"`
+	ImageNames          []string         `json:"images"`         // this is going to be the raw images names from the RAWIMAGES_S3 bucket
 	DeletedImages       []string         `json:"deleted_images"` // deleted_images should be prefixed by the hrID handled by the adminSRR
 	Features            PropertyFeatures `json:"-"`
 	// Features            map[string]interface{} `json:"-"` // This was used before to unmarshal all the fields that come from SSR and are not specifically placed
@@ -89,4 +89,9 @@ type PropertyFeatures struct {
 
 type SQSDeleteImages struct {
 	Images []string `json:"images"`
+}
+
+type SQSProcessRawImages struct {
+	HumanReadableId string   `json:"humanReadableId"` // this is needed because the raw images are stored without the hrID and the processedImages are stored prefixed with the ID
+	Images          []string `json:"images"`
 }
