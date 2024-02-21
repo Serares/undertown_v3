@@ -1,10 +1,5 @@
 #! /bin/bash
 
-# Destroy the distributions first
-# Destoru the raw-images-bucket
-# Destory the processed-images-bucket
-# All the other stacks then
-
 # Define your stack names in order of deletion, starting with the most dependent
 STACKS=(
     "SharedOriginsStack-dev"
