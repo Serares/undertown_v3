@@ -50,7 +50,6 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 		var errChan = make(chan error, len(rawImagesMessage.Images))
 		var s3Errors = make([]error, 0)
 
-		// ❗TODO handle the errors from process images lol
 		for _, rawImageName := range rawImagesMessage.Images {
 			wg.Add(1)
 			go func(rawImageName string) {

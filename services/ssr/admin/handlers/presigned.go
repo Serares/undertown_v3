@@ -41,9 +41,6 @@ type PresignedResponse struct {
 
 func (psh *PresignedS3Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		// ⚠️😒
-		// TODO move this to a service
-		// but I'm too border to do this right now
 		bucketName := os.Getenv(env.RAW_IMAGES_BUCKET)
 		var presignReq PresignedRequest
 
