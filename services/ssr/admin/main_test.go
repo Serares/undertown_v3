@@ -25,7 +25,7 @@ import (
 
 func setupAPI(t *testing.T) (string, func()) {
 	t.Helper()
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load(".env.dev")
 	if err != nil {
 		t.Error("error loading the .env file")
 	}
@@ -54,6 +54,7 @@ func setupAPI(t *testing.T) (string, func()) {
 	sqsClient := sqs.NewFromConfig(cfg)
 	s3Client := s3.NewFromConfig(cfg)
 	loginService := service.NewLoginService(log, client)
+	s3PresignClient := s3.NewPresignClient(s3Client)
 	// TODO use the sqs client for debugging locally
 	submitService := service.NewSubmitService(
 		log,
@@ -77,6 +78,7 @@ func setupAPI(t *testing.T) (string, func()) {
 	listingsHandler := handlers.NewListingsHandler(log, listingService)
 	editHandler := handlers.NewEditHandler(log, editService)
 	deleteHandler := handlers.NewDeleteHandler(log, deleteService)
+	presignHandler := handlers.NewPresignedS3Handler(log, s3PresignClient)
 	// This is not advised to use in prod
 	m.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
 	m.Handle("/login/", loginHanlder)
@@ -85,10 +87,10 @@ func setupAPI(t *testing.T) (string, func()) {
 	m.Handle("/submit", middleware.NewMiddleware(submitHandler, middleware.WithSecure(false)))
 	m.Handle("/edit", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
 	m.Handle("/edit/", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
-	m.Handle("/list", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
-	m.Handle("/list/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
 	m.Handle("/delete", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
 	m.Handle("/delete/", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
+	m.Handle("/presign", middleware.NewMiddleware(presignHandler, middleware.WithSecure(false)))
+	m.Handle("/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
 
 	ts := httptest.NewServer(m)
 
