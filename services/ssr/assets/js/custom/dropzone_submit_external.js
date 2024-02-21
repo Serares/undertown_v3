@@ -19,24 +19,27 @@ function InitSubmitDropzone(imagesFormKey) {
             .querySelector(".dz-hidden-input")
             .setAttribute("name", "thumbnails");
           let formData = new FormData(myDropzone.element);
-          for (const file of myDropzone.files) {
-            let presingResp = await FetchPresign(file.name);
-            let respParse = await presingResp.json();
-            console.log(file);
-            let s3Resp = await fetch(respParse.presignedUrl, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "binary/octet-stream", // Or file.type for the actual MIME type
-              },
-              body: file,
+          const presignedUrlsPromises = myDropzone.files.map((file) =>
+            FetchPresign(file.name)
+          );
+          try {
+            const presignedUrls = await Promise.all(presignedUrlsPromises);
+            const uploadPromises = presignedUrls.map((urlData, index) => {
+              const { presignedUrl, keyName } = urlData; // Assuming the response includes the presigned URL
+              CreateHiddenInputWithInfo(
+                keyName,
+                imagesFormKey,
+                myDropzone.element
+              );
+              return uploadFileToS3(presignedUrl, myDropzone.files[index]);
             });
-
-            CreateHiddenInputWithInfo(
-              respParse.keyName,
-              imagesFormKey,
-              myDropzone.element
-            );
+            await Promise.all(uploadPromises);
+            console.log("All files uploaded successfully.");
+          } catch (err) {
+            myDropzone.emit("errormultiple", [], err);
+            return;
           }
+
           // initialize the formdata again with the images names
           formData = new FormData(myDropzone.element);
 
@@ -72,10 +75,16 @@ function InitSubmitDropzone(imagesFormKey) {
         }
         // return response.json();
         document.documentElement.innerHTML = response;
-        $("#myModal .modal-body").html("Success editing the property");
+        $("#myModal .modal-body").html("Success editing the property").css({
+          color: "green",
+          "font-weight": "900",
+        });
         $("#myModal").modal("show");
         if (response.ok !== undefined && !response.ok) {
-          $("#myModal .modal-body").html("Failed to add the property");
+          $("#myModal .modal-body").html("Failed to add the property").css({
+            color: "red",
+            "font-weight": "900",
+          });
           $("#myModal").modal("show");
         }
         // dispatch a event that the page has loaded success
@@ -85,10 +94,17 @@ function InitSubmitDropzone(imagesFormKey) {
         window.dispatchEvent(submitEvent);
       });
       this.on("errormultiple", function (files, response) {
-        if (response.ok != undefined && !response.ok) {
-          $("#myModal .modal-body").html("Failed editing the property");
-          $("#myModal").modal("show");
-        }
+        $("#myModal .modal-body")
+          .html(
+            "Failed adding the property, try again later or check the console for debugg clues"
+          )
+          .css({
+            color: "green",
+            "font-weight": "900",
+          });
+        $("#myModal").modal("show");
+        console.log(response);
+
         if (typeof response === "string") {
           document.documentElement.innerHTML = response;
         }
