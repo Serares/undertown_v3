@@ -35,7 +35,7 @@ func RawImagesBucket(scope constructs.Construct, id string) *AssetsBucketStack {
 			},
 			AllowedOrigins: jsii.Strings(
 				*jsii.String("https://undertown.ro"),
-				*jsii.String("https://cloudfront.net"), // should get rid of all of these after testing is done
+				*jsii.String("https://admin.undertown.ro"),
 				*jsii.String("http://localhost:4031"),
 				*jsii.String("http://127.0.0.1:4031"),
 			),
