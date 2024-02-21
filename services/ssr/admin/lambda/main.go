@@ -29,6 +29,7 @@ func main() {
 
 	sqsClient := sqs.NewFromConfig(cfg)
 	s3Client := s3.NewFromConfig(cfg)
+	s3PresignClient := s3.NewPresignClient(s3Client)
 
 	loginService := service.NewLoginService(log, client)
 	submitService := service.NewSubmitService(
@@ -53,6 +54,7 @@ func main() {
 	listingsHandler := handlers.NewListingsHandler(log, listingService)
 	editHandler := handlers.NewEditHandler(log, editService)
 	deleteHandler := handlers.NewDeleteHandler(log, deleteService)
+	presignHandler := handlers.NewPresignedS3Handler(log, s3PresignClient)
 
 	// This is not advised to use in prod
 	m.Handle("/login/", loginHanlder)
@@ -63,6 +65,7 @@ func main() {
 	m.Handle("/edit/", middleware.NewMiddleware(editHandler, middleware.WithSecure(false)))
 	m.Handle("/delete", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
 	m.Handle("/delete/", middleware.NewMiddleware(deleteHandler, middleware.WithSecure(false)))
+	m.Handle("/presign", middleware.NewMiddleware(presignHandler, middleware.WithSecure(false)))
 	m.Handle("/", middleware.NewMiddleware(listingsHandler, middleware.WithSecure(false)))
 	algnhsa.ListenAndServe(m, nil)
 }

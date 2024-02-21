@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/Serares/undertown_v3/repositories/repository/lite"
 	"github.com/Serares/undertown_v3/utils"
@@ -35,7 +34,7 @@ func UnmarshalProperty(jsonString []byte) (lite.Property, utils.PropertyFeatures
 		PropertyType:        property.PropertyType,
 		PropertyDescription: property.PropertyDescription,
 		PropertyAddress:     property.PropertyAddress,
-		PropertyTransaction: fmt.Sprintf("%d", property.PropertyTransaction),
+		PropertyTransaction: property.PropertyTransaction,
 		PropertySurface:     int64(property.PropertySurface),
 		Features:            "", // features can be empty because it's already been unmarshaled
 	}, features, nil
