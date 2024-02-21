@@ -60,15 +60,17 @@ func (ss *ProcessImagesService) encodeToWebP(file io.Reader) (*bytes.Buffer, err
 
 // Uploads the files to S3
 // s3RawImagekey is composed of the humanReadableId of the property /humanreadableId/ImageName
-func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImageKey, s3RawImagesBucketName string) error {
+func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImageKey string, humanReadableId string, errCh chan<- error) {
 	processedImagesBucketName := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
+	rawImagesBucket := os.Getenv(env.RAW_IMAGES_BUCKET)
+
 	ss.Log.Info("received image:",
 		"s3key", s3RawImageKey,
 	)
 	s3getObject, err := ss.S3Client.GetObject(
 		ctx,
 		&s3.GetObjectInput{
-			Bucket: &s3RawImagesBucketName,
+			Bucket: &rawImagesBucket,
 			Key:    &s3RawImageKey,
 		},
 	)
@@ -77,7 +79,8 @@ func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImageK
 			"error trying to get the s3 object",
 			"error", err,
 		)
-		return err
+		errCh <- err
+		return
 	}
 	defer s3getObject.Body.Close()
 
@@ -86,8 +89,10 @@ func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImageK
 		ss.Log.Error("error trying to encode to webp",
 			"error", err,
 		)
+		errCh <- err
+		return
 	}
-	processedImageKey := utils.AppendFileExtension("images/"+s3RawImageKey, "webp")
+	processedImageKey := utils.ReplaceFileExtension("images/"+humanReadableId+"/"+s3RawImageKey, "webp")
 	ss.Log.Info("the processed image key", "key", processedImageKey)
 	_, err = ss.S3Client.PutObject(
 		ctx,
@@ -102,18 +107,22 @@ func (ss *ProcessImagesService) ProcessImagesS3(ctx context.Context, s3RawImageK
 			"error uploading the file to s3",
 			"error", err,
 		)
+		errCh <- err
+		return
 	}
 
 	// delete the image from raw images bucket if it's been successfully processed
 	_, err = ss.S3Client.DeleteObject(
 		ctx,
 		&s3.DeleteObjectInput{
-			Bucket: &s3RawImagesBucketName,
+			Bucket: &rawImagesBucket,
 			Key:    &s3RawImageKey,
 		},
 	)
-
-	return err
+	if err != nil {
+		errCh <- err
+		return
+	}
 }
 
 // DEPRECATED

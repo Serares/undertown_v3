@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"log/slog"
 	"os"
+	"sync"
 
 	"github.com/Serares/undertown_v3/services/events/processImages/service"
+	"github.com/Serares/undertown_v3/utils"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -27,15 +31,49 @@ func init() {
 	s3client = s3.NewFromConfig(cfg)
 }
 
-func handler(ctx context.Context, s3Event events.S3Event) {
+func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 	service := service.New(log, s3client)
 
-	for _, record := range s3Event.Records {
+	for _, record := range sqsEvent.Records {
 		log.Info("Got the s3 event",
-			"event", record.EventName,
+			"event", record.MessageId,
 		)
-		service.Log.Info("Got the event")
-		service.ProcessImagesS3(ctx, record.S3.Object.Key, record.S3.Bucket.Name)
+		var rawImagesMessage utils.SQSProcessRawImages
+
+		err := json.Unmarshal([]byte(record.Body), &rawImagesMessage)
+		if err != nil {
+			log.Error("error unmarshaling the sqs message",
+				"error", err,
+			)
+		}
+		var wg sync.WaitGroup
+		var errChan = make(chan error, len(rawImagesMessage.Images))
+		var s3Errors = make([]error, 0)
+
+		// ❗TODO handle the errors from process images lol
+		for _, rawImageName := range rawImagesMessage.Images {
+			wg.Add(1)
+			go func(rawImageName string) {
+				defer wg.Done()
+				service.ProcessImagesS3(
+					ctx,
+					rawImageName,
+					rawImagesMessage.HumanReadableId,
+					errChan,
+				)
+
+			}(rawImageName)
+		}
+		wg.Wait()
+		close(errChan)             // meaning no more errors will be sent on the channel/the loop is over
+		for err := range errChan { // this is going to run indeffinetly until a close signal is met on the channel
+			if err != nil {
+				s3Errors = append(s3Errors, err)
+			}
+		}
+		if len(s3Errors) > 0 {
+			log.Error("Error on s3 processing images", "errors", errors.Join(s3Errors...))
+		}
 	}
 }
 
