@@ -1,5 +1,5 @@
 // transactionType in case of submit
-async function FetchPresign(fileName) {
+function FetchPresign(fileName) {
   return fetch("/presign", {
     method: "POST",
     headers: {
@@ -8,6 +8,17 @@ async function FetchPresign(fileName) {
     body: JSON.stringify({
       fileName,
     }),
+  }).then((response) => response.json());
+}
+
+//
+function uploadFileToS3(presignedUrl, file) {
+  return fetch(presignedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "binary/octet-stream", // Adjust this according to your file type
+    },
+    body: file,
   });
 }
 
