@@ -7,67 +7,12 @@ package includes
 
 import "github.com/a-h/templ"
 
-func DropzoneSubmit() templ.ComponentScript {
+func DropzoneSubmit(imagesFormKey string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DropzoneSubmit_402d`,
-		Function: `function __templ_DropzoneSubmit_402d(){Dropzone.options.uploadForm = {
-    autoProcessQueue: false,
-    addRemoveLinks: true,
-    uploadMultiple: true,
-    parallelUploads: 100,
-    maxFiles: 100,
-    previewsContainer: ".dropzone-previews",
-    hiddenInputContainer: ".browse_submit",
-    paramName: "#images-input",
-    init: function () {
-      var myDropzone = this;
-      this.element
-        .querySelector("button[type=submit]")
-        .addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          document.querySelector(".dz-hidden-input").setAttribute("name", "images")
-          // Have to handle the case where the user is not adding any new images when modifying the property
-          myDropzone.processQueue();
-        });
-      this.on("sendingmultiple", function () {
-        console.log("Sending multiple");
-      });
-      this.on("addedfile", function(file){ 
-        console.log(file)
-      });
-      this.on("successmultiple", function (files, response, xhr) {
-          if (response.redirected) {
-              window.location.href = response.url;
-              return;
-          }
-          // return response.json();
-          document.documentElement.innerHTML = response;
-          $("#myModal .modal-body").html("Success editing the property")
-          $("#myModal").modal("show")
-          if (response.ok !== undefined && !response.ok) {
-              $("#myModal .modal-body").html("Failed to add the property")
-              $("#myModal").modal("show")
-          }
-            // dispatch a event that the page has loaded success
-            var submitEvent = new CustomEvent('submitresponse', {
-                    detail: { key: 'loadsuccess' }
-                  });
-            window.dispatchEvent(submitEvent)
-      });
-      this.on("errormultiple", function (files, response) {
-        if (response.ok != undefined && !response.ok) {
-                $("#myModal .modal-body").html("Failed editing the property")
-                $("#myModal").modal("show")
-          }
-        if (typeof response === "string") {
-          document.documentElement.innerHTML = response;
-        }
-      });
-    },
-  };
+		Name: `__templ_DropzoneSubmit_1696`,
+		Function: `function __templ_DropzoneSubmit_1696(imagesFormKey){InitSubmitDropzone(imagesFormKey)
 }`,
-		Call:       templ.SafeScript(`__templ_DropzoneSubmit_402d`),
-		CallInline: templ.SafeScriptInline(`__templ_DropzoneSubmit_402d`),
+		Call:       templ.SafeScript(`__templ_DropzoneSubmit_1696`, imagesFormKey),
+		CallInline: templ.SafeScriptInline(`__templ_DropzoneSubmit_1696`, imagesFormKey),
 	}
 }

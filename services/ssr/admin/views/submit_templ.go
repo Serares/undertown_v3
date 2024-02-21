@@ -533,7 +533,7 @@ func Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, p
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Footer Section End --><!-- Find Part Satrt --><a href=\"#\" id=\"scroll\"><i class=\"fas fa-arrow-up\"></i></a><!-- Find Part Satrt --></div></div><!-- Wrapper End --><script src=\"https://unpkg.com/dropzone@5/dist/min/dropzone.min.js\"></script>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Footer Section End --><!-- Find Part Satrt --><a href=\"#\" id=\"scroll\"><i class=\"fas fa-arrow-up\"></i></a><!-- Find Part Satrt --></div></div><!-- Wrapper End --><script src=\"https://unpkg.com/dropzone@5/dist/min/dropzone.min.js\"></script><script src=\"/assets/js/custom/handle_presign.js\"></script><script src=\"/assets/js/custom/dropzone_submit_external.js\"></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

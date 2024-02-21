@@ -8,10 +8,10 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 		<span>
 			<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
 			<link
- 				rel="stylesheet"
- 				href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
- 				integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
- 				crossorigin=""
+				rel="stylesheet"
+				href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+				integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+				crossorigin=""
 			/>
 			<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
 			<style>
@@ -58,8 +58,8 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 													<select name="property_type" class="form-control" data-live-search="true">
 														for _, option := range props.PropertyTypes {
 															<option
- 																value={ option.Value }
- 																if option.Value == props.Property.PropertyType {
+																value={ option.Value }
+																if option.Value == props.Property.PropertyType {
 																	selected="true"
 																}
 															>
@@ -74,8 +74,8 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 														<select name="property_transaction" class="form-control" data-live-search="true">
 															for _, option := range props.PropertyTransaction {
 																<option
- 																	value={ option.Value }
- 																	if option.Value == props.Property.PropertyTransaction {
+																	value={ option.Value }
+																	if option.Value == props.Property.PropertyTransaction {
 																		selected="true"
 																	}
 																>
@@ -89,11 +89,11 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 													<div class="form-group">
 														<label for="price">Pretul:</label>
 														<input
- 															value={ fmt.Sprintf("%d", props.Property.Price) }
- 															name="price"
- 															type="number"
- 															placeholder="Pretul"
- 															class="form-control"
+															value={ fmt.Sprintf("%d", props.Property.Price) }
+															name="price"
+															type="number"
+															placeholder="Pretul"
+															class="form-control"
 														/>
 													</div>
 												</div>
@@ -102,13 +102,13 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 														<ul class="check_submit">
 															<li>
 																<input
- 																	if props.Property.IsFeatured == 1 {
+																	if props.Property.IsFeatured == 1 {
 																		checked="true"
 																	}
- 																	name="is_featured"
- 																	id="is_featured"
- 																	class="hide"
- 																	type="checkbox"
+																	name="is_featured"
+																	id="is_featured"
+																	class="hide"
+																	type="checkbox"
 																/>
 																<label for="is_featured">Apare pe pagina principala:</label>
 															</li>
@@ -119,11 +119,11 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 													<div class="form-group">
 														<label for="property_surface">Suprafata m²</label>
 														<input
- 															value={ fmt.Sprintf("%d", props.Property.PropertySurface) }
- 															name="property_surface"
- 															type="number"
- 															placeholder="Suprafata m²"
- 															class="form-control"
+															value={ fmt.Sprintf("%d", props.Property.PropertySurface) }
+															name="property_surface"
+															type="number"
+															placeholder="Suprafata m²"
+															class="form-control"
 														/>
 													</div>
 												</div>
@@ -171,16 +171,16 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 											<div class="form-group">
 												<select name="energy_class" class="form-control" data-live-search="true">
 													<option
- 														if props.PropertyFeatures.EnergyClass == "A" {
+														if props.PropertyFeatures.EnergyClass == "A" {
 															selected="true"
 														}
- 														value="A"
+														value="A"
 													>A</option>
 													<option
- 														if props.PropertyFeatures.EnergyClass == "B" {
+														if props.PropertyFeatures.EnergyClass == "B" {
 															selected="true"
 														}
- 														value="B"
+														value="B"
 													>B</option>
 												</select>
 												<br/>
@@ -198,49 +198,49 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 												<ul class="check_submit">
 													<li>
 														<input
- 															if props.PropertyFeatures.DestinationResidential {
+															if props.PropertyFeatures.DestinationResidential {
 																checked="true"
 															}
- 															name="destination_residential"
- 															id="destination_residential"
- 															class="hide"
- 															type="checkbox"
+															name="destination_residential"
+															id="destination_residential"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="destination_residential">rezidential</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.DestinationCommercial {
+															if props.PropertyFeatures.DestinationCommercial {
 																checked="true"
 															}
- 															name="destination_commercial"
- 															id="destination_commercial"
- 															class="hide"
- 															type="checkbox"
+															name="destination_commercial"
+															id="destination_commercial"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="destination_commercial">comercial</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.DestinationOffice {
+															if props.PropertyFeatures.DestinationOffice {
 																checked="true"
 															}
- 															name="destination_office"
- 															id="destination_office"
- 															class="hide"
- 															type="checkbox"
+															name="destination_office"
+															id="destination_office"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="destination_office">birou</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.DestinationHoliday {
+															if props.PropertyFeatures.DestinationHoliday {
 																checked="true"
 															}
- 															name="destination_holiday"
- 															id="destination_holiday"
- 															class="hide"
- 															type="checkbox"
+															name="destination_holiday"
+															id="destination_holiday"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="destination_holiday">Vacanta</label>
 													</li>
@@ -253,49 +253,49 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 												<ul class="check_submit">
 													<li>
 														<input
- 															if props.PropertyFeatures.OtherUtilitiesTerrance {
+															if props.PropertyFeatures.OtherUtilitiesTerrance {
 																checked="true"
 															}
- 															name="other_utilities_terrance"
- 															id="other_utilities_terrance"
- 															class="hide"
- 															type="checkbox"
+															name="other_utilities_terrance"
+															id="other_utilities_terrance"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="other_utilities_terrance">Terasa</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.OtherUtilitiesServiceToilet {
+															if props.PropertyFeatures.OtherUtilitiesServiceToilet {
 																checked="true"
 															}
- 															name="other_utilities_service_toilet"
- 															id="other_utilities_service_toilet"
- 															class="hide"
- 															type="checkbox"
+															name="other_utilities_service_toilet"
+															id="other_utilities_service_toilet"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="other_utilities_service_toilet">WC SERVICIU</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.OtherUtilitiesUndergroundStorage {
+															if props.PropertyFeatures.OtherUtilitiesUndergroundStorage {
 																checked="true"
 															}
- 															name="other_utilities_underground_storage"
- 															id="other_utilities_underground_storage"
- 															class="hide"
- 															type="checkbox"
+															name="other_utilities_underground_storage"
+															id="other_utilities_underground_storage"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="other_utilities_underground_storage">Boxa la subsol</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.OtherUtilitiesStorage {
+															if props.PropertyFeatures.OtherUtilitiesStorage {
 																checked="true"
 															}
- 															name="other_utilities_storage"
- 															id="other_utilities_storage"
- 															class="hide"
- 															type="checkbox"
+															name="other_utilities_storage"
+															id="other_utilities_storage"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="other_utilities_storage">Debara</label>
 													</li>
@@ -308,49 +308,49 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 												<ul class="check_submit">
 													<li>
 														<input
- 															if props.PropertyFeatures.FurnishedNot {
+															if props.PropertyFeatures.FurnishedNot {
 																checked="true"
 															}
- 															name="furnished_not"
- 															id="furnished_not"
- 															class="hide"
- 															type="checkbox"
+															name="furnished_not"
+															id="furnished_not"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="furnished_not">Nemobilat</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.FurnishedPartially {
+															if props.PropertyFeatures.FurnishedPartially {
 																checked="true"
 															}
- 															name="furnished_partially"
- 															id="furnished_partially"
- 															class="hide"
- 															type="checkbox"
+															name="furnished_partially"
+															id="furnished_partially"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="furnished_partially">Partial</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.FurnishedComplete {
+															if props.PropertyFeatures.FurnishedComplete {
 																checked="true"
 															}
- 															name="furnished_complete"
- 															id="furnished_complete"
- 															class="hide"
- 															type="checkbox"
+															name="furnished_complete"
+															id="furnished_complete"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="furnished_complete">Complet</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.FurnishedLuxury {
+															if props.PropertyFeatures.FurnishedLuxury {
 																checked="true"
 															}
- 															name="furnished_luxury"
- 															id="furnished_luxury"
- 															class="hide"
- 															type="checkbox"
+															name="furnished_luxury"
+															id="furnished_luxury"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="furnished_luxury">Lux</label>
 													</li>
@@ -363,37 +363,37 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 												<ul class="check_submit">
 													<li>
 														<input
- 															if props.PropertyFeatures.InteriorNeedsRenovation {
+															if props.PropertyFeatures.InteriorNeedsRenovation {
 																checked="true"
 															}
- 															name="interior_needs_renovation"
- 															id="interior_needs_renovation"
- 															class="hide"
- 															type="checkbox"
+															name="interior_needs_renovation"
+															id="interior_needs_renovation"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="interior_needs_renovation">Necesita renovare</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.InteriorHasRenovation {
+															if props.PropertyFeatures.InteriorHasRenovation {
 																checked="true"
 															}
- 															name="interior_has_renovation"
- 															id="interior_has_renovation"
- 															class="hide"
- 															type="checkbox"
+															name="interior_has_renovation"
+															id="interior_has_renovation"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="interior_has_renovation">Renovat</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.InteriorGoodState {
+															if props.PropertyFeatures.InteriorGoodState {
 																checked="true"
 															}
- 															name="interior_good_state"
- 															id="interior_good_state"
- 															class="hide"
- 															type="checkbox"
+															name="interior_good_state"
+															id="interior_good_state"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="interior_good_state">Buna</label>
 													</li>
@@ -406,109 +406,109 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 												<ul class="check_submit">
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingTermoficare {
+															if props.PropertyFeatures.HeatingTermoficare {
 																checked="true"
 															}
- 															name="heating_termoficare"
- 															id="heating_termoficare"
- 															class="hide"
- 															type="checkbox"
+															name="heating_termoficare"
+															id="heating_termoficare"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_termoficare">Termoficare</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingCentralHeating {
+															if props.PropertyFeatures.HeatingCentralHeating {
 																checked="true"
 															}
- 															name="heating_central_heating"
- 															id="heating_central_heating"
- 															class="hide"
- 															type="checkbox"
+															name="heating_central_heating"
+															id="heating_central_heating"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_central_heating">Centrala proprie</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingBuilding {
+															if props.PropertyFeatures.HeatingBuilding {
 																checked="true"
 															}
- 															name="heating_building"
- 															id="heating_building"
- 															class="hide"
- 															type="checkbox"
+															name="heating_building"
+															id="heating_building"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_building">Centrala imobil</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingStove {
+															if props.PropertyFeatures.HeatingStove {
 																checked="true"
 															}
- 															name="heating_stove"
- 															id="heating_stove"
- 															class="hide"
- 															type="checkbox"
+															name="heating_stove"
+															id="heating_stove"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_stove">Soba/Teracota</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingRadiator {
+															if props.PropertyFeatures.HeatingRadiator {
 																checked="true"
 															}
- 															name="heating_radiator"
- 															id="heating_radiator"
- 															class="hide"
- 															type="checkbox"
+															name="heating_radiator"
+															id="heating_radiator"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_radiator">Calorifer</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingOtherElectrical {
+															if props.PropertyFeatures.HeatingOtherElectrical {
 																checked="true"
 															}
- 															name="heating_other_electrical"
- 															id="heating_other_electrical"
- 															class="hide"
- 															type="checkbox"
+															name="heating_other_electrical"
+															id="heating_other_electrical"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_other_electrical">Alte metode electrice:</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingGasConvector {
+															if props.PropertyFeatures.HeatingGasConvector {
 																checked="true"
 															}
- 															name="heating_gas_convector"
- 															id="heating_gas_convector"
- 															class="hide"
- 															type="checkbox"
+															name="heating_gas_convector"
+															id="heating_gas_convector"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_gas_convector">Convector gaz</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingInfraredPanels {
+															if props.PropertyFeatures.HeatingInfraredPanels {
 																checked="true"
 															}
- 															name="heating_infrared_panels"
- 															id="heating_infrared_panels"
- 															class="hide"
- 															type="checkbox"
+															name="heating_infrared_panels"
+															id="heating_infrared_panels"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_infrared_panels">Panouri infrarosu</label>
 													</li>
 													<li>
 														<input
- 															if props.PropertyFeatures.HeatingFloorHeating {
+															if props.PropertyFeatures.HeatingFloorHeating {
 																checked="true"
 															}
- 															name="heating_floor_heating"
- 															id="heating_floor_heating"
- 															class="hide"
- 															type="checkbox"
+															name="heating_floor_heating"
+															id="heating_floor_heating"
+															class="hide"
+															type="checkbox"
 														/>
 														<label for="heating_floor_heating">Incalzire prin pardoseala</label>
 													</li>
@@ -568,6 +568,8 @@ templ Submit(contents types.BasicIncludes, submitIncludes types.SubmitIncludes, 
 			</div>
 			<!-- Wrapper End -->
 			<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+			<script src="/assets/js/custom/handle_presign.js"></script>
+			<script src="/assets/js/custom/dropzone_submit_external.js"></script>
 			@contents.Scripts
 			@submitIncludes.SubmitDropzoneScript
 			@submitIncludes.Modal
