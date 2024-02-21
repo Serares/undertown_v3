@@ -7,7 +7,7 @@ const (
 	FeaturedQueryKey                 = "featured"
 	TransactionTypeFormInputKey      = "property_transaction"
 	DeleteImagesFormKey              = "deleted_images"
-	ImagesFormKey                    = "images"
+	FORM_KEY_IMAGES                  = "images"
 	TRANSACTION_TYPE_UI_SELL         = "vanzari"
 	TRANSACTION_TYPE_UI_RENT         = "chirii"
 	CookieTokenKey                   = "token"
