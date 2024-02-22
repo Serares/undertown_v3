@@ -34,9 +34,8 @@ type PresignedRequest struct {
 }
 
 type PresignedResponse struct {
-	PresignedUrl string      `json:"presignedUrl"`
-	KeyName      string      `json:"keyName"`
-	SignedHeader http.Header `json:"signedHeader"`
+	PresignedUrl string `json:"presignedUrl"`
+	KeyName      string `json:"keyName"`
 }
 
 func (psh *PresignedS3Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +88,6 @@ func (psh *PresignedS3Handler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		resp := PresignedResponse{
 			PresignedUrl: presignResponse.URL,
 			KeyName:      keyName,
-			SignedHeader: presignResponse.SignedHeader,
 		}
 
 		rootUtils.ReplySuccess(
