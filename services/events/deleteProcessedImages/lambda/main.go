@@ -35,9 +35,7 @@ func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
 	PROCESSED_IMAGES_BUCKET := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
 
 	for _, message := range sqsDeleteImagesEvent.Records {
-		// TODO is it better to send an array of strings
-		// or send a sqs message for each image?
-		var deleteImages rootUtils.SQSDeleteImages
+		var deleteImages rootUtils.SQSImagesMessage
 		err := json.Unmarshal([]byte(message.Body), &deleteImages)
 
 		if err != nil {

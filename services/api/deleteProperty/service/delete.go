@@ -46,7 +46,8 @@ func (s DeleteService) DeleteProperty(ctx context.Context, id, humanReadableId s
 	}
 	// Dispatch the delete images SQS event and then delete the property
 	imagesToDeleteList := strings.Split(liteProperty.Images, ";")
-	sqsDeleteImagesObject := utils.SQSDeleteImages{
+	// ⚠️ Test if marshaling without adding the hrID is going to fail
+	sqsDeleteImagesObject := utils.SQSImagesMessage{
 		Images: imagesToDeleteList,
 	}
 	sqsDeleteImagesJson, err := json.Marshal(sqsDeleteImagesObject)

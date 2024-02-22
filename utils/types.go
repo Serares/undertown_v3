@@ -87,11 +87,8 @@ type PropertyFeatures struct {
 	Lng                              string `json:"longitude"`
 }
 
-type SQSDeleteImages struct {
-	Images []string `json:"images"`
-}
-
-type SQSProcessRawImages struct {
+// Used for both ProcessRawImages and DeleteImages queues
+type SQSImagesMessage struct {
 	HumanReadableId string   `json:"humanReadableId"` // this is needed because the raw images are stored without the hrID and the processedImages are stored prefixed with the ID
 	Images          []string `json:"images"`
 }

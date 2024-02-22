@@ -38,7 +38,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 		log.Info("Got the s3 event",
 			"event", record.MessageId,
 		)
-		var rawImagesMessage utils.SQSProcessRawImages
+		var rawImagesMessage utils.SQSImagesMessage
 
 		err := json.Unmarshal([]byte(record.Body), &rawImagesMessage)
 		if err != nil {
