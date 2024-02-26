@@ -245,8 +245,8 @@ func (serv *PUService) Persist(ctx context.Context, sqsBody string, userId strin
 		),
 		// TODO
 		// Until I can find a way to figure out when all the images for a property have successfully processd
-		// I'll just use the IsProcessing true flag
-		IsProcessing:        0, // It's always going to be 0 until S3 images are processed
+		// I'll just use the IsProcessing false flag
+		IsProcessing:        0, // It's always going to be 1 until S3 images are processed
 		Thumbnail:           s3ImagesPathsProcessed[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: requestProperty.PropertyTransaction,
@@ -278,19 +278,17 @@ func (serv *PUService) BatchItems(originalItems []string, batchSize int) [][]str
 	return batchedSlice
 }
 
-// This is going to take the list of SQSRawImages messages
-// Create batches of SendMessageBatchRequestEntry with MessageBody of jsoned SQSRawImages
 func (serv *PUService) BatchSQSImageMessagesIntoRequestEntries(
-	sqsRawImagesMessages []utils.SQSImagesMessage,
+	sqsImagesMessageSlice []utils.SQSImagesMessage,
 	batchSize int64,
 ) ([][]sqsTypes.SendMessageBatchRequestEntry, error) {
 	batchesOfRequestEntrySlices := make([][]sqsTypes.SendMessageBatchRequestEntry, 0)
-	for i := 0; i < len(sqsRawImagesMessages); i += int(batchSize) {
+	for i := 0; i < len(sqsImagesMessageSlice); i += int(batchSize) {
 		end := i + int(batchSize)
-		if end > len(sqsRawImagesMessages) {
-			end = len(sqsRawImagesMessages)
+		if end > len(sqsImagesMessageSlice) {
+			end = len(sqsImagesMessageSlice)
 		}
-		batchOfRawImagesMessage := sqsRawImagesMessages[i:end]
+		batchOfRawImagesMessage := sqsImagesMessageSlice[i:end]
 		batchRequestEntrySlice := make([]sqsTypes.SendMessageBatchRequestEntry, 0)
 		for ind, rawImageMessage := range batchOfRawImagesMessage {
 			// ⚠️ handle errors
@@ -308,8 +306,8 @@ func (serv *PUService) BatchSQSImageMessagesIntoRequestEntries(
 	return batchesOfRequestEntrySlices, nil
 }
 
-// This is going to split the images into more SQSProcessRawImages structs
-// Creating more sqs messages for smaller ammout of images slices
+// ⚠️
+// TODO add comments for the methods to explain what they do
 func (serv *PUService) SplitImagesIntoSQSImageMessages(
 	images []string,
 	imagesBatchedSize int,
