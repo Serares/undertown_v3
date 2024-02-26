@@ -32,7 +32,7 @@ func init() {
 	s3client = s3.NewFromConfig(cfg)
 }
 
-func handler(ctx context.Context, sqsEvent events.SQSEvent) {
+func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	service := service.New(log, s3client)
 
 	for _, record := range sqsEvent.Records {
@@ -75,9 +75,12 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 			}
 		}
 		if len(s3Errors) > 0 {
-			log.Error("Error on s3 processing images", "errors", errors.Join(s3Errors...))
+			err := errors.Join(s3Errors...)
+			log.Error("Error on s3 processing images", "errors", err)
+			return err // this should send the sqs message to dlq
 		}
 	}
+	return nil
 }
 
 func main() {
