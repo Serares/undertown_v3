@@ -1,12 +1,12 @@
 // transactionType in case of submit
-function FetchPresign(fileName) {
+function FetchPresign(fileNamesList) {
   return fetch("/presign", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      fileName,
+      fileNames: fileNamesList,
     }),
   }).then((response) => response.json());
 }
@@ -31,54 +31,75 @@ function chunkArray(array, size) {
   return chunkedArr;
 }
 
-function processPresignBatch(filesBatch) {
-  const batchPromises = filesBatch.map((file) => {
-    return FetchPresign(file.name).then((presignedData) => ({
-      //
-      presignedData,
-      file,
-    }));
+function processPresignBatch(filesMap) {
+  const fileNamesList = Object.keys(filesMap);
+  return FetchPresign(fileNamesList).then((presignedResponse) => {
+    return Object.keys(presignedResponse).map((originalFileName) => {
+      return {
+        originalFileName: originalFileName,
+        s3Key: presignedResponse[originalFileName].KeyName,
+        presignedUrl: presignedResponse[originalFileName].PresignedUrl,
+        file: filesMap[originalFileName].file,
+      };
+    });
   });
-  return Promise.all(batchPromises);
 }
 
 function processS3UploadBatch(presignDataFilesBatch) {
-  const batchPromises = presignDataFilesBatch.map(({ presignedData, file }) => {
-    let { presignedUrl, keyName } = presignedData;
-    return uploadFileToS3(presignedUrl, file).then(() => keyName);
-  });
+  const batchPromises = presignDataFilesBatch.map(
+    ({ presignedUrl, file, s3Key }) => {
+      return uploadFileToS3(presignedUrl, file).then(() => s3Key);
+    }
+  );
   return Promise.all(batchPromises);
 }
 
 // Function to process requests in batches
 function ProcessPresignInBatches(files, batchSize) {
-  const fileBatches = chunkArray(files, batchSize);
-  let promiseChain = Promise.resolve(); // Start with a resolved promise for chaining
-  const results = []; // Array to collect all results
-  const keyNames = [];
+  // const fileBatches = chunkArray(files, batchSize);
+  // let promiseChain = Promise.resolve(); // Start with a resolved promise for chaining
+  // const results = []; // Array to collect all results
+  // const keyNames = [];
+  const presigned = []; // create batches with the PresignedResponse
+  let filesMap = {};
+  files.forEach(
+    (file) => (filesMap[file.name] = { name: file.name, file: file })
+  );
 
-  fileBatches.forEach((fileBatch) => {
-    promiseChain = promiseChain
-      .then(() => processPresignBatch(fileBatch))
-      .then((presignDataFilesResults) => {
-        console.log("Batch results:", presignDataFilesResults);
-        results.push(...presignDataFilesResults); // Collect results
-        // Optional: return a new promise if you want to wait between batches
-        return presignDataFilesResults;
-      })
-      .then((results) => {
-        return processS3UploadBatch(results);
-      })
-      .then((keyNamesResults) => {
-        keyNames.push(...keyNamesResults);
-        return new Promise((resolve) => setTimeout(resolve, 500));
-      })
-      .catch((err) => {
-        return err;
-      });
-  });
+  return processPresignBatch(filesMap)
+    .then((data) => data)
+    .then((presigned) => {
+      return processS3UploadBatch(presigned);
+    })
+    .then((keyNames) => keyNames)
+    .catch((err) => {
+      console.log(err);
+      return err;
+    });
+  // do the processS3Upload in the above then lol
 
-  return promiseChain.then(() => keyNames);
+  // fileBatches.forEach((presigned) => {
+  //   promiseChain = promiseChain
+  //     // .then(() => )
+  //     // .then((presignDataFilesResults) => {
+  //     //   console.log("Batch results:", presignDataFilesResults);
+  //     //   results.push(...presignDataFilesResults); // Collect results
+  //     //   // Optional: return a new promise if you want to wait between batches
+  //     //   return presignDataFilesResults;
+  //     // })
+  //     .then((results) => {
+  //       return processS3UploadBatch(results);
+  //     })
+  //     .then((keyNamesResults) => {
+  //       keyNames.push(...keyNamesResults);
+  //       return new Promise((resolve) => setTimeout(resolve, 500));
+  //     })
+  //     .catch((err) => {
+  //       return err;
+  //     });
+  // });
+
+  // return promiseChain.then(() => keyNames);
 }
 
 // imageName: string

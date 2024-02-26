@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	rootUtils "github.com/Serares/undertown_v3/utils"
@@ -30,22 +32,38 @@ func NewPresignedS3Handler(
 }
 
 type PresignedRequest struct {
-	FileName string `json:"fileName"`
+	FileNames []string `json:"fileNames"`
 }
 
 type PresignedResponse struct {
-	PresignedUrl string `json:"presignedUrl"`
-	KeyName      string `json:"keyName"`
+	Response map[string]string `json:"response"` // map the fileName : presignedUrl
 }
 
-func (psh *PresignedS3Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type PresignedResponseValue struct {
+	KeyName      string `json:"KeyName"`
+	PresignedUrl string `json:"PresignedUrl"`
+}
+
+type presignedResult struct {
+	OriginalFileName string
+	KeyName          string
+	PresignedUrl     string
+	Error            error
+}
+
+// type PresignFilekey struct {
+// 	PresignedUrl string `json:"presignedUrl"`
+// 	Filename     string `json:"fileName"`
+// }
+
+func (service *PresignedS3Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		bucketName := os.Getenv(env.RAW_IMAGES_BUCKET)
 		var presignReq PresignedRequest
 
 		err := json.NewDecoder(r.Body).Decode(&presignReq)
 		if err != nil {
-			psh.Log.Error("error trying to decode the json request", "err", err)
+			service.Log.Error("error trying to decode the json request", "err", err)
 			rootUtils.ReplyError(
 				w,
 				r,
@@ -54,47 +72,85 @@ func (psh *PresignedS3Handler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			)
 			return
 		}
+		var fileNameKeyNameMap map[string]string = make(map[string]string)
 
-		keyName := rootUtils.ReplaceWhiteSpaceWithUnderscore(
-			fmt.Sprintf(
-				"%s_%s",
-				rootUtils.GenerateStringTimestamp(),
-				presignReq.FileName,
-			),
-		)
-
-		presignParameters := &s3.PutObjectInput{
-			Bucket: aws.String(bucketName),
-			Key:    aws.String(keyName),
+		for _, fileName := range presignReq.FileNames {
+			keyName := rootUtils.ReplaceWhiteSpaceWithUnderscore(
+				fmt.Sprintf(
+					"%s_%s",
+					rootUtils.GenerateStringTimestamp(),
+					fileName,
+				),
+			)
+			fileNameKeyNameMap[fileName] = keyName
 		}
 
-		presignResponse, err := psh.PresignClient.PresignPutObject(
-			r.Context(),
-			presignParameters,
-			s3.WithPresignExpires(time.Minute*5),
-		)
+		var presignedResponse map[string]PresignedResponseValue = make(map[string]PresignedResponseValue)
+		var s3PresignWg sync.WaitGroup
+		var s3Responses = make(chan presignedResult, len(presignReq.FileNames))
+		var s3ResponseErrors = make([]error, 0)
 
-		if err != nil {
-			psh.Log.Error("error generating the presigned url", "error", err)
+		for fileName, keyName := range fileNameKeyNameMap {
+			s3PresignWg.Add(1)
+			go func(keyName, fileName string) {
+				defer s3PresignWg.Done()
+				presignParameters := &s3.PutObjectInput{
+					Bucket: aws.String(bucketName),
+					Key:    aws.String(keyName),
+				}
+
+				presignResponse, err := service.PresignClient.PresignPutObject(
+					r.Context(),
+					presignParameters,
+					s3.WithPresignExpires(time.Minute*5),
+				)
+				s3Responses <- presignedResult{
+					OriginalFileName: fileName,
+					KeyName:          keyName,
+					PresignedUrl:     presignResponse.URL,
+					Error:            err,
+				}
+			}(keyName, fileName)
+		}
+
+		go func() {
+			s3PresignWg.Wait()
+			close(s3Responses)
+		}()
+
+		for result := range s3Responses {
+			if result.Error == nil {
+				presignedResponse[result.OriginalFileName] = PresignedResponseValue{
+					KeyName:      result.KeyName,
+					PresignedUrl: result.PresignedUrl,
+				}
+			} else {
+				s3ResponseErrors = append(s3ResponseErrors, result.Error)
+			}
+		}
+
+		if len(s3ResponseErrors) > 0 {
+			service.Log.Error(
+				"Error requesting s3 presigned url",
+				"errors",
+				errors.Join(s3ResponseErrors...),
+				"success responses",
+				presignedResponse,
+			)
 			rootUtils.ReplyError(
 				w,
 				r,
 				http.StatusInternalServerError,
-				"Error on generating the presigned url",
+				"Error on S3 Presign request",
 			)
 			return
-		}
-
-		resp := PresignedResponse{
-			PresignedUrl: presignResponse.URL,
-			KeyName:      keyName,
 		}
 
 		rootUtils.ReplySuccess(
 			w,
 			r,
 			http.StatusAccepted,
-			resp,
+			presignedResponse,
 		)
 	}
 }
