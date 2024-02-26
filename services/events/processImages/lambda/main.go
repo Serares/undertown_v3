@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"runtime"
 	"sync"
 
 	"github.com/Serares/undertown_v3/services/events/processImages/service"
@@ -49,17 +50,20 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 		var wg sync.WaitGroup
 		var errChan = make(chan error, len(rawImagesMessage.Images))
 		var s3Errors = make([]error, 0)
+		sem := make(chan interface{}, runtime.NumCPU())
 
 		for _, rawImageName := range rawImagesMessage.Images {
 			wg.Add(1)
 			go func(rawImageName string) {
 				defer wg.Done()
+				sem <- struct{}{}
 				service.ProcessImagesS3(
 					ctx,
 					rawImageName,
 					rawImagesMessage.HumanReadableId,
 					errChan,
 				)
+				<-sem
 
 			}(rawImageName)
 		}
