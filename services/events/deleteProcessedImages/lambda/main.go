@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"os"
+	"sync"
 
 	rootUtils "github.com/Serares/undertown_v3/utils"
 	"github.com/Serares/undertown_v3/utils/constants"
@@ -35,9 +37,7 @@ func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
 	PROCESSED_IMAGES_BUCKET := os.Getenv(env.PROCESSED_IMAGES_BUCKET)
 
 	for _, message := range sqsDeleteImagesEvent.Records {
-		// TODO is it better to send an array of strings
-		// or send a sqs message for each image?
-		var deleteImages rootUtils.SQSDeleteImages
+		var deleteImages rootUtils.SQSImagesMessage
 		err := json.Unmarshal([]byte(message.Body), &deleteImages)
 
 		if err != nil {
@@ -48,23 +48,45 @@ func handler(ctx context.Context, sqsDeleteImagesEvent events.SQSEvent) error {
 			return err
 		}
 
+		var wg sync.WaitGroup
+		var s3errors = make([]error, 0)
+		var s3errorsChannel = make(chan error, len(deleteImages.Images))
+
 		for _, imageToDelete := range deleteImages.Images {
-			processedImageKey := constants.S3_PROCESSED_IMAGES_PREFIX + "/" + imageToDelete
-			_, err := s3client.DeleteObject(
-				ctx,
-				&s3.DeleteObjectInput{
-					Bucket: aws.String(PROCESSED_IMAGES_BUCKET),
-					Key:    aws.String(processedImageKey),
-				},
-			)
-			if err != nil {
-				log.Error("error trying to delete the key:",
-					"key:", imageToDelete,
+			wg.Add(1)
+			go func(imageToDelete string) {
+				defer wg.Done()
+				processedImageKey := constants.S3_PROCESSED_IMAGES_PREFIX + "/" + imageToDelete
+				_, err := s3client.DeleteObject(
+					ctx,
+					&s3.DeleteObjectInput{
+						Bucket: aws.String(PROCESSED_IMAGES_BUCKET),
+						Key:    aws.String(processedImageKey),
+					},
 				)
-				return err
+				if err != nil {
+					log.Error("error trying to delete the key:",
+						"key:", imageToDelete,
+					)
+					s3errorsChannel <- err
+				}
+			}(imageToDelete)
+		}
+
+		wg.Wait()
+		close(s3errorsChannel)
+		for err := range s3errorsChannel {
+			if err != nil {
+				s3errors = append(s3errors, err)
 			}
 		}
+		if len(s3errors) > 0 {
+			err := errors.Join(s3errors...)
+			log.Error("Error on s3 processing images", "errors", err)
+			return err
+		}
 	}
+
 	return nil
 }
 

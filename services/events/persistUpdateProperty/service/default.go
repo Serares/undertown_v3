@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"github.com/Serares/undertown_v3/utils/env"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/google/uuid"
 )
 
@@ -45,18 +47,18 @@ func NewPUService(
 	}
 }
 
-func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId string) error {
-	sqsDeleteImagesQueue := os.Getenv(env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL)
-	sqsProcessRawImages := os.Getenv(env.SQS_PROCESS_RAW_IMAGES_QUEUE_URL)
+func (serv *PUService) Update(ctx context.Context, sqsBody string, humanReadableId string) error {
+	sqsDeleteImagesQueueUrl := os.Getenv(env.SQS_DELETE_PROCESSED_IMAGES_QUEUE_URL)
+	sqsProcessRawImagesUrl := os.Getenv(env.SQS_PROCESS_RAW_IMAGES_QUEUE_URL)
 
 	var requestProperty utils.RequestProperty
 
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty); err != nil {
-		ss.Log.Error("error decoding the json property for PUT request", "err", err)
+		serv.Log.Error("error decoding the json property for PUT request", "err", err)
 		return fmt.Errorf("error on json unmarshal")
 	}
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty.Features); err != nil {
-		ss.Log.Error("error decoding the json property features for PUT request", "err", err)
+		serv.Log.Error("error decoding the json property features for PUT request", "err", err)
 		return fmt.Errorf("error on json unmarshal")
 	}
 
@@ -66,9 +68,9 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 	}
 
 	// get the existing property to append the existing files if new files are added
-	liteProperty, err := ss.PropertyRepository.GetById(ctx, "", humanReadableId)
+	liteProperty, err := serv.PropertyRepository.GetById(ctx, "", humanReadableId)
 	if err != nil {
-		ss.Log.Error("error trying to get the existing proprety", "hrID", humanReadableId, "error", err)
+		serv.Log.Error("error trying to get the existing proprety", "hrID", humanReadableId, "error", err)
 		return fmt.Errorf("error trying to get the existing property to update")
 	}
 
@@ -105,66 +107,46 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 	go func() {
 		defer wgSqs.Done()
 		if len(prefixedDeletedImages) > 0 {
-			sqsDeleteImagesObject := utils.SQSDeleteImages{
-				Images: prefixedDeletedImages,
-			}
-
-			jsonDeletedImagesList, err := json.Marshal(sqsDeleteImagesObject)
-			ss.Log.Info("images to delete dispatched to sqs queue",
-				"list", prefixedDeletedImages,
-				"jsoned", string(jsonDeletedImagesList),
-			)
-
+			sqsDeletedImagesList := serv.SplitImagesIntoSQSImageMessages(prefixedDeletedImages, 2, "")
+			sqsMessagesForBatch, err := serv.BatchSQSImageMessagesIntoRequestEntries(sqsDeletedImagesList, 10)
 			if err != nil {
-				ss.Log.Error(
-					"error trying to marshal the sqs delete images",
+				serv.Log.Error(
+					"error trying to create the batches of SQS Request Entries",
 					"error", err,
 				)
-				sqsErrors[0] = err
-				return
 			}
-			_, err = ss.SQSClient.SendMessage(
-				ctx,
-				&sqs.SendMessageInput{
-					QueueUrl:    &sqsDeleteImagesQueue,
-					MessageBody: aws.String(string(jsonDeletedImagesList)),
-				},
-			)
+
+			// this is going to wait
+			err = serv.DispatchSQSBatches(ctx, sqsMessagesForBatch, sqsDeleteImagesQueueUrl)
 
 			if err != nil {
-				ss.Log.Error(
-					"error trying to dispatch the sqs delete images message",
+				serv.Log.Error("error processing the sqs batches",
 					"error", err,
 				)
-				sqsErrors[0] = err
-				return
+				sqsErrors[1] = err
 			}
 		}
 	}()
 	go func() {
 		defer wgSqs.Done()
 		if len(requestProperty.ImageNames) > 0 {
-			sqsRawImages := utils.SQSProcessRawImages{
-				Images:          requestProperty.ImageNames,
-				HumanReadableId: humanReadableId,
+			sqsRawImagesList := serv.SplitImagesIntoSQSImageMessages(requestProperty.ImageNames, 2, humanReadableId)
+			sqsMessagesForBatch, err := serv.BatchSQSImageMessagesIntoRequestEntries(sqsRawImagesList, 10)
+			if err != nil {
+				serv.Log.Error(
+					"error trying to create the batches of SQS Request Entries",
+					"error", err,
+				)
 			}
 
-			jsonRawImages, err := json.Marshal(sqsRawImages)
+			// this is going to wait
+			err = serv.DispatchSQSBatches(ctx, sqsMessagesForBatch, sqsProcessRawImagesUrl)
+
 			if err != nil {
+				serv.Log.Error("error processing the sqs batches",
+					"error", err,
+				)
 				sqsErrors[1] = err
-				return
-			}
-			// send the raw images to be processed
-			_, err = ss.SQSClient.SendMessage(
-				ctx,
-				&sqs.SendMessageInput{
-					QueueUrl:    &sqsProcessRawImages,
-					MessageBody: aws.String(string(jsonRawImages)),
-				},
-			)
-			if err != nil {
-				sqsErrors[1] = err
-				return
 			}
 		}
 	}()
@@ -177,7 +159,7 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 	}
 	// TODO handle the case where no new images are uploaded
 	// OR when new images are uploaded and the old ones are not deleted
-	if err := ss.PropertyRepository.UpdateProperty(ctx, lite.UpdatePropertyFieldsParams{
+	if err := serv.PropertyRepository.UpdateProperty(ctx, lite.UpdatePropertyFieldsParams{
 		Humanreadableid:     humanReadableId,
 		Title:               requestProperty.Title,
 		Images:              strings.Join(filteredImages, ";"),
@@ -197,17 +179,17 @@ func (ss *PUService) Update(ctx context.Context, sqsBody string, humanReadableId
 	return nil
 }
 
-func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId string) error {
+func (serv *PUService) Persist(ctx context.Context, sqsBody string, userId string) error {
+	sqsProcessRawImagesUrl := os.Getenv(env.SQS_PROCESS_RAW_IMAGES_QUEUE_URL)
 	var propertyId = uuid.New().String()
 	var requestProperty utils.RequestProperty
-	sqsProcessRawImagesUrl := os.Getenv(env.SQS_PROCESS_RAW_IMAGES_QUEUE_URL)
 
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty); err != nil {
-		ss.Log.Error("error decoding the json property", "err", err)
+		serv.Log.Error("error decoding the json property", "err", err)
 		return fmt.Errorf("error on json unmarshal")
 	}
 	if err := json.Unmarshal([]byte(sqsBody), &requestProperty.Features); err != nil {
-		ss.Log.Error("error decoding the json property features for PUT request", "err", err)
+		serv.Log.Error("error decoding the json property features for PUT request", "err", err)
 		return fmt.Errorf("error on json unmarshal")
 	}
 
@@ -222,28 +204,37 @@ func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId string)
 	images := utils.PrependImagesWithHrId(requestProperty.ImageNames, humanReadableId)
 	s3ImagesPathsProcessed := utils.HydrateImagesNames(utils.ReplaceFileExtensionForList(images, "webp"))
 
-	// dispatch sqs process image sqs message
-	rawImagesSqsMessage := utils.SQSProcessRawImages{
-		Images:          requestProperty.ImageNames,
-		HumanReadableId: humanReadableId,
+	if len(s3ImagesPathsProcessed) == 0 {
+		// ⚠️ don't return a error
+		// because I don't want lambda to retry this message
+		// it's not needed to get to dlq either
+		serv.Log.Error(
+			"no images found in the sqs body",
+			"sqs body:", requestProperty,
+		)
+		return nil
 	}
 
-	jsonRawImagesSqsMessage, err := json.Marshal(rawImagesSqsMessage)
+	sqsRawImagesList := serv.SplitImagesIntoSQSImageMessages(requestProperty.ImageNames, 2, humanReadableId)
+	sqsMessagesForBatch, err := serv.BatchSQSImageMessagesIntoRequestEntries(sqsRawImagesList, 10)
 	if err != nil {
+		serv.Log.Error(
+			"error trying to create the batches of SQS Request Entries",
+			"error", err,
+		)
+	}
+
+	// this is going to wait
+	err = serv.DispatchSQSBatches(ctx, sqsMessagesForBatch, sqsProcessRawImagesUrl)
+
+	if err != nil {
+		serv.Log.Error("error processing the sqs batches",
+			"error", err,
+		)
 		return err
 	}
 
-	_, err = ss.SQSClient.SendMessage(
-		ctx,
-		&sqs.SendMessageInput{
-			QueueUrl:    &sqsProcessRawImagesUrl,
-			MessageBody: aws.String(string(jsonRawImagesSqsMessage)),
-		},
-	)
-	if err != nil {
-		return err
-	}
-	if err := ss.PropertyRepository.Add(ctx, lite.AddPropertyParams{
+	if err := serv.PropertyRepository.Add(ctx, lite.AddPropertyParams{
 		ID:              propertyId,
 		UserID:          userId,
 		Humanreadableid: humanReadableId,
@@ -254,8 +245,8 @@ func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId string)
 		),
 		// TODO
 		// Until I can find a way to figure out when all the images for a property have successfully processd
-		// I'll just use the IsProcessing true flag
-		IsProcessing:        0, // It's always going to be 0 until S3 images are processed
+		// I'll just use the IsProcessing false flag
+		IsProcessing:        0, // It's always going to be 1 until S3 images are processed
 		Thumbnail:           s3ImagesPathsProcessed[0],
 		IsFeatured:          utils.BoolToInt(requestProperty.IsFeatured),
 		PropertyTransaction: requestProperty.PropertyTransaction,
@@ -271,4 +262,102 @@ func (ss *PUService) Persist(ctx context.Context, sqsBody string, userId string)
 		return fmt.Errorf("error trying to persist the order with error: %v", err)
 	}
 	return nil
+}
+
+func (serv *PUService) BatchItems(originalItems []string, batchSize int) [][]string {
+
+	var batchedSlice = make([][]string, 0)
+	for i := 0; i < len(originalItems); i += batchSize {
+		end := i + batchSize
+		if end > len(originalItems) {
+			end = len(originalItems)
+		}
+		batchedSlice = append(batchedSlice, originalItems[i:end])
+	}
+
+	return batchedSlice
+}
+
+func (serv *PUService) BatchSQSImageMessagesIntoRequestEntries(
+	sqsImagesMessageSlice []utils.SQSImagesMessage,
+	batchSize int64,
+) ([][]sqsTypes.SendMessageBatchRequestEntry, error) {
+	batchesOfRequestEntrySlices := make([][]sqsTypes.SendMessageBatchRequestEntry, 0)
+	for i := 0; i < len(sqsImagesMessageSlice); i += int(batchSize) {
+		end := i + int(batchSize)
+		if end > len(sqsImagesMessageSlice) {
+			end = len(sqsImagesMessageSlice)
+		}
+		batchOfRawImagesMessage := sqsImagesMessageSlice[i:end]
+		batchRequestEntrySlice := make([]sqsTypes.SendMessageBatchRequestEntry, 0)
+		for ind, rawImageMessage := range batchOfRawImagesMessage {
+			// ⚠️ handle errors
+			jsonedRawImagesMessage, err := json.Marshal(rawImageMessage)
+			if err != nil {
+				return nil, err
+			}
+			batchRequestEntrySlice = append(batchRequestEntrySlice, sqsTypes.SendMessageBatchRequestEntry{
+				Id:          aws.String(strconv.Itoa((ind + 1) * end)),
+				MessageBody: aws.String(string(jsonedRawImagesMessage)),
+			})
+		}
+		batchesOfRequestEntrySlices = append(batchesOfRequestEntrySlices, batchRequestEntrySlice)
+	}
+	return batchesOfRequestEntrySlices, nil
+}
+
+// ⚠️
+// TODO add comments for the methods to explain what they do
+func (serv *PUService) SplitImagesIntoSQSImageMessages(
+	images []string,
+	imagesBatchedSize int,
+	humanReadableId string,
+) []utils.SQSImagesMessage {
+
+	batchedImages := serv.BatchItems(images, imagesBatchedSize)
+
+	rawImagesSQSList := make([]utils.SQSImagesMessage, len(batchedImages))
+	for ind, pair := range batchedImages {
+		rawImagesSQSList[ind] = utils.SQSImagesMessage{
+			HumanReadableId: humanReadableId,
+			Images:          pair,
+		}
+	}
+	return rawImagesSQSList
+}
+
+func (serv *PUService) DispatchSQSBatches(
+	ctx context.Context,
+	sqsMessagesForBatch [][]sqsTypes.SendMessageBatchRequestEntry,
+	sqsUrl string,
+) error {
+
+	sqsSendBatchesErrors := make([]error, 0)
+	errChan := make(chan error, len(sqsMessagesForBatch))
+
+	var wgForBatches sync.WaitGroup
+	for _, batchRequestEntry := range sqsMessagesForBatch {
+		wgForBatches.Add(1)
+		go func(batch []sqsTypes.SendMessageBatchRequestEntry) {
+			defer wgForBatches.Done()
+			_, err := serv.SQSClient.SendMessageBatch(
+				ctx,
+				&sqs.SendMessageBatchInput{
+					QueueUrl: &sqsUrl,
+					Entries:  batch,
+				},
+			)
+			if err != nil {
+				errChan <- err
+			}
+		}(batchRequestEntry)
+	}
+	wgForBatches.Wait()
+	close(errChan)
+
+	for err := range errChan {
+		sqsSendBatchesErrors = append(sqsSendBatchesErrors, err)
+	}
+
+	return errors.Join(sqsSendBatchesErrors...)
 }

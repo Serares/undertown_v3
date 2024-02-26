@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"runtime"
 	"sync"
 
 	"github.com/Serares/undertown_v3/services/events/processImages/service"
@@ -31,14 +32,14 @@ func init() {
 	s3client = s3.NewFromConfig(cfg)
 }
 
-func handler(ctx context.Context, sqsEvent events.SQSEvent) {
+func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	service := service.New(log, s3client)
 
 	for _, record := range sqsEvent.Records {
 		log.Info("Got the s3 event",
 			"event", record.MessageId,
 		)
-		var rawImagesMessage utils.SQSProcessRawImages
+		var rawImagesMessage utils.SQSImagesMessage
 
 		err := json.Unmarshal([]byte(record.Body), &rawImagesMessage)
 		if err != nil {
@@ -49,17 +50,20 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 		var wg sync.WaitGroup
 		var errChan = make(chan error, len(rawImagesMessage.Images))
 		var s3Errors = make([]error, 0)
+		sem := make(chan interface{}, runtime.NumCPU())
 
 		for _, rawImageName := range rawImagesMessage.Images {
 			wg.Add(1)
 			go func(rawImageName string) {
 				defer wg.Done()
+				sem <- struct{}{}
 				service.ProcessImagesS3(
 					ctx,
 					rawImageName,
 					rawImagesMessage.HumanReadableId,
 					errChan,
 				)
+				<-sem
 
 			}(rawImageName)
 		}
@@ -71,9 +75,12 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) {
 			}
 		}
 		if len(s3Errors) > 0 {
-			log.Error("Error on s3 processing images", "errors", errors.Join(s3Errors...))
+			err := errors.Join(s3Errors...)
+			log.Error("Error on s3 processing images", "errors", err)
+			return err // this should send the sqs message to dlq
 		}
 	}
+	return nil
 }
 
 func main() {
