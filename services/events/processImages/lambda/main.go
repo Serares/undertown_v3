@@ -36,7 +36,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	service := service.New(log, s3client)
 
 	for _, record := range sqsEvent.Records {
-		log.Info("Got the s3 event",
+		log.Info("Got the sqs message",
 			"event", record.MessageId,
 		)
 		var rawImagesMessage utils.SQSImagesMessage
